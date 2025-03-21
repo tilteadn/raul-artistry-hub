@@ -1,0 +1,120 @@
+
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Artwork } from "@/types/artwork";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+
+interface ArtworkGridProps {
+  artworks: Artwork[];
+  collection?: string;
+  loading?: boolean;
+}
+
+const ArtworkGrid = ({ artworks, collection, loading = false }: ArtworkGridProps) => {
+  return (
+    <div className="artwork-grid">
+      {loading ? (
+        // Loading skeletons
+        Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i} className="overflow-hidden">
+            <Skeleton className="w-full aspect-[3/4]" />
+            <CardContent className="p-4">
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardContent>
+          </Card>
+        ))
+      ) : artworks.length > 0 ? (
+        artworks.map((artwork) => (
+          <ArtworkCard key={artwork.id} artwork={artwork} />
+        ))
+      ) : (
+        <div className="col-span-full text-center py-12">
+          <p className="text-muted-foreground">
+            {collection
+              ? `No se encontraron obras en la colección "${collection}".`
+              : "No se encontraron obras."}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface ArtworkCardProps {
+  artwork: Artwork;
+}
+
+const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentElement = document.getElementById(`artwork-${artwork.id}`);
+    if (currentElement) {
+      observer.observe(currentElement);
+    }
+
+    return () => {
+      if (currentElement) {
+        observer.unobserve(currentElement);
+      }
+    };
+  }, [artwork.id]);
+
+  useEffect(() => {
+    if (isInView && artwork.imageUrl) {
+      const img = new Image();
+      img.src = artwork.imageUrl;
+      img.onload = () => setIsLoaded(true);
+    }
+  }, [isInView, artwork.imageUrl]);
+
+  return (
+    <Link to={`/obras/${artwork.id}`}>
+      <Card 
+        id={`artwork-${artwork.id}`} 
+        className={cn(
+          "artwork-card overflow-hidden border-0 shadow-none group",
+          isInView ? "animate-slide-up" : "opacity-0"
+        )}
+      >
+        <div 
+          className={cn(
+            "relative w-full aspect-[3/4] overflow-hidden blur-load",
+            isLoaded && "loaded"
+          )}
+          style={{ backgroundImage: `url(${artwork.thumbnailUrl || artwork.imageUrl})` }}
+        >
+          <img
+            src={artwork.imageUrl}
+            alt={artwork.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
+        </div>
+        <CardContent className="p-4 bg-white">
+          <h3 className="font-serif text-xl font-medium text-primary transition-colors group-hover:text-primary/80">
+            {artwork.title}
+          </h3>
+          <p className="text-sm text-muted-foreground">{artwork.subtitle}</p>
+          <p className="text-xs text-muted-foreground mt-1">{artwork.collection}</p>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+};
+
+export default ArtworkGrid;
