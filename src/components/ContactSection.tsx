@@ -75,7 +75,7 @@ const ContactSection = () => {
               <MapPin className="w-5 h-5 text-primary mt-1" />
               <div>
                 <h3 className="font-medium">Estudio</h3>
-                <p className="text-muted-foreground">Madrid, España</p>
+                <p className="text-muted-foreground">A Coruña, España</p>
               </div>
             </div>
             
