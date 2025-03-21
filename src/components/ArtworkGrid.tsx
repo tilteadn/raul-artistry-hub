@@ -15,7 +15,7 @@ interface ArtworkGridProps {
 
 const ArtworkGrid = ({ artworks, collection, loading = false }: ArtworkGridProps) => {
   return (
-    <div className="artwork-grid">
+    <div className="artwork-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {loading ? (
         // Loading skeletons
         Array.from({ length: 6 }).map((_, i) => (
@@ -78,6 +78,13 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
 
   useEffect(() => {
     if (isInView && artwork.imageUrl) {
+      // For local images, we don't need to preload
+      if (artwork.imageUrl.startsWith('/lovable-uploads/')) {
+        setIsLoaded(true);
+        setHasError(false);
+        return;
+      }
+      
       const img = new Image();
       img.src = artwork.imageUrl;
       img.onload = () => {

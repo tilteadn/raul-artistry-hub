@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ImageOff } from "lucide-react";
 import { Artwork } from "@/types/artwork";
@@ -17,6 +18,13 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
     if (artwork && artwork.imageUrl) {
       setIsImageLoaded(false);
       setHasImageError(false);
+      
+      // For local images, we don't need to preload
+      if (artwork.imageUrl.startsWith('/lovable-uploads/')) {
+        setIsImageLoaded(true);
+        setHasImageError(false);
+        return;
+      }
       
       const img = new Image();
       img.src = artwork.imageUrl;
