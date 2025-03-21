@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +29,8 @@ const formSchema = z.object({
   description: z.string().optional(),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 interface AddArtworkFormProps {
   onSubmit: (artwork: Omit<Artwork, "id" | "createdAt">) => void;
   editArtwork?: Artwork;
@@ -41,7 +42,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     editArtwork?.imageUrl || null
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: editArtwork?.title || "",
@@ -63,15 +64,28 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     }
   };
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = (values: FormValues) => {
     setIsSubmitting(true);
     
     try {
-      onSubmit(values);
+      const artworkData: Omit<Artwork, "id" | "createdAt"> = {
+        title: values.title,
+        subtitle: values.subtitle,
+        collection: values.collection,
+        imageUrl: values.imageUrl,
+        year: values.year,
+        technique: values.technique,
+        dimensions: values.dimensions,
+        description: values.description,
+      };
+      
+      onSubmit(artworkData);
+      
       if (!editArtwork) {
         form.reset();
         setImagePreview(null);
       }
+      
       toast.success(
         editArtwork 
           ? "Obra actualizada correctamente" 
