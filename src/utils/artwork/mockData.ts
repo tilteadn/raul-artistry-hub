@@ -22,38 +22,38 @@ export const SAFE_IMAGE_URLS = [
 export const MOCK_ARTWORKS: Artwork[] = [
   {
     id: "1",
-    title: "Vibración Cromática",
-    subtitle: "Estudio de interacción de colores",
+    title: "Retrato",
+    subtitle: "Estudio de de tonalidades blanco & negro",
     collection: "Abstracciones",
-    imageUrl: LOCAL_IMAGE_URLS[3], // Flores image
+    imageUrl: LOCAL_IMAGE_URLS[1], // Flores image
     year: "2022",
-    technique: "Óleo sobre lienzo",
+    technique: "Fotografia digital",
     dimensions: "70 x 90 cm",
-    description: "Una exploración de la riqueza cromática a través de la composición floral, donde cada elemento aporta un tono particular creando una sinfonía visual que evoca emociones a través del color.",
+    description: "Una foto bien guaperrona",
     createdAt: new Date("2022-04-15"),
   },
   {
     id: "2",
-    title: "Reflejos Urbanos",
-    subtitle: "La ciudad tras la lluvia",
+    title: "El Pintor",
+    subtitle: "El Pintor",
     collection: "Urbano",
-    imageUrl: LOCAL_IMAGE_URLS[4], // Pintura abstracta
+    imageUrl: LOCAL_IMAGE_URLS[2], // Pintura abstracta
     year: "2023",
     technique: "Técnica mixta sobre lienzo",
     dimensions: "100 x 80 cm",
-    description: "Una representación abstracta del paisaje urbano después de la lluvia, donde los colores se mezclan y difuminan reflejando las luces de la ciudad sobre el asfalto mojado.",
+    description: "Una representación del pintor, simbolizando con la bata over-sized lo dificil que es para el artista sentir que merece el honor de usar este sustantivo.",
     createdAt: new Date("2023-02-10"),
   },
   {
     id: "3",
-    title: "Fragmentos de Memoria",
-    subtitle: "Recuerdos abstractos",
+    title: "Sumersión",
+    subtitle: "Sumersión",
     collection: "Abstracciones",
-    imageUrl: LOCAL_IMAGE_URLS[5], // Pinceles con pintura
+    imageUrl: LOCAL_IMAGE_URLS[3], // Pinceles con pintura
     year: "2023",
     technique: "Acrílico sobre lienzo",
     dimensions: "60 x 80 cm",
-    description: "Una pieza que explora la memoria a través del color y la textura, donde cada pincelada representa un fragmento de recuerdos que se superponen, creando una narrativa visual abstracta pero profundamente personal.",
+    description: "Una pieza que explora la memoria a través del color y la textura.",
     createdAt: new Date("2023-03-22"),
   }
 ];
