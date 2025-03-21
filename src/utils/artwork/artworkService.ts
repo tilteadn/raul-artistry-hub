@@ -1,7 +1,6 @@
-
 import { Artwork, Collection } from "@/types/artwork";
 import { v4 as uuidv4 } from 'uuid';
-import { getStoredArtworks, saveStoredArtworks, filterProblematicArtworks } from "./storageUtils";
+import { getStoredArtworks, saveStoredArtworks, resetToMockArtworks } from "./storageUtils";
 
 /**
  * Retrieves all artworks, sorted by creation date (newest first)
@@ -10,18 +9,12 @@ export const getAllArtworks = async (): Promise<Artwork[]> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 500));
   
-  const artworks = getStoredArtworks();
-  
-  // Filter out the problematic artworks if they exist
-  const filteredArtworks = filterProblematicArtworks(artworks);
-  
-  // If any were filtered out, update the storage
-  if (filteredArtworks.length !== artworks.length) {
-    saveStoredArtworks(filteredArtworks);
-  }
+  // Force reset to use the new mock data
+  // This is a temporary measure to ensure the gallery displays the correct artworks
+  const artworks = resetToMockArtworks();
   
   // Sort by creation date, newest first
-  return filteredArtworks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return artworks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 };
 
 /**
@@ -71,15 +64,12 @@ export const getCollections = async (): Promise<Collection[]> => {
   
   const artworks = getStoredArtworks();
   
-  // Filter out problematic artworks
-  const filteredArtworks = filterProblematicArtworks(artworks);
-  
   // Extract unique collections and create collection objects
   const collections = Array.from(
-    new Set(filteredArtworks.map((artwork) => artwork.collection))
+    new Set(artworks.map((artwork) => artwork.collection))
   ).map((name) => {
     // Find the first artwork in this collection to use as thumbnail
-    const firstArtwork = filteredArtworks.find((a) => a.collection === name);
+    const firstArtwork = artworks.find((a) => a.collection === name);
     
     return {
       id: name.toLowerCase().replace(/\s+/g, "-"),

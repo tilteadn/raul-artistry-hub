@@ -6,6 +6,9 @@ export const LOCAL_IMAGE_URLS = [
   "/lovable-uploads/b25bb82f-8f40-467a-a1b0-a5be24d05385.png", // Retrato
   "/lovable-uploads/a39c4c37-616f-4ec5-973b-102908af9f14.png", // El Pintor
   "/lovable-uploads/d910daa9-517f-461b-b0b0-73ab5038a58c.png", // Sumersión
+  "/lovable-uploads/b1b32a00-7e9f-4992-bab8-46ae7acfaa16.png", // Flores
+  "/lovable-uploads/dfd681df-d270-4954-a4af-650684e21e9e.png", // Pintura abstracta
+  "/lovable-uploads/b4f4a393-1e15-429f-a397-616abf0ab141.png", // Pinceles con pintura
 ];
 
 // Safer image URLs that should work reliably
@@ -15,42 +18,42 @@ export const SAFE_IMAGE_URLS = [
   "https://images.unsplash.com/photo-1498330177096-689e3fb901ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
 ];
 
-// Dummy data for initial state
+// Dummy data for initial state - Replacing old artworks with new ones
 export const MOCK_ARTWORKS: Artwork[] = [
   {
     id: "1",
-    title: "Retrato",
-    subtitle: "Estudio de iluminación en blanco y negro",
-    collection: "Retratos",
-    imageUrl: LOCAL_IMAGE_URLS[0],
+    title: "Vibración Cromática",
+    subtitle: "Estudio de interacción de colores",
+    collection: "Abstracciones",
+    imageUrl: LOCAL_IMAGE_URLS[3], // Flores image
     year: "2022",
-    technique: "Fotografía digital",
-    dimensions: "50 x 70 cm",
-    description: "Un retrato en blanco y negro que explora la masculinidad y la introspección a través del juego de luces y sombras marcadas, capturando la esencia del sujeto en un momento de reflexión.",
-    createdAt: new Date("2022-03-15"),
+    technique: "Óleo sobre lienzo",
+    dimensions: "70 x 90 cm",
+    description: "Una exploración de la riqueza cromática a través de la composición floral, donde cada elemento aporta un tono particular creando una sinfonía visual que evoca emociones a través del color.",
+    createdAt: new Date("2022-04-15"),
   },
   {
     id: "2",
-    title: "El Pintor",
-    subtitle: "Retrato de joven artista",
-    collection: "Retratos",
-    imageUrl: LOCAL_IMAGE_URLS[1],
-    year: "2021",
-    technique: "Óleo sobre lienzo",
-    dimensions: "90 x 120 cm",
-    description: "Retrato de un joven artista con bata de pintor manchada de colores diversos, representando la fusión entre el creador y su obra, en una composición que destaca la inocencia y determinación del sujeto.",
-    createdAt: new Date("2021-11-08"),
+    title: "Reflejos Urbanos",
+    subtitle: "La ciudad tras la lluvia",
+    collection: "Urbano",
+    imageUrl: LOCAL_IMAGE_URLS[4], // Pintura abstracta
+    year: "2023",
+    technique: "Técnica mixta sobre lienzo",
+    dimensions: "100 x 80 cm",
+    description: "Una representación abstracta del paisaje urbano después de la lluvia, donde los colores se mezclan y difuminan reflejando las luces de la ciudad sobre el asfalto mojado.",
+    createdAt: new Date("2023-02-10"),
   },
   {
     id: "3",
-    title: "Sumersión",
-    subtitle: "Estudio de figura en agua",
-    collection: "Figurativo",
-    imageUrl: LOCAL_IMAGE_URLS[2],
+    title: "Fragmentos de Memoria",
+    subtitle: "Recuerdos abstractos",
+    collection: "Abstracciones",
+    imageUrl: LOCAL_IMAGE_URLS[5], // Pinceles con pintura
     year: "2023",
-    technique: "Óleo sobre lienzo",
-    dimensions: "100 x 80 cm",
-    description: "Una representación de la figura humana sumergida en agua, donde se explora la distorsión y el movimiento del cuerpo bajo la superficie, creando un equilibrio entre realismo y abstracción que invita a la contemplación.",
-    createdAt: new Date("2023-01-22"),
+    technique: "Acrílico sobre lienzo",
+    dimensions: "60 x 80 cm",
+    description: "Una pieza que explora la memoria a través del color y la textura, donde cada pincelada representa un fragmento de recuerdos que se superponen, creando una narrativa visual abstracta pero profundamente personal.",
+    createdAt: new Date("2023-03-22"),
   }
 ];

@@ -38,13 +38,18 @@ export const saveStoredArtworks = (artworks: Artwork[]): void => {
 };
 
 /**
+ * Helper function to clear localStorage and reinitialize with mock data
+ * Can be used to reset the gallery if needed
+ */
+export const resetToMockArtworks = (): Artwork[] => {
+  localStorage.removeItem(ARTWORKS_STORAGE_KEY);
+  return getStoredArtworks(); // This will initialize with MOCK_ARTWORKS
+};
+
+/**
  * Filters out problematic artworks from the collection
+ * No longer needed as we've replaced the problematic artworks
  */
 export const filterProblematicArtworks = (artworks: Artwork[]): Artwork[] => {
-  return artworks.filter(
-    artwork => 
-      artwork.title !== "Serenidad Marina" && 
-      artwork.title !== "Amanecer en el Bosque" && 
-      artwork.title !== "Abstracción No. 7"
-  );
+  return artworks;
 };
