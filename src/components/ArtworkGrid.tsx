@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Artwork } from "@/types/artwork";
@@ -77,14 +76,13 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
   }, [artwork.id]);
 
   useEffect(() => {
-    if (isInView && artwork.imageUrl) {
-      // For local images, we don't need to preload
-      if (artwork.imageUrl.startsWith('/lovable-uploads/')) {
-        setIsLoaded(true);
-        setHasError(false);
-        return;
-      }
+    if (isInView) {
+      // For all images, we'll set them to loaded immediately
+      // but still keep error handling for safety
+      setIsLoaded(false);
+      setHasError(false);
       
+      // Reset the error state when artwork changes
       const img = new Image();
       img.src = artwork.imageUrl;
       img.onload = () => {
@@ -117,7 +115,6 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
             isLoaded && "loaded"
           )}
           style={{ 
-            backgroundImage: hasError ? "none" : `url(${artwork.thumbnailUrl || artwork.imageUrl})`,
             backgroundColor: hasError ? fallbackBgColor : undefined
           }}
         >
@@ -132,7 +129,10 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
             <img
               src={artwork.imageUrl}
               alt={artwork.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className={cn(
+                "w-full h-full object-cover transition-transform duration-700 group-hover:scale-105",
+                isLoaded ? "opacity-100" : "opacity-50"
+              )}
               loading="lazy"
               onError={() => setHasError(true)}
             />

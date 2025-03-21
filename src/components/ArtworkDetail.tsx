@@ -19,13 +19,6 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
       setIsImageLoaded(false);
       setHasImageError(false);
       
-      // For local images, we don't need to preload
-      if (artwork.imageUrl.startsWith('/lovable-uploads/')) {
-        setIsImageLoaded(true);
-        setHasImageError(false);
-        return;
-      }
-      
       const img = new Image();
       img.src = artwork.imageUrl;
       
@@ -96,19 +89,16 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
         ) : (
           <div 
             className={cn(
-              "relative w-full aspect-[3/4] overflow-hidden blur-load rounded-lg",
-              isImageLoaded && "loaded"
+              "relative w-full aspect-[3/4] overflow-hidden rounded-lg",
+              isImageLoaded ? "opacity-100" : "opacity-50"
             )}
-            style={{ backgroundImage: `url(${artwork.thumbnailUrl || artwork.imageUrl})` }}
           >
             <img
               src={artwork.imageUrl}
               alt={artwork.title}
-              className={cn(
-                "w-full h-full object-cover transition-opacity duration-700",
-                isImageLoaded ? "opacity-100" : "opacity-0"
-              )}
+              className="w-full h-full object-cover transition-opacity duration-700"
               onError={() => setHasImageError(true)}
+              onLoad={() => setIsImageLoaded(true)}
             />
           </div>
         )}

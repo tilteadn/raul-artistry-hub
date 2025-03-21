@@ -6,6 +6,8 @@ const LOCAL_IMAGE_URLS = [
   "/lovable-uploads/b25bb82f-8f40-467a-a1b0-a5be24d05385.png", // Retrato
   "/lovable-uploads/a39c4c37-616f-4ec5-973b-102908af9f14.png", // El Pintor
   "/lovable-uploads/d910daa9-517f-461b-b0b0-73ab5038a58c.png", // Sumersión
+  "/lovable-uploads/dfd681df-d270-4954-a4af-650684e21e9e.png", // New image 1
+  "/lovable-uploads/b1b32a00-7e9f-4992-bab8-46ae7acfaa16.png", // New image 2
 ];
 
 // Safer image URLs that should work reliably
@@ -55,38 +57,38 @@ const MOCK_ARTWORKS: Artwork[] = [
   },
   {
     id: "4",
-    title: "Reflejos Urbanos",
-    subtitle: "La ciudad tras la lluvia",
-    collection: "Urbano",
-    imageUrl: SAFE_IMAGE_URLS[0],
+    title: "Serenidad Marina",
+    subtitle: "Estudio del horizonte",
+    collection: "Naturaleza",
+    imageUrl: LOCAL_IMAGE_URLS[3], // Using the newly uploaded image
     year: "2022",
     technique: "Óleo sobre lienzo",
     dimensions: "90 x 70 cm",
-    description: "Una representación de la ciudad moderna después de la lluvia, capturando los reflejos en las superficies mojadas y la atmósfera particular que se crea cuando las luces urbanas se reflejan en las calles húmedas.",
+    description: "Una representación serena del mar al atardecer, capturando la tranquilidad y vastedad del océano con tonos suaves que evocan paz y contemplación.",
     createdAt: new Date("2022-07-04"),
   },
   {
     id: "5",
-    title: "Fragmentos de Memoria",
-    subtitle: "Recuerdos abstractos",
-    collection: "Abstracciones",
-    imageUrl: SAFE_IMAGE_URLS[1],
+    title: "Amanecer en el Bosque",
+    subtitle: "Juego de luces entre árboles",
+    collection: "Naturaleza",
+    imageUrl: LOCAL_IMAGE_URLS[4], // Using the newly uploaded image
     year: "2021",
     technique: "Técnica mixta",
     dimensions: "110 x 90 cm",
-    description: "Una composición que explora la naturaleza fragmentada de los recuerdos, mezclando formas y colores que evocan momentos efímeros de la memoria personal.",
+    description: "Una composición que explora la forma en que la luz del amanecer se filtra entre los árboles del bosque, creando patrones y contrastes que realzan la belleza natural del entorno.",
     createdAt: new Date("2021-09-17"),
   },
   {
     id: "6",
-    title: "Vibración Cromática",
-    subtitle: "Estudio de interacción de colores",
+    title: "Abstracción No. 7",
+    subtitle: "Estudio de formas y color",
     collection: "Abstracciones",
-    imageUrl: SAFE_IMAGE_URLS[2],
+    imageUrl: "/lovable-uploads/b1b32a00-7e9f-4992-bab8-46ae7acfaa16.png", // Reusing one of the uploaded images as fallback
     year: "2023",
     technique: "Acrílico sobre lienzo",
     dimensions: "100 x 100 cm",
-    description: "Un experimento visual que explora cómo los colores interactúan entre sí, creando vibraciones ópticas y generando movimiento a través de la yuxtaposición de tonos complementarios.",
+    description: "Un experimento visual que explora cómo las formas y colores interactúan entre s��, creando dinámicas visuales que invitan al espectador a encontrar su propia interpretación.",
     createdAt: new Date("2023-02-28"),
   }
 ];
