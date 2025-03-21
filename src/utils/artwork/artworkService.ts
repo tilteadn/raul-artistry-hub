@@ -84,23 +84,15 @@ export const getCollections = async (): Promise<Collection[]> => {
 /**
  * Saves a new artwork
  */
-export const saveArtwork = async (artwork: Omit<Artwork, "id" | "createdAt">): Promise<Artwork> => {
+export const saveArtwork = async (artwork: Artwork): Promise<Artwork> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 600));
   
   const artworks = getStoredArtworks();
-  
-  // Create a full artwork with id and createdAt
-  const newArtwork: Artwork = {
-    ...artwork,
-    id: uuidv4(),
-    createdAt: new Date()
-  };
-  
-  artworks.push(newArtwork);
+  artworks.push(artwork);
   saveStoredArtworks(artworks);
   
-  return newArtwork;
+  return artwork;
 };
 
 /**
