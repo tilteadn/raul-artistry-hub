@@ -6,8 +6,6 @@ const LOCAL_IMAGE_URLS = [
   "/lovable-uploads/b25bb82f-8f40-467a-a1b0-a5be24d05385.png", // Retrato
   "/lovable-uploads/a39c4c37-616f-4ec5-973b-102908af9f14.png", // El Pintor
   "/lovable-uploads/d910daa9-517f-461b-b0b0-73ab5038a58c.png", // Sumersión
-  "/lovable-uploads/dfd681df-d270-4954-a4af-650684e21e9e.png", // New image 1
-  "/lovable-uploads/b1b32a00-7e9f-4992-bab8-46ae7acfaa16.png", // New image 2
 ];
 
 // Safer image URLs that should work reliably
@@ -54,42 +52,6 @@ const MOCK_ARTWORKS: Artwork[] = [
     dimensions: "100 x 80 cm",
     description: "Una representación de la figura humana sumergida en agua, donde se explora la distorsión y el movimiento del cuerpo bajo la superficie, creando un equilibrio entre realismo y abstracción que invita a la contemplación.",
     createdAt: new Date("2023-01-22"),
-  },
-  {
-    id: "4",
-    title: "Serenidad Marina",
-    subtitle: "Estudio del horizonte",
-    collection: "Naturaleza",
-    imageUrl: LOCAL_IMAGE_URLS[3], // Using the newly uploaded image
-    year: "2022",
-    technique: "Óleo sobre lienzo",
-    dimensions: "90 x 70 cm",
-    description: "Una representación serena del mar al atardecer, capturando la tranquilidad y vastedad del océano con tonos suaves que evocan paz y contemplación.",
-    createdAt: new Date("2022-07-04"),
-  },
-  {
-    id: "5",
-    title: "Amanecer en el Bosque",
-    subtitle: "Juego de luces entre árboles",
-    collection: "Naturaleza",
-    imageUrl: LOCAL_IMAGE_URLS[4], // Using the newly uploaded image
-    year: "2021",
-    technique: "Técnica mixta",
-    dimensions: "110 x 90 cm",
-    description: "Una composición que explora la forma en que la luz del amanecer se filtra entre los árboles del bosque, creando patrones y contrastes que realzan la belleza natural del entorno.",
-    createdAt: new Date("2021-09-17"),
-  },
-  {
-    id: "6",
-    title: "Abstracción No. 7",
-    subtitle: "Estudio de formas y color",
-    collection: "Abstracciones",
-    imageUrl: "/lovable-uploads/b1b32a00-7e9f-4992-bab8-46ae7acfaa16.png", // Reusing one of the uploaded images as fallback
-    year: "2023",
-    technique: "Acrílico sobre lienzo",
-    dimensions: "100 x 100 cm",
-    description: "Un experimento visual que explora cómo las formas y colores interactúan entre s��, creando dinámicas visuales que invitan al espectador a encontrar su propia interpretación.",
-    createdAt: new Date("2023-02-28"),
   }
 ];
 
@@ -129,8 +91,22 @@ export const getAllArtworks = async (): Promise<Artwork[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   
   const artworks = getStoredArtworks();
+  
+  // Filter out the problematic artworks if they exist
+  const filteredArtworks = artworks.filter(
+    artwork => 
+      artwork.title !== "Serenidad Marina" && 
+      artwork.title !== "Amanecer en el Bosque" && 
+      artwork.title !== "Abstracción No. 7"
+  );
+  
+  // If any were filtered out, update the storage
+  if (filteredArtworks.length !== artworks.length) {
+    saveStoredArtworks(filteredArtworks);
+  }
+  
   // Sort by creation date, newest first
-  return artworks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return filteredArtworks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 };
 
 export const getFeaturedArtworks = async (): Promise<Artwork[]> => {
@@ -168,12 +144,20 @@ export const getCollections = async (): Promise<Collection[]> => {
   
   const artworks = getStoredArtworks();
   
+  // Filter out problematic artworks
+  const filteredArtworks = artworks.filter(
+    artwork => 
+      artwork.title !== "Serenidad Marina" && 
+      artwork.title !== "Amanecer en el Bosque" && 
+      artwork.title !== "Abstracción No. 7"
+  );
+  
   // Extract unique collections and create collection objects
   const collections = Array.from(
-    new Set(artworks.map((artwork) => artwork.collection))
+    new Set(filteredArtworks.map((artwork) => artwork.collection))
   ).map((name) => {
     // Find the first artwork in this collection to use as thumbnail
-    const firstArtwork = artworks.find((a) => a.collection === name);
+    const firstArtwork = filteredArtworks.find((a) => a.collection === name);
     
     return {
       id: name.toLowerCase().replace(/\s+/g, "-"),
