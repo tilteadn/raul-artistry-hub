@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
@@ -29,6 +29,7 @@ const Navbar = () => {
     { name: "Inicio", path: "/" },
     { name: "Obras", path: "/obras" },
     { name: "Contacto", path: "/contacto" },
+    { name: "Admin", path: "/admin", icon: <Settings className="h-4 w-4" /> },
   ];
 
   return (
@@ -52,13 +53,14 @@ const Navbar = () => {
               key={link.path}
               to={link.path}
               className={cn(
-                "relative py-2 text-sm font-medium tracking-wide transition-colors",
+                "relative py-2 text-sm font-medium tracking-wide transition-colors flex items-center gap-2",
                 location.pathname === link.path
                   ? "text-primary"
                   : "text-muted-foreground hover:text-primary"
               )}
               onClick={closeMenu}
             >
+              {link.icon && link.icon}
               {link.name}
               {location.pathname === link.path && (
                 <span className="absolute bottom-0 left-0 w-full h-[1px] bg-primary" />
@@ -87,13 +89,14 @@ const Navbar = () => {
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "px-6 py-2 text-base transition-colors",
+                    "px-6 py-2 text-base transition-colors flex items-center gap-2",
                     location.pathname === link.path
                       ? "font-medium text-primary"
                       : "text-muted-foreground hover:text-primary"
                   )}
                   onClick={closeMenu}
                 >
+                  {link.icon && link.icon}
                   {link.name}
                 </Link>
               ))}
