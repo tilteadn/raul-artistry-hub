@@ -1,7 +1,13 @@
-
 import { Artwork } from "@/types/artwork";
 
-// Local images uploaded by the user
+// Asset paths for uploaded images in the assets folder
+export const ASSETS_IMAGE_URLS = [
+  "/assets/e9024d21-2e3c-4fea-833b-01428e743d2e.png", // Portrait in black and white
+  "/assets/24922b89-7916-405a-b1bb-9e471c33d047.png", // Boy with paint stained coat
+  "/assets/6d956258-6370-4e7b-a09f-5c5be890c12d.png", // Woman underwater
+];
+
+// Local images uploaded by the user (keeping for compatibility)
 export const LOCAL_IMAGE_URLS = [
   "/lovable-uploads/b25bb82f-8f40-467a-a1b0-a5be24d05385.png", // Retrato
   "/lovable-uploads/a39c4c37-616f-4ec5-973b-102908af9f14.png", // El Pintor
@@ -11,49 +17,49 @@ export const LOCAL_IMAGE_URLS = [
   "/lovable-uploads/b4f4a393-1e15-429f-a397-616abf0ab141.png", // Pinceles con pintura
 ];
 
-// Safer image URLs that should work reliably
+// Safer image URLs that should work reliably (keeping for backup)
 export const SAFE_IMAGE_URLS = [
   "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
   "https://images.unsplash.com/photo-1551732998-9573f695fdbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
   "https://images.unsplash.com/photo-1498330177096-689e3fb901ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
 ];
 
-// Dummy data for initial state - Replacing old artworks with new ones
+// Updated mock artworks with the new asset images
 export const MOCK_ARTWORKS: Artwork[] = [
   {
     id: "1",
-    title: "Retrato",
-    subtitle: "Estudio de de tonalidades blanco & negro",
-    collection: "Abstracciones",
-    imageUrl: LOCAL_IMAGE_URLS[1], // Flores image
-    year: "2022",
-    technique: "Fotografia digital",
-    dimensions: "70 x 90 cm",
-    description: "Una foto bien guaperrona",
-    createdAt: new Date("2022-04-15"),
+    title: "Retrato en Claroscuro",
+    subtitle: "Estudio de luz y sombra",
+    collection: "Retratos",
+    imageUrl: ASSETS_IMAGE_URLS[0], // Black and white portrait
+    year: "2023",
+    technique: "Fotografía digital",
+    dimensions: "60 x 80 cm",
+    description: "Un retrato en blanco y negro que explora la dualidad entre luz y sombra, revelando la profundidad y carácter a través del contraste.",
+    createdAt: new Date("2023-05-15"),
   },
   {
     id: "2",
-    title: "El Pintor",
-    subtitle: "El Pintor",
-    collection: "Urbano",
-    imageUrl: LOCAL_IMAGE_URLS[2], // Pintura abstracta
-    year: "2023",
-    technique: "Técnica mixta sobre lienzo",
-    dimensions: "100 x 80 cm",
-    description: "Una representación del pintor, simbolizando con la bata over-sized lo dificil que es para el artista sentir que merece el honor de usar este sustantivo.",
-    createdAt: new Date("2023-02-10"),
+    title: "El Joven Artista",
+    subtitle: "Inocencia y creatividad",
+    collection: "Figurativo",
+    imageUrl: ASSETS_IMAGE_URLS[1], // Boy with paint stained coat
+    year: "2022",
+    technique: "Óleo sobre lienzo",
+    dimensions: "90 x 120 cm",
+    description: "Retrato de un joven artista con su abrigo manchado de pintura, simbolizando la pureza de la expresión creativa sin restricciones.",
+    createdAt: new Date("2022-11-10"),
   },
   {
     id: "3",
     title: "Sumersión",
-    subtitle: "Sumersión",
-    collection: "Abstracciones",
-    imageUrl: LOCAL_IMAGE_URLS[3], // Pinceles con pintura
+    subtitle: "Entre dos mundos",
+    collection: "Figurativo",
+    imageUrl: ASSETS_IMAGE_URLS[2], // Woman underwater
     year: "2023",
     technique: "Acrílico sobre lienzo",
-    dimensions: "60 x 80 cm",
-    description: "Una pieza que explora la memoria a través del color y la textura.",
+    dimensions: "100 x 150 cm",
+    description: "Una exploración de la dualidad entre consciencia e inconsciencia, representada por una figura sumergida entre dos realidades.",
     createdAt: new Date("2023-03-22"),
   }
 ];

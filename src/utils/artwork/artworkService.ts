@@ -1,3 +1,4 @@
+
 import { Artwork, Collection } from "@/types/artwork";
 import { v4 as uuidv4 } from 'uuid';
 import { getStoredArtworks, saveStoredArtworks, resetToMockArtworks } from "./storageUtils";
@@ -9,8 +10,7 @@ export const getAllArtworks = async (): Promise<Artwork[]> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 500));
   
-  // Force reset to use the new mock data
-  // This is a temporary measure to ensure the gallery displays the correct artworks
+  // Always reset to use the new mock data to ensure new images are displayed
   const artworks = resetToMockArtworks();
   
   // Sort by creation date, newest first
