@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ImageOff } from "lucide-react";
 import { Artwork } from "@/types/artwork";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -12,14 +11,32 @@ interface ArtworkDetailProps {
 
 const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [hasImageError, setHasImageError] = useState(false);
 
   useEffect(() => {
     if (artwork && artwork.imageUrl) {
+      setIsImageLoaded(false);
+      setHasImageError(false);
+      
       const img = new Image();
       img.src = artwork.imageUrl;
-      img.onload = () => setIsImageLoaded(true);
+      
+      img.onload = () => {
+        setIsImageLoaded(true);
+        setHasImageError(false);
+      };
+      
+      img.onerror = () => {
+        console.error(`Failed to load image for artwork: ${artwork.title}`);
+        setHasImageError(true);
+        setIsImageLoaded(true); // Consider it "loaded" even though it errored
+      };
     }
   }, [artwork]);
+
+  const fallbackBgColor = artwork?.id ? 
+    `hsl(${parseInt(artwork.id) * 60 % 360}, 70%, 80%)` : 
+    "hsl(200, 70%, 80%)";
 
   if (loading) {
     return (
@@ -57,23 +74,38 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
       <div className="w-full md:sticky md:top-24 h-fit">
-        <div 
-          className={cn(
-            "relative w-full aspect-[3/4] overflow-hidden blur-load",
-            isImageLoaded && "loaded"
-          )}
-          style={{ backgroundImage: `url(${artwork.thumbnailUrl || artwork.imageUrl})` }}
-        >
-          <img
-            src={artwork.imageUrl}
-            alt={artwork.title}
+        {hasImageError ? (
+          <div 
+            className="w-full aspect-[3/4] flex items-center justify-center rounded-lg"
+            style={{ backgroundColor: fallbackBgColor }}
+          >
+            <div className="text-center p-8">
+              <ImageOff className="w-16 h-16 mx-auto text-primary/20 mb-4" />
+              <h3 className="text-xl font-medium text-primary/60">{artwork.title}</h3>
+              <p className="text-sm text-primary/60 mt-2">La imagen no está disponible</p>
+            </div>
+          </div>
+        ) : (
+          <div 
             className={cn(
-              "w-full h-full object-cover transition-opacity duration-700",
-              isImageLoaded ? "opacity-100" : "opacity-0"
+              "relative w-full aspect-[3/4] overflow-hidden blur-load rounded-lg",
+              isImageLoaded && "loaded"
             )}
-          />
-        </div>
+            style={{ backgroundImage: `url(${artwork.thumbnailUrl || artwork.imageUrl})` }}
+          >
+            <img
+              src={artwork.imageUrl}
+              alt={artwork.title}
+              className={cn(
+                "w-full h-full object-cover transition-opacity duration-700",
+                isImageLoaded ? "opacity-100" : "opacity-0"
+              )}
+              onError={() => setHasImageError(true)}
+            />
+          </div>
+        )}
       </div>
+      
       <div className="space-y-6 px-4 md:px-0">
         <h1 className="font-serif text-3xl md:text-4xl font-medium text-primary">
           {artwork.title}

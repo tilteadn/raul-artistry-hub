@@ -1,5 +1,15 @@
-
 import { Artwork, Collection } from "@/types/artwork";
+import { v4 as uuidv4 } from 'uuid';
+
+// Safer image URLs that should work reliably
+const SAFE_IMAGE_URLS = [
+  "https://images.unsplash.com/photo-1549887534-1541e9326642?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
+  "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
+  "https://images.unsplash.com/photo-1551732998-9573f695fdbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
+  "https://images.unsplash.com/photo-1541701494587-cb58502866ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
+  "https://images.unsplash.com/photo-1498330177096-689e3fb901ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
+  "https://images.unsplash.com/photo-1520209268518-aec60b8bb5ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=1050&q=80",
+];
 
 // Dummy data for initial state
 const MOCK_ARTWORKS: Artwork[] = [
@@ -8,7 +18,7 @@ const MOCK_ARTWORKS: Artwork[] = [
     title: "Amanecer en el Bosque",
     subtitle: "Juego de luces entre árboles",
     collection: "Naturaleza",
-    imageUrl: "https://images.unsplash.com/photo-1519674358697-8e4bf4b18830?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+    imageUrl: SAFE_IMAGE_URLS[0],
     year: "2022",
     technique: "Óleo sobre lienzo",
     dimensions: "100 x 80 cm",
@@ -20,7 +30,7 @@ const MOCK_ARTWORKS: Artwork[] = [
     title: "Abstracción No. 7",
     subtitle: "Estudio de formas y color",
     collection: "Abstracciones",
-    imageUrl: "https://images.unsplash.com/photo-1615226882533-85eb194d311c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+    imageUrl: SAFE_IMAGE_URLS[1],
     year: "2021",
     technique: "Acrílico sobre lienzo",
     dimensions: "120 x 100 cm",
@@ -32,7 +42,7 @@ const MOCK_ARTWORKS: Artwork[] = [
     title: "Reflejos Urbanos",
     subtitle: "La ciudad tras la lluvia",
     collection: "Urbano",
-    imageUrl: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
+    imageUrl: SAFE_IMAGE_URLS[2],
     year: "2023",
     technique: "Óleo sobre lienzo",
     dimensions: "90 x 70 cm",
@@ -44,7 +54,7 @@ const MOCK_ARTWORKS: Artwork[] = [
     title: "Serenidad Marina",
     subtitle: "Estudio del horizonte",
     collection: "Naturaleza",
-    imageUrl: "https://images.unsplash.com/photo-1606947026902-d178b844afe3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
+    imageUrl: SAFE_IMAGE_URLS[3],
     year: "2022",
     technique: "Acrílico sobre lienzo",
     dimensions: "80 x 60 cm",
@@ -56,7 +66,7 @@ const MOCK_ARTWORKS: Artwork[] = [
     title: "Fragmentos de Memoria",
     subtitle: "Recuerdos abstractos",
     collection: "Abstracciones",
-    imageUrl: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1471&q=80",
+    imageUrl: SAFE_IMAGE_URLS[4],
     year: "2021",
     technique: "Técnica mixta",
     dimensions: "110 x 90 cm",
@@ -68,7 +78,7 @@ const MOCK_ARTWORKS: Artwork[] = [
     title: "Vibración Cromática",
     subtitle: "Estudio de interacción de colores",
     collection: "Abstracciones",
-    imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=745&q=80",
+    imageUrl: SAFE_IMAGE_URLS[5],
     year: "2023",
     technique: "Acrílico sobre lienzo",
     dimensions: "100 x 100 cm",
@@ -169,15 +179,23 @@ export const getCollections = async (): Promise<Collection[]> => {
   return collections;
 };
 
-export const saveArtwork = async (artwork: Artwork): Promise<Artwork> => {
+export const saveArtwork = async (artwork: Omit<Artwork, "id" | "createdAt">): Promise<Artwork> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 600));
   
   const artworks = getStoredArtworks();
-  artworks.push(artwork);
+  
+  // Create a full artwork with id and createdAt
+  const newArtwork: Artwork = {
+    ...artwork,
+    id: uuidv4(),
+    createdAt: new Date()
+  };
+  
+  artworks.push(newArtwork);
   saveStoredArtworks(artworks);
   
-  return artwork;
+  return newArtwork;
 };
 
 export const updateArtwork = async (artwork: Artwork): Promise<Artwork> => {
