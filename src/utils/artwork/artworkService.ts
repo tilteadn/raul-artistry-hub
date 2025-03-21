@@ -10,7 +10,7 @@ export const getAllArtworks = async (): Promise<Artwork[]> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 500));
   
-  // Always reset to use the new mock data to ensure new images are displayed
+  // Always reset to use the updated safe URLs to ensure images are displayed
   const artworks = resetToMockArtworks();
   
   // Sort by creation date, newest first

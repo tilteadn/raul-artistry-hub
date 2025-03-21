@@ -31,7 +31,7 @@ export const MOCK_ARTWORKS: Artwork[] = [
     title: "Retrato en Claroscuro",
     subtitle: "Estudio de luz y sombra",
     collection: "Retratos",
-    imageUrl: ASSETS_IMAGE_URLS[0], // Black and white portrait
+    imageUrl: SAFE_IMAGE_URLS[0], // Using safer image URLs until assets are properly set up
     year: "2023",
     technique: "Fotografía digital",
     dimensions: "60 x 80 cm",
@@ -43,7 +43,7 @@ export const MOCK_ARTWORKS: Artwork[] = [
     title: "El Joven Artista",
     subtitle: "Inocencia y creatividad",
     collection: "Figurativo",
-    imageUrl: ASSETS_IMAGE_URLS[1], // Boy with paint stained coat
+    imageUrl: SAFE_IMAGE_URLS[1], // Using safer image URLs until assets are properly set up
     year: "2022",
     technique: "Óleo sobre lienzo",
     dimensions: "90 x 120 cm",
@@ -55,7 +55,7 @@ export const MOCK_ARTWORKS: Artwork[] = [
     title: "Sumersión",
     subtitle: "Entre dos mundos",
     collection: "Figurativo",
-    imageUrl: ASSETS_IMAGE_URLS[2], // Woman underwater
+    imageUrl: SAFE_IMAGE_URLS[2], // Using safer image URLs until assets are properly set up
     year: "2023",
     technique: "Acrílico sobre lienzo",
     dimensions: "100 x 150 cm",
