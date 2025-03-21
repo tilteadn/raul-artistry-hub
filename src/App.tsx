@@ -36,5 +36,3 @@ const App = () => (
 );
 
 export default App;
-</lov-add-dependency>
-<lov-add-dependency>uuid@latest</lov-add-dependency>
