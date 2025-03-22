@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { ImagePlus, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -124,7 +125,7 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
         ) : (
           <div className={cn(
             "flex flex-col items-center justify-center p-4 text-muted-foreground cursor-pointer",
-            isMobile ? "aspect-[4/3]" : "aspect-[3/4]"
+            isMobile ? "aspect-[4/3]" : "min-h-[220px]"
           )}>
             {isUploading ? (
               <div className="text-center">

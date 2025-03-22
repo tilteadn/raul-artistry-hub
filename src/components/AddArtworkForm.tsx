@@ -59,7 +59,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
 
   const handleImageChange = (url: string) => {
     form.setValue("imageUrl", url);
-    // Trigger validation
     form.trigger("imageUrl");
   };
 
@@ -249,13 +248,9 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
   return (
     <div className="bg-secondary p-8">
       <Form {...form}>
-        {isMobile ? (
-          <ScrollArea className="h-[60vh]">
-            <FormContent />
-          </ScrollArea>
-        ) : (
+        <ScrollArea className="pr-4 max-h-[80vh]">
           <FormContent />
-        )}
+        </ScrollArea>
       </Form>
     </div>
   );
