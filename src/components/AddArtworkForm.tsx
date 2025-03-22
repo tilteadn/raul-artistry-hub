@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, Image } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,12 +18,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Artwork } from "@/types/artwork";
+import ImageUploader from "./ImageUploader";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "El título es requerido" }),
   subtitle: z.string().min(1, { message: "El subtítulo es requerido" }),
   collection: z.string().min(1, { message: "La colección es requerida" }),
-  imageUrl: z.string().min(1, { message: "La URL de la imagen es requerida" }),
+  imageUrl: z.string().min(1, { message: "La imagen es requerida" }),
   year: z.string().optional(),
   technique: z.string().optional(),
   dimensions: z.string().optional(),
@@ -39,9 +40,6 @@ interface AddArtworkFormProps {
 
 const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    editArtwork?.imageUrl || null
-  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -57,12 +55,10 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     },
   });
 
-  const handleImageUrlChange = (url: string) => {
-    if (url) {
-      setImagePreview(url);
-    } else {
-      setImagePreview(null);
-    }
+  const handleImageChange = (url: string) => {
+    form.setValue("imageUrl", url);
+    // Trigger validation
+    form.trigger("imageUrl");
   };
 
   const handleSubmit = (values: FormValues) => {
@@ -84,7 +80,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
       
       if (!editArtwork) {
         form.reset();
-        setImagePreview(null);
       }
       
       toast.success(
@@ -199,45 +194,20 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL de la imagen</FormLabel>
+                    <FormLabel>Imagen</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="https://example.com/imagen.jpg" 
-                        {...field} 
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleImageUrlChange(e.target.value);
-                        }}
+                      <ImageUploader 
+                        onChange={handleImageChange}
+                        initialImage={field.value}
                       />
                     </FormControl>
                     <FormDescription>
-                      Introduce la URL de la imagen de la obra
+                      Sube una imagen o arrastra y suelta aquí
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
-              <div className="border border-dashed border-border rounded-md overflow-hidden bg-background">
-                {imagePreview ? (
-                  <div className="relative aspect-[3/4]">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={() => setImagePreview(null)}
-                    />
-                  </div>
-                ) : (
-                  <div className="aspect-[3/4] flex items-center justify-center text-muted-foreground">
-                    <div className="text-center p-4">
-                      <Image className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <p className="mt-2">Vista previa de la imagen</p>
-                      <p className="text-sm">Introduce una URL válida para ver la imagen</p>
-                    </div>
-                  </div>
-                )}
-              </div>
               
               <FormField
                 control={form.control}
