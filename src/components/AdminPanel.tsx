@@ -25,6 +25,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddArtworkForm from "./AddArtworkForm";
+import { useIsMobile } from "@/hooks/use-mobile"; 
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 interface AdminPanelProps {
   artworks: Artwork[];
@@ -43,6 +51,7 @@ const AdminPanel = ({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState("obras");
+  const isMobile = useIsMobile();
 
   const uniqueCollections = Array.from(
     new Set(artworks.map((artwork) => artwork.collection))
@@ -65,30 +74,92 @@ const AdminPanel = ({
     toast.success("Obra eliminada correctamente");
   };
 
+  const AddArtworkDialog = () => (
+    <>
+      {isMobile ? (
+        <Drawer open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DrawerTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Añadir Obra
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="px-0 pt-0">
+            <DrawerHeader className="mb-0 pb-0">
+              <DrawerTitle>Añadir Nueva Obra</DrawerTitle>
+            </DrawerHeader>
+            <AddArtworkForm 
+              onSubmit={(data) => {
+                onAddArtwork(data);
+                setIsAddDialogOpen(false);
+              }} 
+            />
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Añadir Obra
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Añadir Nueva Obra</DialogTitle>
+            </DialogHeader>
+            <AddArtworkForm 
+              onSubmit={(data) => {
+                onAddArtwork(data);
+                setIsAddDialogOpen(false);
+              }} 
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+
+  const EditArtworkDialog = () => (
+    <>
+      {isMobile ? (
+        <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DrawerContent className="px-0 pt-0">
+            <DrawerHeader className="mb-0 pb-0">
+              <DrawerTitle>Editar Obra</DrawerTitle>
+            </DrawerHeader>
+            {selectedArtwork && (
+              <AddArtworkForm
+                editArtwork={selectedArtwork}
+                onSubmit={handleUpdateArtwork}
+              />
+            )}
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Editar Obra</DialogTitle>
+            </DialogHeader>
+            {selectedArtwork && (
+              <AddArtworkForm
+                editArtwork={selectedArtwork}
+                onSubmit={handleUpdateArtwork}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <h2 className="font-serif text-3xl font-medium">Panel de Administración</h2>
         <div className="flex gap-4">
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Añadir Obra
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>Añadir Nueva Obra</DialogTitle>
-              </DialogHeader>
-              <AddArtworkForm 
-                onSubmit={(data) => {
-                  onAddArtwork(data);
-                  setIsAddDialogOpen(false);
-                }} 
-              />
-            </DialogContent>
-          </Dialog>
+          <AddArtworkDialog />
         </div>
       </div>
 
@@ -206,20 +277,7 @@ const AdminPanel = ({
         </TabsContent>
       </Tabs>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Editar Obra</DialogTitle>
-          </DialogHeader>
-          {selectedArtwork && (
-            <AddArtworkForm
-              editArtwork={selectedArtwork}
-              onSubmit={handleUpdateArtwork}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditArtworkDialog />
     </div>
   );
 };

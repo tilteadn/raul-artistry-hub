@@ -1,8 +1,8 @@
-
 import { useState, useRef } from "react";
 import { ImagePlus, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ImageUploaderProps {
   onChange: (url: string) => void;
@@ -15,6 +15,7 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialImage || null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -54,15 +55,10 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
 
     setIsUploading(true);
     try {
-      // Create a local object URL to preview the image
       const localUrl = URL.createObjectURL(file);
       setPreviewUrl(localUrl);
       
-      // Simulate upload delay
       await new Promise(resolve => setTimeout(resolve, 500));
-
-      // In a real app, you would upload to a server or cloud storage
-      // For this MVP, we'll just use the local object URL
       onChange(localUrl);
     } catch (error) {
       console.error("Error handling file:", error);
@@ -126,7 +122,10 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
             </Button>
           </div>
         ) : (
-          <div className="aspect-[3/4] flex flex-col items-center justify-center p-4 text-muted-foreground cursor-pointer">
+          <div className={cn(
+            "flex flex-col items-center justify-center p-4 text-muted-foreground cursor-pointer",
+            isMobile ? "aspect-[4/3]" : "aspect-[3/4]"
+          )}>
             {isUploading ? (
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -137,7 +136,7 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
                 <ImagePlus className="mx-auto h-12 w-12 mb-4" />
                 <p className="font-medium">Sube una imagen</p>
                 <p className="text-sm text-center mt-2">
-                  Arrastra y suelta aquí o haz clic para seleccionar
+                  {isMobile ? "Haz clic para seleccionar" : "Arrastra y suelta aquí o haz clic para seleccionar"}
                 </p>
                 <Button variant="outline" size="sm" className="mt-4" onClick={handleClickUpload}>
                   <Upload className="mr-2 h-4 w-4" />
