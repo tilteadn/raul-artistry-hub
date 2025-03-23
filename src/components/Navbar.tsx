@@ -59,7 +59,6 @@ const Navbar = () => {
               )}
               onClick={closeMenu}
             >
-              {link.icon && link.icon}
               {link.name}
               {location.pathname === link.path && (
                 <span className="absolute bottom-0 left-0 w-full h-[1px] bg-primary" />
@@ -95,7 +94,6 @@ const Navbar = () => {
                   )}
                   onClick={closeMenu}
                 >
-                  {link.icon && link.icon}
                   {link.name}
                 </Link>
               ))}
