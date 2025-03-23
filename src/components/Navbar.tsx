@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Settings } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
@@ -29,7 +29,6 @@ const Navbar = () => {
     { name: "Inicio", path: "/" },
     { name: "Obras", path: "/obras" },
     { name: "Contacto", path: "/contacto" },
-    { name: "Admin", path: "/admin", icon: <Settings className="h-4 w-4" /> },
   ];
 
   return (
