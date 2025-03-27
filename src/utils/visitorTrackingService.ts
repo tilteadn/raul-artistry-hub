@@ -1,3 +1,4 @@
+
 // Types for visitor data
 export interface CountryData {
   country: string;
@@ -18,10 +19,19 @@ export interface VisitorData {
   monthlyData: MonthlyData[];
 }
 
-// Get the visitor's country (in a real app, you would use a geolocation API)
-const getUserCountry = (): string => {
-  // For this demo, we'll always return Spain instead of a random country
-  return "España";
+// Get the visitor's country using a geolocation API
+const getUserCountry = async (): Promise<string> => {
+  try {
+    // Using the free ipapi.co service to get visitor's country
+    const response = await fetch('https://ipapi.co/json/');
+    const data = await response.json();
+    
+    // Return the country name
+    return data.country_name || "Unknown";
+  } catch (error) {
+    console.error("Error detecting country:", error);
+    return "Unknown";
+  }
 };
 
 // Function to track a new visit if consent was given
@@ -35,7 +45,7 @@ export const trackVisit = async (): Promise<void> => {
   try {
     const now = new Date();
     const month = now.toLocaleString('default', { month: 'short' });
-    const country = getUserCountry();
+    const country = await getUserCountry();
     
     // Get existing tracking data
     let trackingData = localStorage.getItem("visitor-tracking-data");

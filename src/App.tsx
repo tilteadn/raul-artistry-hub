@@ -25,7 +25,10 @@ const VisitTracker = () => {
   useEffect(() => {
     // Only track when we have an explicit boolean value for consent
     if (consentGiven === true) {
-      trackVisit();
+      // Call the async function
+      trackVisit().catch(error => {
+        console.error("Failed to track visit:", error);
+      });
     }
   }, [location.pathname, consentGiven]);
   
