@@ -36,12 +36,6 @@ const getUserCountry = async (): Promise<string> => {
 
 // Function to track a new visit if consent was given
 export const trackVisit = async (): Promise<void> => {
-  const consent = localStorage.getItem("cookie-consent");
-  if (consent !== "true") {
-    console.log("Visit not tracked - no consent");
-    return;
-  }
-
   try {
     const now = new Date();
     const month = now.toLocaleString('default', { month: 'short' });
