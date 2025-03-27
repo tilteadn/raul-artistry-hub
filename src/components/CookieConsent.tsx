@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,13 @@ export const useCookieConsent = () => {
 
   useEffect(() => {
     const savedConsent = localStorage.getItem("cookie-consent");
-    setConsentGiven(savedConsent === "true");
+    if (savedConsent === "true") {
+      setConsentGiven(true);
+    } else if (savedConsent === "false") {
+      setConsentGiven(false);
+    } else {
+      setConsentGiven(null);
+    }
   }, []);
 
   const giveConsent = () => {
@@ -27,8 +32,13 @@ export const useCookieConsent = () => {
 
 const CookieConsent = () => {
   const { consentGiven, giveConsent, denyConsent } = useCookieConsent();
+  const [mounted, setMounted] = useState(false);
 
-  if (consentGiven !== null) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || consentGiven !== null) {
     return null;
   }
 

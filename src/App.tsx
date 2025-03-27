@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,7 +23,8 @@ const VisitTracker = () => {
   const { consentGiven } = useCookieConsent();
   
   useEffect(() => {
-    if (consentGiven) {
+    // Only track when we have an explicit boolean value for consent
+    if (consentGiven === true) {
       trackVisit();
     }
   }, [location.pathname, consentGiven]);
