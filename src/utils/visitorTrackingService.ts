@@ -1,4 +1,3 @@
-
 // Types for visitor data
 export interface CountryData {
   country: string;
@@ -21,12 +20,8 @@ export interface VisitorData {
 
 // Get the visitor's country (in a real app, you would use a geolocation API)
 const getUserCountry = (): string => {
-  const countries = [
-    "España", "Estados Unidos", "México", "Argentina", 
-    "Colombia", "Chile", "Perú", "Francia", "Alemania", "Reino Unido"
-  ];
-  // For demo purposes, we'll return a random country
-  return countries[Math.floor(Math.random() * countries.length)];
+  // For this demo, we'll always return Spain instead of a random country
+  return "España";
 };
 
 // Function to track a new visit if consent was given
