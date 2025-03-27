@@ -12,6 +12,7 @@ import ArtworkPage from "./pages/ArtworkPage";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import CookieConsent, { useCookieConsent } from "./components/CookieConsent";
 import { trackVisit } from "./utils/visitorTrackingService";
 
 const queryClient = new QueryClient();
@@ -19,10 +20,13 @@ const queryClient = new QueryClient();
 // This component will handle the visit tracking
 const VisitTracker = () => {
   const location = useLocation();
+  const { consentGiven } = useCookieConsent();
   
   useEffect(() => {
-    trackVisit();
-  }, [location.pathname]);
+    if (consentGiven) {
+      trackVisit();
+    }
+  }, [location.pathname, consentGiven]);
   
   return null;
 };
@@ -43,6 +47,7 @@ const App = () => (
           </Routes>
         </Layout>
       </BrowserRouter>
+      <CookieConsent />
       <Toaster />
       <Sonner />
     </TooltipProvider>

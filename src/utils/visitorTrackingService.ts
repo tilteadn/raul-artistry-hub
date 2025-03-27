@@ -19,55 +19,136 @@ export interface VisitorData {
   monthlyData: MonthlyData[];
 }
 
-// Simulated data for demonstration
-const mockVisitorData: VisitorData = {
-  totalVisits: 1258,
-  currentMonthVisits: 324,
-  visitIncrease: 12.5,
-  topCountries: [
-    { country: "España", visits: 756, percentage: 60.1 },
-    { country: "Estados Unidos", visits: 203, percentage: 16.1 },
-    { country: "México", visits: 87, percentage: 6.9 },
-    { country: "Argentina", visits: 62, percentage: 4.9 },
-    { country: "Colombia", visits: 45, percentage: 3.6 },
-    { country: "Otros", visits: 105, percentage: 8.4 }
-  ],
-  monthlyData: [
-    { month: "Ene", visits: 85 },
-    { month: "Feb", visits: 92 },
-    { month: "Mar", visits: 113 },
-    { month: "Abr", visits: 128 },
-    { month: "May", visits: 156 },
-    { month: "Jun", visits: 182 },
-    { month: "Jul", visits: 178 },
-    { month: "Ago", visits: 195 },
-    { month: "Sep", visits: 212 },
-    { month: "Oct", visits: 245 },
-    { month: "Nov", visits: 285 },
-    { month: "Dic", visits: 324 }
-  ]
+// Get the visitor's country (in a real app, you would use a geolocation API)
+const getUserCountry = (): string => {
+  const countries = [
+    "España", "Estados Unidos", "México", "Argentina", 
+    "Colombia", "Chile", "Perú", "Francia", "Alemania", "Reino Unido"
+  ];
+  // For demo purposes, we'll return a random country
+  return countries[Math.floor(Math.random() * countries.length)];
 };
 
-// Function to track a new visit
+// Function to track a new visit if consent was given
 export const trackVisit = async (): Promise<void> => {
-  // Here you would implement actual tracking logic
-  // For now, we're just simulating it
-  console.log("Visit tracked");
-  
-  // In a real implementation, you would:
-  // 1. Get the user's location (country) using an IP geolocation service
-  // 2. Store the visit in localStorage or a database
-  // 3. Include timestamp data
+  const consent = localStorage.getItem("cookie-consent");
+  if (consent !== "true") {
+    console.log("Visit not tracked - no consent");
+    return;
+  }
+
+  try {
+    const now = new Date();
+    const month = now.toLocaleString('default', { month: 'short' });
+    const country = getUserCountry();
+    
+    // Get existing tracking data
+    let trackingData = localStorage.getItem("visitor-tracking-data");
+    let data = trackingData ? JSON.parse(trackingData) : {
+      visits: [],
+      countries: {}
+    };
+    
+    // Add new visit
+    data.visits.push({
+      timestamp: now.toISOString(),
+      month: month,
+      country: country,
+      path: window.location.pathname
+    });
+    
+    // Update country counter
+    data.countries[country] = (data.countries[country] || 0) + 1;
+    
+    // Save updated data
+    localStorage.setItem("visitor-tracking-data", JSON.stringify(data));
+    console.log("Visit tracked for", country);
+  } catch (error) {
+    console.error("Error tracking visit:", error);
+  }
 };
 
-// Function to get visitor statistics
+// Function to get visitor statistics from localStorage
 export const getVisitorStats = async (): Promise<VisitorData> => {
-  // In a real implementation, you would fetch this data from your storage
-  // For this demo, we'll use the mock data
-  return new Promise((resolve) => {
-    // Simulate API delay
-    setTimeout(() => {
-      resolve(mockVisitorData);
-    }, 800);
-  });
+  try {
+    const trackingData = localStorage.getItem("visitor-tracking-data");
+    
+    if (!trackingData) {
+      return getEmptyStats();
+    }
+    
+    const data = JSON.parse(trackingData);
+    const visits = data.visits || [];
+    const countries = data.countries || {};
+    
+    // Calculate total visits
+    const totalVisits = visits.length;
+    
+    // Get current month and previous month visits
+    const now = new Date();
+    const currentMonth = now.toLocaleString('default', { month: 'short' });
+    
+    const currentMonthVisits = visits.filter(v => v.month === currentMonth).length;
+    
+    // Calculate previous month (simple approach for demo)
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1)
+      .toLocaleString('default', { month: 'short' });
+    
+    const previousMonthVisits = visits.filter(v => v.month === lastMonth).length;
+    
+    // Calculate visit increase percentage
+    const visitIncrease = previousMonthVisits 
+      ? ((currentMonthVisits - previousMonthVisits) / previousMonthVisits) * 100
+      : 100;
+    
+    // Get top countries
+    const topCountries = Object.entries(countries)
+      .map(([country, visits]) => ({
+        country,
+        visits: visits as number,
+        percentage: totalVisits ? ((visits as number) / totalVisits) * 100 : 0
+      }))
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 5);
+    
+    // If we have less than 6 countries, add "Otros" for the rest
+    if (Object.keys(countries).length > 5) {
+      const otherVisits = totalVisits - topCountries.reduce((sum, country) => sum + country.visits, 0);
+      topCountries.push({
+        country: "Otros",
+        visits: otherVisits,
+        percentage: totalVisits ? (otherVisits / totalVisits) * 100 : 0
+      });
+    }
+    
+    // Get monthly data
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const monthlyData = months.map(month => {
+      const monthVisits = visits.filter(v => v.month === month).length;
+      return { month, visits: monthVisits };
+    });
+    
+    return {
+      totalVisits,
+      currentMonthVisits,
+      visitIncrease,
+      topCountries,
+      monthlyData
+    };
+  } catch (error) {
+    console.error("Error getting visitor stats:", error);
+    return getEmptyStats();
+  }
+};
+
+// Function to get empty stats when no data is available
+const getEmptyStats = (): VisitorData => {
+  const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  return {
+    totalVisits: 0,
+    currentMonthVisits: 0,
+    visitIncrease: 0,
+    topCountries: [],
+    monthlyData: months.map(month => ({ month, visits: 0 }))
+  };
 };

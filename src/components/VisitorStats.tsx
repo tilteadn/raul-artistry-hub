@@ -1,12 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MapPin, Calendar, Users, BarChart2 } from "lucide-react";
+import { MapPin, Calendar, Users, BarChart2, AlertTriangle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getVisitorStats, VisitorData } from "@/utils/visitorTrackingService";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const VisitorStats = () => {
   const [visitData, setVisitData] = useState<VisitorData | null>(null);
@@ -46,6 +46,18 @@ const VisitorStats = () => {
     );
   }
 
+  if (visitData.totalVisits === 0) {
+    return (
+      <Alert className="bg-card">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          No hay datos de visitas todavía. Una vez que los usuarios acepten las cookies
+          y naveguen por tu sitio, comenzarás a ver estadísticas aquí.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -58,8 +70,8 @@ const VisitorStats = () => {
             <div className="text-2xl font-bold">{visitData.totalVisits}</div>
             <p className="text-xs text-muted-foreground">
               {visitData.visitIncrease > 0 
-                ? `+${visitData.visitIncrease}% desde el mes pasado` 
-                : `${visitData.visitIncrease}% desde el mes pasado`}
+                ? `+${visitData.visitIncrease.toFixed(1)}% desde el mes pasado` 
+                : `${visitData.visitIncrease.toFixed(1)}% desde el mes pasado`}
             </p>
           </CardContent>
         </Card>
@@ -85,7 +97,7 @@ const VisitorStats = () => {
           <CardContent>
             <div className="text-2xl font-bold">{visitData.topCountries[0]?.country || "N/A"}</div>
             <p className="text-xs text-muted-foreground">
-              {visitData.topCountries[0]?.percentage || 0}% de las visitas totales
+              {visitData.topCountries[0]?.percentage.toFixed(1) || 0}% de las visitas totales
             </p>
           </CardContent>
         </Card>
