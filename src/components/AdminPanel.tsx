@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Edit, Trash2, Plus, Image } from "lucide-react";
+import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3 } from "lucide-react";
 import { toast } from "sonner";
 import { Artwork } from "@/types/artwork";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import VisitorStats from "./VisitorStats";
 
 interface AdminPanelProps {
   artworks: Artwork[];
@@ -159,14 +160,24 @@ const AdminPanel = ({
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <h2 className="font-serif text-3xl font-medium">Panel de Administración</h2>
         <div className="flex gap-4">
-          <AddArtworkDialog />
+          {currentTab === "obras" && <AddArtworkDialog />}
         </div>
       </div>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
         <TabsList>
-          <TabsTrigger value="obras">Obras</TabsTrigger>
-          <TabsTrigger value="colecciones">Colecciones</TabsTrigger>
+          <TabsTrigger value="obras">
+            <LayoutGrid className="h-4 w-4 mr-2" />
+            Obras
+          </TabsTrigger>
+          <TabsTrigger value="colecciones">
+            <Grid3X3 className="h-4 w-4 mr-2" />
+            Colecciones
+          </TabsTrigger>
+          <TabsTrigger value="estadisticas">
+            <Users className="h-4 w-4 mr-2" />
+            Estadísticas
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="obras" className="mt-6">
@@ -274,6 +285,10 @@ const AdminPanel = ({
               </div>
             )}
           </div>
+        </TabsContent>
+        
+        <TabsContent value="estadisticas" className="mt-6">
+          <VisitorStats />
         </TabsContent>
       </Tabs>
 
