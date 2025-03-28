@@ -107,77 +107,98 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
   };
 
   return (
-    <div className="bg-secondary p-8">
+    <div className="bg-secondary p-8 relative flex flex-col h-full">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          <ScrollArea className="h-[calc(100vh-300px)] overflow-y-auto pr-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Título <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input placeholder="Título de la obra" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="subtitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Subtítulo <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input placeholder="Subtítulo de la obra" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="collection"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Colección <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nombre de la colección" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col h-full">
+          <div className="flex-grow overflow-auto">
+            <ScrollArea className="h-[calc(100vh-250px)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+                <div className="space-y-6">
+                  {/* Title field */}
                   <FormField
                     control={form.control}
-                    name="year"
+                    name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Año</FormLabel>
+                        <FormLabel>Título <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="2023" {...field} />
+                          <Input placeholder="Título de la obra" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   
+                  {/* Subtitle field */}
                   <FormField
                     control={form.control}
-                    name="technique"
+                    name="subtitle"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Técnica</FormLabel>
+                        <FormLabel>Subtítulo <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="Técnica" {...field} />
+                          <Input placeholder="Subtítulo de la obra" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Collection field */}
+                  <FormField
+                    control={form.control}
+                    name="collection"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Colección <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nombre de la colección" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Year and Technique fields */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="year"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Año</FormLabel>
+                          <FormControl>
+                            <Input placeholder="2023" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="technique"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Técnica</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Técnica" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {/* Dimensions field */}
+                  <FormField
+                    control={form.control}
+                    name="dimensions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dimensiones</FormLabel>
+                        <FormControl>
+                          <Input placeholder="100 x 80 cm" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -185,64 +206,53 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                   />
                 </div>
                 
-                <FormField
-                  control={form.control}
-                  name="dimensions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dimensiones</FormLabel>
-                      <FormControl>
-                        <Input placeholder="100 x 80 cm" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-6">
+                  {/* Image uploader */}
+                  <FormField
+                    control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Imagen <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <ImageUploader 
+                            onChange={handleImageChange}
+                            initialImage={field.value}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {isMobile ? "Haz clic para seleccionar una imagen" : "Sube una imagen o arrastra y suelta aquí"}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Description field */}
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descripción</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Descripción de la obra" 
+                            className="min-h-[120px]" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-              
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Imagen <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <ImageUploader 
-                          onChange={handleImageChange}
-                          initialImage={field.value}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {isMobile ? "Haz clic para seleccionar una imagen" : "Sube una imagen o arrastra y suelta aquí"}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descripción</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Descripción de la obra" 
-                          className="min-h-[120px]" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </ScrollArea>
+            </ScrollArea>
+          </div>
           
-          <div className="sticky bottom-0 bg-secondary pt-4 pb-2 border-t mt-4">
+          {/* Submit button - fixed at the bottom */}
+          <div className="pt-4 mt-auto border-t">
             <Button 
               type="submit" 
               className="w-full"
