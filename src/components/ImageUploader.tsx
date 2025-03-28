@@ -56,39 +56,30 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
       return;
     }
 
-    setIsUploading(true);
     try {
-      // First create a local preview
+      // Create a local preview only - don't upload yet
       const localUrl = URL.createObjectURL(file);
       setPreviewUrl(localUrl);
       
-      // Then try to upload to Supabase storage
-      try {
-        // For development, we'll use localUrl directly when not actually uploading to Supabase
-        const useLocalUrl = process.env.NODE_ENV === 'development' && !true; // Set to true to skip upload in dev
-        
-        let finalUrl: string;
-        if (useLocalUrl) {
-          // In development, we might just use the local URL
-          finalUrl = localUrl;
-          await new Promise(resolve => setTimeout(resolve, 500)); // Fake delay
-        } else {
-          // In production, we upload to Supabase
-          finalUrl = await uploadImage(file);
-        }
-        
-        onChange(finalUrl);
-      } catch (uploadError) {
-        console.error("Error uploading to storage:", uploadError);
-        // If upload fails, use the local URL and show a warning
-        onChange(localUrl);
-        toast.warning("La imagen se guardará temporalmente. La carga a la nube falló.");
-      }
+      // Just store the file for later upload
+      const fileObj = {
+        file,
+        localUrl
+      };
+      
+      // Pass the local URL to parent component for preview
+      onChange(localUrl);
+      
+      // Store file in localStorage for form submission
+      localStorage.setItem('pendingArtworkImage', JSON.stringify({
+        localUrl,
+        fileName: file.name,
+        type: file.type
+      }));
+      
     } catch (error) {
       console.error("Error handling file:", error);
       toast.error("Error al procesar la imagen");
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -104,6 +95,7 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    localStorage.removeItem('pendingArtworkImage');
   };
 
   // Handler to prevent right-click
@@ -178,8 +170,8 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
                   variant="outline" 
                   size="sm" 
                   className="mt-4" 
-                  onClick={handleClickUpload} // Use the handleClickUpload here
-                  type="button" // Add type="button" to prevent form submission
+                  onClick={handleClickUpload}
+                  type="button"
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   Seleccionar archivo

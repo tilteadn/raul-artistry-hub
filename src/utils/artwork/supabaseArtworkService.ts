@@ -113,9 +113,31 @@ export const getAllArtworksFromDb = async (): Promise<Artwork[]> => {
  */
 export const saveArtworkToDb = async (artwork: Omit<Artwork, "id" | "createdAt">): Promise<Artwork> => {
   try {
-    // Handle image upload if it's a data URL
+    // Handle image upload if it's a local URL (starts with blob:)
     let imageUrl = artwork.imageUrl;
-    if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
+    
+    // Check if there's a pending image in localStorage
+    const pendingImage = localStorage.getItem('pendingArtworkImage');
+    if (pendingImage && imageUrl.startsWith('blob:')) {
+      try {
+        const imageData = JSON.parse(pendingImage);
+        // Fetch the image as a blob and upload it
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], imageData.fileName || 'artwork.jpg', { 
+          type: imageData.type || 'image/jpeg' 
+        });
+        
+        // Upload the actual file
+        imageUrl = await uploadImage(file);
+        
+        // Clear the pending image
+        localStorage.removeItem('pendingArtworkImage');
+      } catch (uploadError) {
+        console.error('Error uploading stored image:', uploadError);
+        throw uploadError;
+      }
+    } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       imageUrl = await uploadImage(artwork.imageUrl);
     }
     
@@ -147,9 +169,31 @@ export const saveArtworkToDb = async (artwork: Omit<Artwork, "id" | "createdAt">
  */
 export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" | "createdAt">): Promise<Artwork> => {
   try {
-    // Handle image upload if it's a data URL
+    // Handle image upload if it's a local URL (starts with blob:)
     let imageUrl = artwork.imageUrl;
-    if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
+    
+    // Check if there's a pending image in localStorage
+    const pendingImage = localStorage.getItem('pendingArtworkImage');
+    if (pendingImage && imageUrl.startsWith('blob:')) {
+      try {
+        const imageData = JSON.parse(pendingImage);
+        // Fetch the image as a blob and upload it
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], imageData.fileName || 'artwork.jpg', { 
+          type: imageData.type || 'image/jpeg' 
+        });
+        
+        // Upload the actual file
+        imageUrl = await uploadImage(file);
+        
+        // Clear the pending image
+        localStorage.removeItem('pendingArtworkImage');
+      } catch (uploadError) {
+        console.error('Error uploading stored image:', uploadError);
+        throw uploadError;
+      }
+    } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       imageUrl = await uploadImage(artwork.imageUrl);
     }
     
