@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,19 +21,26 @@ import ImageUploader from "./ImageUploader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Enhanced validation schema with more specific rules
 const formSchema = z.object({
   title: z.string().min(1, { message: "El título es requerido" }).max(100, { message: "El título es demasiado largo, máximo 100 caracteres" }),
   subtitle: z.string().min(1, { message: "El subtítulo es requerido" }).max(200, { message: "El subtítulo es demasiado largo, máximo 200 caracteres" }),
   collection: z.string().min(1, { message: "La colección es requerida" }).max(50, { message: "El nombre de la colección es demasiado largo" }),
   imageUrl: z.string().min(1, { message: "La imagen es requerida" }),
-  year: z.string().optional().refine(val => !val || /^\d{4}$/.test(val), { message: "El año debe tener 4 dígitos" }),
-  technique: z.string().optional().max(100, { message: "La técnica es demasiado larga" }),
-  dimensions: z.string().optional().max(50, { message: "Las dimensiones son demasiado largas" }),
-  description: z.string().optional().max(2000, { message: "La descripción es demasiado larga, máximo 2000 caracteres" }),
+  year: z.string().optional(),
+  technique: z.string().optional(),
+  dimensions: z.string().optional(),
+  description: z.string().optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+const enhancedFormSchema = formSchema
+  .extend({
+    year: z.string().optional().refine(val => !val || /^\d{4}$/.test(val), { message: "El año debe tener 4 dígitos" }),
+    technique: z.string().optional().transform(val => val || ""),
+    dimensions: z.string().optional().transform(val => val || ""),
+    description: z.string().optional().transform(val => val || ""),
+  });
+
+type FormValues = z.infer<typeof enhancedFormSchema>;
 
 interface AddArtworkFormProps {
   onSubmit: (artwork: Omit<Artwork, "id" | "createdAt">) => void;
@@ -46,7 +52,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
   const isMobile = useIsMobile();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(enhancedFormSchema),
     defaultValues: {
       title: editArtwork?.title || "",
       subtitle: editArtwork?.subtitle || "",
@@ -74,10 +80,10 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
         subtitle: values.subtitle.trim(),
         collection: values.collection.trim(),
         imageUrl: values.imageUrl,
-        year: values.year?.trim(),
-        technique: values.technique?.trim(),
-        dimensions: values.dimensions?.trim(),
-        description: values.description?.trim(),
+        year: values.year ? values.year.trim() : undefined,
+        technique: values.technique ? values.technique.trim() : undefined,
+        dimensions: values.dimensions ? values.dimensions.trim() : undefined,
+        description: values.description ? values.description.trim() : undefined,
       };
       
       await onSubmit(artworkData);
