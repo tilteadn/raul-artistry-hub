@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3 } from "lucide-react";
+import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Artwork } from "@/types/artwork";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ interface AdminPanelProps {
   onAddArtwork: (artwork: Omit<Artwork, "id" | "createdAt">) => void;
   onUpdateArtwork: (id: string, artwork: Omit<Artwork, "id" | "createdAt">) => void;
   onDeleteArtwork: (id: string) => void;
+  isLoading?: boolean;
 }
 
 const AdminPanel = ({
@@ -47,6 +48,7 @@ const AdminPanel = ({
   onAddArtwork,
   onUpdateArtwork,
   onDeleteArtwork,
+  isLoading = false,
 }: AdminPanelProps) => {
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -155,6 +157,16 @@ const AdminPanel = ({
     </>
   );
 
+  // Loading state component
+  const LoadingState = () => (
+    <div className="flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
+      <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+      <p className="text-center text-muted-foreground">
+        Cargando las obras...
+      </p>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
@@ -181,110 +193,125 @@ const AdminPanel = ({
         </TabsList>
         
         <TabsContent value="obras" className="mt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {artworks.map((artwork) => (
-              <Card key={artwork.id} className="overflow-hidden">
-                <div className="relative aspect-[3/4]">
-                  <img
-                    src={artwork.imageUrl}
-                    alt={artwork.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-medium text-lg line-clamp-1">{artwork.title}</h3>
-                      <p className="text-sm text-muted-foreground">{artwork.collection}</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEditArtwork(artwork)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="icon">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta acción no se puede deshacer. Se eliminará permanentemente la obra
-                              "{artwork.title}" de la base de datos.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteArtwork(artwork.id)}
-                            >
-                              Eliminar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+          {isLoading ? (
+            <LoadingState />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {artworks.map((artwork) => (
+                <Card key={artwork.id} className="overflow-hidden">
+                  <div className="relative aspect-[3/4]">
+                    <img
+                      src={artwork.imageUrl}
+                      alt={artwork.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                        console.error("Failed to load image:", artwork.imageUrl);
+                      }}
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-medium text-lg line-clamp-1">{artwork.title}</h3>
+                        <p className="text-sm text-muted-foreground">{artwork.collection}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEditArtwork(artwork)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="icon">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Se eliminará permanentemente la obra
+                                "{artwork.title}" de la base de datos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteArtwork(artwork.id)}
+                              >
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-            {artworks.length === 0 && (
-              <div className="col-span-full flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
-                <Image className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-center text-muted-foreground">
-                  No hay obras todavía. Añade tu primera obra haciendo clic en el botón "Añadir Obra".
-                </p>
-              </div>
-            )}
-          </div>
+              {artworks.length === 0 && !isLoading && (
+                <div className="col-span-full flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
+                  <Image className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-center text-muted-foreground">
+                    No hay obras todavía. Añade tu primera obra haciendo clic en el botón "Añadir Obra".
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="colecciones" className="mt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {uniqueCollections.map((collection) => {
-              const collectionArtworks = artworks.filter(a => a.collection === collection);
-              const thumbnailArtwork = collectionArtworks[0];
-              
-              return (
-                <Card key={collection} className="overflow-hidden">
-                  <div className="relative aspect-[3/4]">
-                    {thumbnailArtwork ? (
-                      <img
-                        src={thumbnailArtwork.imageUrl}
-                        alt={collection}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-secondary flex items-center justify-center">
-                        <Image className="h-12 w-12 text-muted-foreground" />
+          {isLoading ? (
+            <LoadingState />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {uniqueCollections.map((collection) => {
+                const collectionArtworks = artworks.filter(a => a.collection === collection);
+                const thumbnailArtwork = collectionArtworks[0];
+                
+                return (
+                  <Card key={collection} className="overflow-hidden">
+                    <div className="relative aspect-[3/4]">
+                      {thumbnailArtwork ? (
+                        <img
+                          src={thumbnailArtwork.imageUrl}
+                          alt={collection}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-secondary flex items-center justify-center">
+                          <Image className="h-12 w-12 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-4">
+                        <h3 className="font-serif text-lg text-white">{collection}</h3>
+                        <p className="text-sm text-white/80">{collectionArtworks.length} obras</p>
                       </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-4">
-                      <h3 className="font-serif text-lg text-white">{collection}</h3>
-                      <p className="text-sm text-white/80">{collectionArtworks.length} obras</p>
                     </div>
-                  </div>
-                </Card>
-              );
-            })}
+                  </Card>
+                );
+              })}
 
-            {uniqueCollections.length === 0 && (
-              <div className="col-span-full flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
-                <Image className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-center text-muted-foreground">
-                  No hay colecciones todavía. Las colecciones se crearán automáticamente al añadir obras.
-                </p>
-              </div>
-            )}
-          </div>
+              {uniqueCollections.length === 0 && !isLoading && (
+                <div className="col-span-full flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
+                  <Image className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-center text-muted-foreground">
+                    No hay colecciones todavía. Las colecciones se crearán automáticamente al añadir obras.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="estadisticas" className="mt-6">

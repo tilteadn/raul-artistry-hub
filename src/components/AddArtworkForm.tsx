@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,15 +22,16 @@ import ImageUploader from "./ImageUploader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// Enhanced validation schema with more specific rules
 const formSchema = z.object({
-  title: z.string().min(1, { message: "El título es requerido" }),
-  subtitle: z.string().min(1, { message: "El subtítulo es requerido" }),
-  collection: z.string().min(1, { message: "La colección es requerida" }),
+  title: z.string().min(1, { message: "El título es requerido" }).max(100, { message: "El título es demasiado largo, máximo 100 caracteres" }),
+  subtitle: z.string().min(1, { message: "El subtítulo es requerido" }).max(200, { message: "El subtítulo es demasiado largo, máximo 200 caracteres" }),
+  collection: z.string().min(1, { message: "La colección es requerida" }).max(50, { message: "El nombre de la colección es demasiado largo" }),
   imageUrl: z.string().min(1, { message: "La imagen es requerida" }),
-  year: z.string().optional(),
-  technique: z.string().optional(),
-  dimensions: z.string().optional(),
-  description: z.string().optional(),
+  year: z.string().optional().refine(val => !val || /^\d{4}$/.test(val), { message: "El año debe tener 4 dígitos" }),
+  technique: z.string().optional().max(100, { message: "La técnica es demasiado larga" }),
+  dimensions: z.string().optional().max(50, { message: "Las dimensiones son demasiado largas" }),
+  description: z.string().optional().max(2000, { message: "La descripción es demasiado larga, máximo 2000 caracteres" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -55,6 +57,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
       dimensions: editArtwork?.dimensions || "",
       description: editArtwork?.description || "",
     },
+    mode: "onBlur", // Validate on blur for better UX
   });
 
   const handleImageChange = (url: string) => {
@@ -62,22 +65,22 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     form.trigger("imageUrl");
   };
 
-  const handleSubmit = (values: FormValues) => {
+  const handleSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     
     try {
       const artworkData: Omit<Artwork, "id" | "createdAt"> = {
-        title: values.title,
-        subtitle: values.subtitle,
-        collection: values.collection,
+        title: values.title.trim(),
+        subtitle: values.subtitle.trim(),
+        collection: values.collection.trim(),
         imageUrl: values.imageUrl,
-        year: values.year,
-        technique: values.technique,
-        dimensions: values.dimensions,
-        description: values.description,
+        year: values.year?.trim(),
+        technique: values.technique?.trim(),
+        dimensions: values.dimensions?.trim(),
+        description: values.description?.trim(),
       };
       
-      onSubmit(artworkData);
+      await onSubmit(artworkData);
       
       if (!editArtwork) {
         form.reset();
@@ -89,8 +92,8 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
           : "Obra añadida correctamente"
       );
     } catch (error) {
+      console.error("Error al guardar la obra:", error);
       toast.error("Error al guardar la obra");
-      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,7 +108,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Título</FormLabel>
+                <FormLabel>Título <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Título de la obra" {...field} />
                 </FormControl>
@@ -119,7 +122,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
             name="subtitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Subtítulo</FormLabel>
+                <FormLabel>Subtítulo <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Subtítulo de la obra" {...field} />
                 </FormControl>
@@ -133,7 +136,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
             name="collection"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Colección</FormLabel>
+                <FormLabel>Colección <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="Nombre de la colección" {...field} />
                 </FormControl>
@@ -150,7 +153,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                 <FormItem>
                   <FormLabel>Año</FormLabel>
                   <FormControl>
-                    <Input placeholder="Año" {...field} />
+                    <Input placeholder="2023" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,7 +196,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
             name="imageUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Imagen</FormLabel>
+                <FormLabel>Imagen <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
                   <ImageUploader 
                     onChange={handleImageChange}

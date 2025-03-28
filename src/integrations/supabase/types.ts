@@ -30,6 +30,51 @@ export type Database = {
         }
         Relationships: []
       }
+      artworks: {
+        Row: {
+          collection: string
+          created_at: string
+          description: string | null
+          dimensions: string | null
+          id: string
+          image_url: string
+          subtitle: string
+          technique: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          year: string | null
+        }
+        Insert: {
+          collection: string
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          image_url: string
+          subtitle: string
+          technique?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          year?: string | null
+        }
+        Update: {
+          collection?: string
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          image_url?: string
+          subtitle?: string
+          technique?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

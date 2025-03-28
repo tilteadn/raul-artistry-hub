@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
@@ -56,15 +57,16 @@ const Admin = () => {
 
   const handleAddArtwork = async (artworkData: Omit<Artwork, "id" | "createdAt">) => {
     try {
+      // For Supabase, we'll let the service generate the ID and createdAt
       const newArtwork: Artwork = {
         ...artworkData,
-        id: uuidv4(),
+        id: uuidv4(), // This ID might be overridden by the database
         createdAt: new Date(),
       };
       
-      await saveArtwork(newArtwork);
-      setArtworks((prev) => [...prev, newArtwork]);
-      return newArtwork;
+      const savedArtwork = await saveArtwork(newArtwork);
+      setArtworks((prev) => [savedArtwork, ...prev]); // Add to the beginning for newest-first sorting
+      return savedArtwork;
     } catch (error) {
       console.error("Error adding artwork:", error);
       toast.error("Error al añadir la obra");
@@ -88,12 +90,12 @@ const Admin = () => {
         ...artworkData,
       };
       
-      await updateArtwork(updatedArtwork);
+      const result = await updateArtwork(updatedArtwork);
       setArtworks((prev) =>
-        prev.map((a) => (a.id === id ? updatedArtwork : a))
+        prev.map((a) => (a.id === id ? result : a))
       );
       
-      return updatedArtwork;
+      return result;
     } catch (error) {
       console.error("Error updating artwork:", error);
       toast.error("Error al actualizar la obra");
@@ -147,15 +149,16 @@ const Admin = () => {
       </div>
       
       <div className="container mx-auto px-6 py-16">
-        {isAuthenticated ? (
+        {showAuthForm ? (
+          <AdminAuth onAuthenticated={handleSuccessfulAuthentication} />
+        ) : (
           <AdminPanel
             artworks={artworks}
             onAddArtwork={handleAddArtwork}
             onUpdateArtwork={handleUpdateArtwork}
             onDeleteArtwork={handleDeleteArtwork}
+            isLoading={loading}
           />
-        ) : (
-          <AdminAuth onAuthenticated={handleSuccessfulAuthentication} />
         )}
       </div>
     </div>
