@@ -36,7 +36,11 @@ export const useAdminAuth = () => {
       }
       
       if (data === true) {
+        // Update the authentication state
         setIsAuthenticated(true);
+        
+        // Store auth status based on remember me preference
+        // This will be handled in the component
         return true;
       } else {
         toast.error("Credenciales incorrectas");
@@ -59,6 +63,7 @@ export const useAdminAuth = () => {
 
   return {
     isAuthenticated,
+    setIsAuthenticated, // Expose this to allow direct state updates
     isLoading,
     login,
     logout

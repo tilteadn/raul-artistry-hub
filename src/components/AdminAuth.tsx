@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -26,7 +25,7 @@ const authFormSchema = z.object({
 type AuthFormValues = z.infer<typeof authFormSchema>;
 
 interface AdminAuthProps {
-  onAuthenticated: () => void;
+  onAuthenticated: (rememberMe: boolean) => void;
 }
 
 const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
@@ -54,16 +53,10 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
       const isSuccessful = await login(data.username, data.password);
       
       if (isSuccessful) {
-        if (data.rememberMe) {
-          localStorage.setItem("adminAuthenticated", "true");
-        } else {
-          sessionStorage.setItem("adminAuthenticated", "true");
-        }
-        
         toast.success("Inicio de sesión exitoso");
         
-        // Call the callback function to notify the parent component
-        onAuthenticated();
+        // Call the callback function to notify the parent component with rememberMe flag
+        onAuthenticated(data.rememberMe);
       }
     } catch (error) {
       console.error("Authentication error:", error);

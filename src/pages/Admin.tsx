@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 const Admin = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated, isLoading, logout } = useAdminAuth();
+  const { isAuthenticated, isLoading, logout, setIsAuthenticated } = useAdminAuth();
+  const [showAuthForm, setShowAuthForm] = useState(!isAuthenticated);
 
   const loadArtworks = async () => {
     if (!isAuthenticated) return;
@@ -31,13 +32,26 @@ const Admin = () => {
   };
 
   useEffect(() => {
+    setShowAuthForm(!isAuthenticated);
+    
     if (isAuthenticated) {
       loadArtworks();
     }
   }, [isAuthenticated]);
 
-  const handleSuccessfulAuthentication = () => {
+  const handleSuccessfulAuthentication = (rememberMe: boolean) => {
+    if (rememberMe) {
+      localStorage.setItem("adminAuthenticated", "true");
+    } else {
+      sessionStorage.setItem("adminAuthenticated", "true");
+    }
+    
+    setIsAuthenticated(true);
+    setShowAuthForm(false);
+    
     console.log("Authentication successful, artworks will be loaded");
+    
+    loadArtworks();
   };
 
   const handleAddArtwork = async (artworkData: Omit<Artwork, "id" | "createdAt">) => {
