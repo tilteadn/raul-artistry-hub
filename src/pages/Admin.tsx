@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
@@ -16,23 +15,30 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const { isAuthenticated, isLoading, logout } = useAdminAuth();
 
+  const loadArtworks = async () => {
+    if (!isAuthenticated) return;
+    
+    setLoading(true);
+    try {
+      const data = await getAllArtworks();
+      setArtworks(data);
+    } catch (error) {
+      console.error("Error loading artworks:", error);
+      toast.error("Error al cargar las obras");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
-      const loadArtworks = async () => {
-        try {
-          const data = await getAllArtworks();
-          setArtworks(data);
-        } catch (error) {
-          console.error("Error loading artworks:", error);
-          toast.error("Error al cargar las obras");
-        } finally {
-          setLoading(false);
-        }
-      };
-
       loadArtworks();
     }
   }, [isAuthenticated]);
+
+  const handleSuccessfulAuthentication = () => {
+    console.log("Authentication successful, artworks will be loaded");
+  };
 
   const handleAddArtwork = async (artworkData: Omit<Artwork, "id" | "createdAt">) => {
     try {
@@ -135,7 +141,7 @@ const Admin = () => {
             onDeleteArtwork={handleDeleteArtwork}
           />
         ) : (
-          <AdminAuth onAuthenticated={() => {}} />
+          <AdminAuth onAuthenticated={handleSuccessfulAuthentication} />
         )}
       </div>
     </div>

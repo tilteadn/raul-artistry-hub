@@ -61,6 +61,8 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
         }
         
         toast.success("Inicio de sesión exitoso");
+        
+        // Call the callback function to notify the parent component
         onAuthenticated();
       }
     } catch (error) {
