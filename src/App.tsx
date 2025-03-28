@@ -9,6 +9,7 @@ import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Artworks from "./pages/Artworks";
 import ArtworkPage from "./pages/ArtworkPage";
+import AboutMe from "./pages/AboutMe";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/obras" element={<Artworks />} />
             <Route path="/obras/:id" element={<ArtworkPage />} />
+            <Route path="/sobre-mi" element={<AboutMe />} />
             <Route path="/contacto" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
