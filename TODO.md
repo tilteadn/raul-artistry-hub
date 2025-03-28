@@ -2,7 +2,7 @@
 # TODO List for Raúl Álvarez's Portfolio Website
 
 ## Backend Implementation
-- [ ] Set up authentication system for admin area
+- [x] Set up authentication system for admin area
 - [ ] Implement secure image upload functionality
 - [ ] Create API endpoints for artwork management (create, read, update, delete)
 - [ ] Add validation for all forms

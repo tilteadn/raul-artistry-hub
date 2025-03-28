@@ -1,6 +1,10 @@
 
 import { useState, useEffect } from "react";
 
+// Define valid credentials
+const ADMIN_USERNAME = "bossman";
+const ADMIN_PASSWORD = "RaulM0la!";
+
 export const useAdminAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,8 +20,16 @@ export const useAdminAuth = () => {
     setIsLoading(false);
   }, []);
 
-  const login = () => {
-    setIsAuthenticated(true);
+  const login = (username: string, password: string): boolean => {
+    // Validate credentials
+    const isValid = username === ADMIN_USERNAME && password === ADMIN_PASSWORD;
+    
+    if (isValid) {
+      setIsAuthenticated(true);
+      return true;
+    }
+    
+    return false;
   };
 
   const logout = () => {

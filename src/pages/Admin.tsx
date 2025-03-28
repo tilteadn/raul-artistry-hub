@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +13,7 @@ import { Button } from "@/components/ui/button";
 const Admin = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated, isLoading, login, logout } = useAdminAuth();
+  const { isAuthenticated, isLoading, logout } = useAdminAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -92,7 +91,6 @@ const Admin = () => {
     }
   };
 
-  // Show loading state when checking authentication
   if (isLoading) {
     return (
       <div className="container mx-auto px-6 py-16">
@@ -136,7 +134,7 @@ const Admin = () => {
             onDeleteArtwork={handleDeleteArtwork}
           />
         ) : (
-          <AdminAuth onAuthenticated={login} />
+          <AdminAuth onAuthenticated={() => {}} />
         )}
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -49,17 +48,12 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     setIsLoading(true);
     
     try {
-      // For demonstration purposes only - replace with actual authentication
-      // In a real app, this would call your authentication API
-      console.log("Authentication data:", data);
+      const { useAdminAuth } = await import("@/hooks/use-admin-auth");
+      const { login } = useAdminAuth();
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const isSuccessful = login(data.username, data.password);
       
-      // Temporary authentication check - for demonstration only
-      // TODO: Replace with proper authentication
-      if (data.username === "admin" && data.password === "password") {
-        // Store authentication state
+      if (isSuccessful) {
         if (data.rememberMe) {
           localStorage.setItem("adminAuthenticated", "true");
         } else {
