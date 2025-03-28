@@ -3,10 +3,10 @@
 
 ## Backend Implementation
 - [x] Set up authentication system for admin area
-- [ ] Implement secure image upload functionality
-- [ ] Create API endpoints for artwork management (create, read, update, delete)
-- [ ] Add validation for all forms
-- [ ] Set up database for storing artwork information
+- [x] Implement secure image upload functionality
+- [x] Create API endpoints for artwork management (create, read, update, delete)
+- [x] Add validation for all forms
+- [x] Set up database for storing artwork information
 
 ## SEO Improvements
 - [ ] Update LocalBusiness schema with accurate business information
@@ -45,3 +45,9 @@
 - [ ] Check accessibility compliance
 - [ ] Verify SEO implementation with testing tools
 - [ ] Cross-browser testing
+
+## Sell this project as a template to other artists
+- [ ] Ask Raul to recommend me
+- [ ] Ask Feli and Jorge to recommend me
+- [ ] Look around the neighbourhood and Coruña for leads
+
