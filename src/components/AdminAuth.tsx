@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 
 const authFormSchema = z.object({
   username: z.string().min(3, {
@@ -30,6 +32,7 @@ interface AdminAuthProps {
 const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAdminAuth();
 
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(authFormSchema),
@@ -48,10 +51,7 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     setIsLoading(true);
     
     try {
-      const { useAdminAuth } = await import("@/hooks/use-admin-auth");
-      const { login } = useAdminAuth();
-      
-      const isSuccessful = login(data.username, data.password);
+      const isSuccessful = await login(data.username, data.password);
       
       if (isSuccessful) {
         if (data.rememberMe) {
@@ -62,8 +62,6 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
         
         toast.success("Inicio de sesión exitoso");
         onAuthenticated();
-      } else {
-        toast.error("Credenciales incorrectas");
       }
     } catch (error) {
       console.error("Authentication error:", error);
