@@ -81,6 +81,12 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
     }
   };
 
+  // Handler to prevent right-click
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+
   return (
     <div className={cn("w-full", className)}>
       <input
@@ -103,12 +109,13 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
         onClick={previewUrl ? undefined : handleClickUpload}
       >
         {previewUrl ? (
-          <div className="relative aspect-[3/4]">
+          <div className="relative aspect-[3/4]" onContextMenu={handleContextMenu}>
             <img
               src={previewUrl}
               alt="Preview"
               className="w-full h-full object-cover"
               onError={handleRemoveImage}
+              draggable="false"
             />
             <Button
               variant="destructive"

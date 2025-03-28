@@ -14,6 +14,12 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
 
+  // Handler to prevent right-click
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+
   useEffect(() => {
     if (artwork && artwork.imageUrl) {
       setIsImageLoaded(false);
@@ -34,6 +40,20 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
       };
     }
   }, [artwork]);
+
+  // Disable keyboard shortcuts for saving images
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Block Ctrl+S, Ctrl+U and other saving-related shortcuts
+      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'u')) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const fallbackBgColor = artwork?.id ? 
     `hsl(${parseInt(artwork.id) * 60 % 360}, 70%, 80%)` : 
@@ -92,6 +112,7 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
               "relative w-full aspect-[3/4] overflow-hidden rounded-lg",
               isImageLoaded ? "opacity-100" : "opacity-50"
             )}
+            onContextMenu={handleContextMenu}
           >
             <img
               src={artwork.imageUrl}
@@ -99,7 +120,17 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
               className="w-full h-full object-cover transition-opacity duration-700"
               onError={() => setHasImageError(true)}
               onLoad={() => setIsImageLoaded(true)}
+              draggable="false"
             />
+            <div className="absolute inset-0 select-none pointer-events-none">
+              {/* Visible watermark */}
+              <div className="absolute bottom-0 right-0 p-3 text-white text-sm font-light rotate-[-30deg] transform origin-bottom-right">
+                © Raúl Álvarez
+              </div>
+              
+              {/* Invisible overlay to help prevent screen capture */}
+              <div className="absolute inset-0 bg-transparent"></div>
+            </div>
           </div>
         )}
       </div>

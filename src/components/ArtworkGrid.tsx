@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Artwork } from "@/types/artwork";
@@ -51,6 +52,12 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  // Handler to prevent right-click
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -117,6 +124,7 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
           style={{ 
             backgroundColor: hasError ? fallbackBgColor : undefined
           }}
+          onContextMenu={handleContextMenu}
         >
           {hasError ? (
             <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -126,16 +134,24 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
               </div>
             </div>
           ) : (
-            <img
-              src={artwork.imageUrl}
-              alt={artwork.title}
-              className={cn(
-                "w-full h-full object-cover transition-transform duration-700 group-hover:scale-105",
-                isLoaded ? "opacity-100" : "opacity-50"
-              )}
-              loading="lazy"
-              onError={() => setHasError(true)}
-            />
+            <>
+              <img
+                src={artwork.imageUrl}
+                alt={artwork.title}
+                className={cn(
+                  "w-full h-full object-cover transition-transform duration-700 group-hover:scale-105",
+                  isLoaded ? "opacity-100" : "opacity-50"
+                )}
+                loading="lazy"
+                onError={() => setHasError(true)}
+                draggable="false"
+              />
+              <div className="absolute inset-0 bg-transparent select-none pointer-events-none">
+                <div className="absolute bottom-0 right-0 p-2 text-white text-opacity-70 text-xs font-light rotate-[-30deg] transform origin-bottom-right">
+                  © Raúl Álvarez
+                </div>
+              </div>
+            </>
           )}
         </div>
         <CardContent className="p-4 bg-white">
