@@ -24,6 +24,7 @@
 - [ ] Add loading states for all data fetching operations
 - [ ] Implement error handling for all API calls
 - [ ] Optimize images for faster loading
+- [x] Add authentication form for the admin area
 
 ## Domain & Hosting
 - [ ] Purchase domain: raulalvarezpintura.es

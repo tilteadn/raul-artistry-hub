@@ -2,29 +2,37 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
+import { LogOut } from "lucide-react";
+
 import AdminPanel from "@/components/AdminPanel";
+import AdminAuth from "@/components/AdminAuth";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Artwork } from "@/types/artwork";
 import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork } from "@/utils/artworkService";
+import { Button } from "@/components/ui/button";
 
 const Admin = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated, isLoading, login, logout } = useAdminAuth();
 
   useEffect(() => {
-    const loadArtworks = async () => {
-      try {
-        const data = await getAllArtworks();
-        setArtworks(data);
-      } catch (error) {
-        console.error("Error loading artworks:", error);
-        toast.error("Error al cargar las obras");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (isAuthenticated) {
+      const loadArtworks = async () => {
+        try {
+          const data = await getAllArtworks();
+          setArtworks(data);
+        } catch (error) {
+          console.error("Error loading artworks:", error);
+          toast.error("Error al cargar las obras");
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    loadArtworks();
-  }, []);
+      loadArtworks();
+    }
+  }, [isAuthenticated]);
 
   const handleAddArtwork = async (artworkData: Omit<Artwork, "id" | "createdAt">) => {
     try {
@@ -84,7 +92,8 @@ const Admin = () => {
     }
   };
 
-  if (loading) {
+  // Show loading state when checking authentication
+  if (isLoading) {
     return (
       <div className="container mx-auto px-6 py-16">
         <div className="h-96 flex items-center justify-center">
@@ -102,18 +111,33 @@ const Admin = () => {
             Administración
           </h1>
           <p className="text-muted-foreground text-center max-w-2xl mx-auto">
-            Gestiona las obras y colecciones de la galería.
+            {isAuthenticated 
+              ? "Gestiona las obras y colecciones de la galería." 
+              : "Accede al panel de administración."}
           </p>
+          
+          {isAuthenticated && (
+            <div className="flex justify-center mt-6">
+              <Button variant="outline" onClick={logout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Cerrar sesión
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       
       <div className="container mx-auto px-6 py-16">
-        <AdminPanel
-          artworks={artworks}
-          onAddArtwork={handleAddArtwork}
-          onUpdateArtwork={handleUpdateArtwork}
-          onDeleteArtwork={handleDeleteArtwork}
-        />
+        {isAuthenticated ? (
+          <AdminPanel
+            artworks={artworks}
+            onAddArtwork={handleAddArtwork}
+            onUpdateArtwork={handleUpdateArtwork}
+            onDeleteArtwork={handleDeleteArtwork}
+          />
+        ) : (
+          <AdminAuth onAuthenticated={login} />
+        )}
       </div>
     </div>
   );
