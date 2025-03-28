@@ -92,7 +92,9 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
     }
   };
 
-  const handleClickUpload = () => {
+  const handleClickUpload = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event propagation
+    e.preventDefault(); // Prevent default behavior
     fileInputRef.current?.click();
   };
 
@@ -172,7 +174,13 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
                 <p className="text-sm text-center mt-2">
                   {isMobile ? "Haz clic para seleccionar" : "Arrastra y suelta aquí o haz clic para seleccionar"}
                 </p>
-                <Button variant="outline" size="sm" className="mt-4" onClick={handleClickUpload}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4" 
+                  onClick={handleClickUpload} // Use the handleClickUpload here
+                  type="button" // Add type="button" to prevent form submission
+                >
                   <Upload className="mr-2 h-4 w-4" />
                   Seleccionar archivo
                 </Button>

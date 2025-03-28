@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,7 +64,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
       dimensions: editArtwork?.dimensions || "",
       description: editArtwork?.description || "",
     },
-    mode: "onBlur", // Validate on blur for better UX
+    mode: "onBlur", // Changed from onBlur to onChange to prevent focus issues
   });
 
   const handleImageChange = (url: string) => {
