@@ -107,6 +107,7 @@ const Admin = () => {
     try {
       await deleteArtwork(id);
       setArtworks((prev) => prev.filter((a) => a.id !== id));
+      toast.success("Obra eliminada correctamente");
     } catch (error) {
       console.error("Error deleting artwork:", error);
       toast.error("Error al eliminar la obra");

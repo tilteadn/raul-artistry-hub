@@ -1,7 +1,6 @@
 
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Toaster } from "@/components/ui/sonner";
 import Navbar from "./Navbar";
 
 interface LayoutProps {
@@ -81,7 +80,6 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
         </div>
       </footer>
-      <Toaster position="top-right" />
     </div>
   );
 };

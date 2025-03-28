@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -74,7 +73,6 @@ const AdminPanel = ({
 
   const handleDeleteArtwork = (id: string) => {
     onDeleteArtwork(id);
-    toast.success("Obra eliminada correctamente");
   };
 
   const AddArtworkDialog = () => (
@@ -157,7 +155,6 @@ const AdminPanel = ({
     </>
   );
 
-  // Loading state component
   const LoadingState = () => (
     <div className="flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
       <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
