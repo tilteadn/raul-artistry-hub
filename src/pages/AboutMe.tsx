@@ -105,9 +105,15 @@ Be water, my friend.`;
       >
         <header className="mb-12 text-center">
           <h1 className="text-4xl font-serif mb-4">Sobre mí</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            {artistInfo.shortBio}
-          </p>
+          <div className="w-48 mx-auto mt-4">
+            <img 
+              src="/lovable-uploads/Firma sin fondo.jpg" 
+              alt="Firma de Raúl Álvarez" 
+              className="w-full h-auto"
+              draggable="false"
+              onContextMenu={(e) => e.preventDefault()}
+            />
+          </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
