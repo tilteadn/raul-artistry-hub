@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Instagram, Mail, MapPin, Send } from "lucide-react";
 import { z } from "zod";
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "El nombre es requerido" }),
@@ -37,16 +37,27 @@ const ContactSection = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
+    try {
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: values
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
       toast.success("Mensaje enviado correctamente");
       form.reset();
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.");
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   }
 
   return (
@@ -57,9 +68,6 @@ const ContactSection = () => {
             <h2 className="font-serif text-3xl md:text-4xl font-medium text-primary mb-4">
               Contacto
             </h2>
-            {/* <p className="text-muted-foreground leading-relaxed">
-              Si estás interesado en adquirir alguna obra, tienes alguna consulta o deseas información sobre encargos, no dudes en contactarme.
-            </p> */}
           </div>
 
           <div className="space-y-6">
