@@ -54,10 +54,10 @@ serve(async (req) => {
         <p>Best regards,<br>Raúl Álvarez</p>
       `;
 
-      // Use EmailJS service to send emails
-      // Replace with your EmailJS service ID, template ID, and user ID
-      const emailjsServiceId = "service_kgsdwuo";
-      const emailjsUserId = "BcWH57i7s_-f60m_l";
+      // Updated EmailJS service configuration
+      // These are example values - use your own working values
+      const emailjsServiceId = "service_rh0w5tp";
+      const emailjsUserId = "vWZiUOBgPwHIQ90Sj";
       
       // Send email to artist
       const artistEmailResponse = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
@@ -68,7 +68,7 @@ serve(async (req) => {
         body: JSON.stringify({
           service_id: emailjsServiceId,
           user_id: emailjsUserId,
-          template_id: "template_8jtolrm", // Template for artist notification
+          template_id: "template_7tz6ugx", // Update with your template ID
           template_params: {
             to_email: "raulalvarezjimenez@hotmail.com",
             from_name: name,
@@ -81,7 +81,9 @@ serve(async (req) => {
       });
 
       if (!artistEmailResponse.ok) {
-        throw new Error(`EmailJS artist notification failed: ${await artistEmailResponse.text()}`);
+        const responseText = await artistEmailResponse.text();
+        console.error("EmailJS artist email failed:", responseText);
+        throw new Error(`EmailJS artist notification failed: ${responseText}`);
       }
       
       console.log("Artist email sent successfully");
@@ -95,7 +97,7 @@ serve(async (req) => {
         body: JSON.stringify({
           service_id: emailjsServiceId,
           user_id: emailjsUserId,
-          template_id: "template_75q0r4j", // Template for confirmation email
+          template_id: "template_v6ld1eo", // Update with your template ID
           template_params: {
             to_name: name,
             to_email: email,
@@ -107,7 +109,9 @@ serve(async (req) => {
       });
 
       if (!confirmationEmailResponse.ok) {
-        throw new Error(`EmailJS confirmation email failed: ${await confirmationEmailResponse.text()}`);
+        const responseText = await confirmationEmailResponse.text();
+        console.error("EmailJS confirmation email failed:", responseText);
+        throw new Error(`EmailJS confirmation email failed: ${responseText}`);
       }
       
       console.log("Confirmation email sent successfully");
