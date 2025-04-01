@@ -32,11 +32,14 @@ const AboutMe = () => {
 
   // New biography text
   const biographyText = `Pintar y dibujar es mi VIDA. Una ley innata.
+
 Algo grabado a fuego en mi ADN que me atrapa día tras día. Algo de lo
 que no puedo ni quiero huir.
+
 Mi oficio de pintor es mi válvula de escape, me absorbe y me da el aire
 que necesito para expresar mis sentimientos e intentar transmitir como
 soy, lo que siento y me apasiona.
+
 Todo mi trabajo hasta ahora ha girado en torno al agua, elemento puro y
 necesario para la supervivencia del ser humano y otras especies, elemento
 sanador y purificador del cuerpo y el alma. A mi manera de ver el agua
@@ -44,6 +47,7 @@ tiene varias similitudes con las distintas formas de ser o de comportarnos
 que tenemos los seres humanos; podemos ser amables, agradables,
 divertidos, mansos como al agua en calma o destructivos, dañinos y
 temerarios como el agua desbocada sin control o el mar enfurecido.
+
 Me interesa la creación de mis obras con el agua como elemento pictórico
 por su dificultad a la hora de plasmarla de manera creíble y el gran
 abanico de posibilidades de representación que abarca. Crear ese binomio
@@ -55,10 +59,12 @@ espectador. Cada una de mis series habla de distintas cosas u estados de
 cualquiera nos podemos sentir identificados pero siempre con un
 elemento en común que aparece de una manera más o menos directa o
 protagonista, el agua.
+
 El Realismo Figurativo es el lenguaje pictórico con el que como pintor me
 siento más cómodo e identificado para desarrollar mi trabajo, más yo.
 Trato de evolucionar tanto en mi obra como técnicamente para encontrar
 mi camino, me dejo fluir.
+
 Be water, my friend.`;
 
   return (
