@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,39 +38,85 @@ serve(async (req) => {
     // Log for debugging
     console.log(`Sending email from ${name} (${email}): ${subject}`);
 
-    // Format email content
-    const artistEmailContent = `
-      <h2>New contact from website</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Subject:</strong> ${subject}</p>
-      <p><strong>Message:</strong></p>
-      <p>${message.replace(/\n/g, "<br>")}</p>
-    `;
+    try {
+      // Create a new SMTP client
+      const client = new SmtpClient();
+      
+      try {
+        // Connect to Gmail's SMTP server
+        await client.connectTLS({
+          hostname: "smtp.gmail.com",
+          port: 465,
+          username: "mailsenderwebraul@gmail.com",
+          password: "harj zozg ppkc xxwq", // App password
+        });
 
-    const confirmationEmailContent = `
-      <h2>Thank you for your message!</h2>
-      <p>Dear ${name},</p>
-      <p>This is a confirmation that we have received your message. We will get back to you as soon as possible.</p>
-      <p>Best regards,<br>Raúl Álvarez</p>
-    `;
+        // Email content
+        const artistEmailHtml = `
+          <h2>New contact from website</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, "<br>")}</p>
+        `;
 
-    // Send emails using a simple HTTP POST request to an email API
-    // We'll use a mock success response for now
-    console.log("Would send artist email with content:", artistEmailContent);
-    console.log("Would send confirmation email with content:", confirmationEmailContent);
+        const confirmationEmailHtml = `
+          <h2>Thank you for your message!</h2>
+          <p>Dear ${name},</p>
+          <p>This is a confirmation that we have received your message. We will get back to you as soon as possible.</p>
+          <p>Best regards,<br>Raúl Álvarez</p>
+        `;
 
-    // In a real implementation, you would use an email API here
-    // Since we can't use the SMTP client, we'll simulate success
-    // The frontend will still display success message
+        // Send email to the artist
+        await client.send({
+          from: "mailsenderwebraul@gmail.com",
+          to: "raulalvarezjimenez@hotmail.com", // Send to the artist's actual email
+          subject: `Web Contact: ${subject}`,
+          html: artistEmailHtml,
+        });
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      message: "Contact message received. We'll be in touch soon."
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+        console.log("Artist email sent successfully");
+
+        // Send confirmation email to the contact
+        await client.send({
+          from: "mailsenderwebraul@gmail.com",
+          to: email,
+          subject: "Thank you for contacting Raúl Álvarez",
+          html: confirmationEmailHtml,
+        });
+
+        console.log("Confirmation email sent successfully");
+
+        // Close the connection
+        await client.close();
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: "Contact message received. We'll be in touch soon." 
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      } catch (emailError) {
+        console.error("SMTP error:", emailError);
+        
+        // Make sure to close the connection if it was opened
+        try {
+          await client.close();
+        } catch (closeError) {
+          console.error("Error closing SMTP connection:", closeError);
+        }
+        
+        throw emailError;
+      }
+    } catch (smtpError) {
+      console.error("SMTP client error:", smtpError);
+      throw smtpError;
+    }
   } catch (error) {
     console.error("Error processing contact request:", error);
     return new Response(
