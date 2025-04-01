@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Instagram, Mail, MapPin, Send } from "lucide-react";
 import { z } from "zod";
@@ -17,6 +16,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+
+const loadEmailJSScript = () => {
+  if (document.getElementById('emailjs-sdk')) return Promise.resolve();
+  
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.id = 'emailjs-sdk';
+    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+};
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "El nombre es requerido" }),
@@ -42,7 +55,6 @@ const ContactSection = () => {
     setIsSubmitting(true);
     
     try {
-      // Call the Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('send-contact-email', {
         body: values
       });
@@ -50,8 +62,28 @@ const ContactSection = () => {
       if (error) {
         throw new Error(error.message);
       }
+      
+      await loadEmailJSScript();
+      
+      window.emailjs.init("chx-roi_Po5TumXx8");
+      
+      const emailResult = await window.emailjs.send(
+        "service_dbp59e9", 
+        "cutomer.template", 
+        {
+          to_name: values.name,
+          to_email: values.email,
+          from_name: "Raúl Álvarez",
+          subject: `Web Contact: ${values.subject}`,
+          message: values.message,
+          reply_to: "raulalvarezjimenez@hotmail.com",
+          user_email: values.email,
+          user_name: values.name,
+          user_subject: values.subject,
+          user_message: values.message
+        }
+      );
 
-      // Show success message
       toast.success("Mensaje enviado correctamente. Nos pondremos en contacto pronto.");
       form.reset();
     } catch (error) {
