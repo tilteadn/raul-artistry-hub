@@ -54,7 +54,7 @@ serve(async (req) => {
     // Send email to the artist
     await client.send({
       from: "mailsenderwebraul@gmail.com",
-      to: "raulalvarezjimenez@hotmail.com",
+      to: "eduxeiroa@gmail.com",
       subject: `Web Contact: ${subject}`,
       content: `
         <h2>New contact from website</h2>
