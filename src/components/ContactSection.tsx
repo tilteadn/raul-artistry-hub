@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Instagram, Mail, MapPin, Send } from "lucide-react";
 import { z } from "zod";
@@ -50,7 +51,8 @@ const ContactSection = () => {
         throw new Error(error.message);
       }
 
-      toast.success("Mensaje enviado correctamente");
+      // Show success message
+      toast.success("Mensaje enviado correctamente. Nos pondremos en contacto pronto.");
       form.reset();
     } catch (error) {
       console.error("Error sending message:", error);
