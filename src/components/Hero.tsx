@@ -16,7 +16,7 @@ interface HeroProps {
 const Hero = ({
   title = "Raúl Álvarez",
   subtitle = "Arte y expresión visual",
-  image = "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
+  image = "/lovable-uploads/iceberg.jpg",
   imageAlt = "Obra de arte de Raúl Álvarez",
   ctaText = "Ver Obras",
   ctaLink = "/obras",
