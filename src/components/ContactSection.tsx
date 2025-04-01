@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Instagram, Mail, MapPin, Send } from "lucide-react";
 import { z } from "zod";
@@ -15,21 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
-
-const loadEmailJSScript = () => {
-  if (document.getElementById('emailjs-sdk')) return Promise.resolve();
-  
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.id = 'emailjs-sdk';
-    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-};
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "El nombre es requerido" }),
@@ -51,47 +37,16 @@ const ContactSection = () => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
-    try {
-      const { data, error } = await supabase.functions.invoke('send-contact-email', {
-        body: values
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      await loadEmailJSScript();
-      
-      window.emailjs.init("chx-roi_Po5TumXx8");
-      
-      const emailResult = await window.emailjs.send(
-        "service_dbp59e9", 
-        "cutomer.template", 
-        {
-          to_name: values.name,
-          to_email: values.email,
-          from_name: "Raúl Álvarez",
-          subject: `Web Contact: ${values.subject}`,
-          message: values.message,
-          reply_to: "raulalvarezjimenez@hotmail.com",
-          user_email: values.email,
-          user_name: values.name,
-          user_subject: values.subject,
-          user_message: values.message
-        }
-      );
-
-      toast.success("Mensaje enviado correctamente. Nos pondremos en contacto pronto.");
+    // Simulate API call
+    setTimeout(() => {
+      console.log(values);
+      toast.success("Mensaje enviado correctamente");
       form.reset();
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast.error("Error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.");
-    } finally {
       setIsSubmitting(false);
-    }
+    }, 1500);
   }
 
   return (
@@ -102,6 +57,9 @@ const ContactSection = () => {
             <h2 className="font-serif text-3xl md:text-4xl font-medium text-primary mb-4">
               Contacto
             </h2>
+            {/* <p className="text-muted-foreground leading-relaxed">
+              Si estás interesado en adquirir alguna obra, tienes alguna consulta o deseas información sobre encargos, no dudes en contactarme.
+            </p> */}
           </div>
 
           <div className="space-y-6">
