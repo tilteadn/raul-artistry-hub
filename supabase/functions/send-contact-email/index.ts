@@ -15,8 +15,8 @@ const client = new SMTPClient({
     port: 465,
     tls: true,
     auth: {
-      username: Deno.env.get("GMAIL_USER") || "",
-      password: Deno.env.get("GMAIL_APP_PASSWORD") || "",
+      username: "mailsenderwebraul@gmail.com",
+      password: "harj zozg ppkc xxwq",
     },
   },
 });
@@ -53,7 +53,7 @@ serve(async (req) => {
 
     // Send email to the artist
     await client.send({
-      from: Deno.env.get("GMAIL_USER") || "",
+      from: "mailsenderwebraul@gmail.com",
       to: "raulalvarezjimenez@hotmail.com",
       subject: `Web Contact: ${subject}`,
       content: `
@@ -76,7 +76,7 @@ serve(async (req) => {
 
     // Send confirmation email to the sender
     await client.send({
-      from: Deno.env.get("GMAIL_USER") || "",
+      from: "mailsenderwebraul@gmail.com",
       to: email,
       subject: "We've received your message - Raúl Álvarez",
       content: `
