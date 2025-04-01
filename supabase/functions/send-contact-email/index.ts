@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,83 +38,93 @@ serve(async (req) => {
     console.log(`Sending email from ${name} (${email}): ${subject}`);
 
     try {
-      // Create a new SMTP client
-      const client = new SmtpClient();
+      const artistEmailHtml = `
+        <h2>New contact from website</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, "<br>")}</p>
+      `;
+
+      const confirmationEmailHtml = `
+        <h2>Thank you for your message!</h2>
+        <p>Dear ${name},</p>
+        <p>This is a confirmation that we have received your message. We will get back to you as soon as possible.</p>
+        <p>Best regards,<br>Raúl Álvarez</p>
+      `;
+
+      // Use EmailJS service to send emails
+      // Replace with your EmailJS service ID, template ID, and user ID
+      const emailjsServiceId = "service_kgsdwuo";
+      const emailjsUserId = "BcWH57i7s_-f60m_l";
       
-      try {
-        // Connect to Gmail's SMTP server
-        await client.connectTLS({
-          hostname: "smtp.gmail.com",
-          port: 465,
-          username: "mailsenderwebraul@gmail.com",
-          password: "harj zozg ppkc xxwq", // App password
-        });
-
-        // Email content
-        const artistEmailHtml = `
-          <h2>New contact from website</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Subject:</strong> ${subject}</p>
-          <p><strong>Message:</strong></p>
-          <p>${message.replace(/\n/g, "<br>")}</p>
-        `;
-
-        const confirmationEmailHtml = `
-          <h2>Thank you for your message!</h2>
-          <p>Dear ${name},</p>
-          <p>This is a confirmation that we have received your message. We will get back to you as soon as possible.</p>
-          <p>Best regards,<br>Raúl Álvarez</p>
-        `;
-
-        // Send email to the artist
-        await client.send({
-          from: "mailsenderwebraul@gmail.com",
-          to: "raulalvarezjimenez@hotmail.com", // Send to the artist's actual email
-          subject: `Web Contact: ${subject}`,
-          html: artistEmailHtml,
-        });
-
-        console.log("Artist email sent successfully");
-
-        // Send confirmation email to the contact
-        await client.send({
-          from: "mailsenderwebraul@gmail.com",
-          to: email,
-          subject: "Thank you for contacting Raúl Álvarez",
-          html: confirmationEmailHtml,
-        });
-
-        console.log("Confirmation email sent successfully");
-
-        // Close the connection
-        await client.close();
-
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: "Contact message received. We'll be in touch soon." 
-          }),
-          {
-            status: 200,
-            headers: { "Content-Type": "application/json", ...corsHeaders },
+      // Send email to artist
+      const artistEmailResponse = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          service_id: emailjsServiceId,
+          user_id: emailjsUserId,
+          template_id: "template_8jtolrm", // Template for artist notification
+          template_params: {
+            to_email: "raulalvarezjimenez@hotmail.com",
+            from_name: name,
+            from_email: email,
+            subject: `Web Contact: ${subject}`,
+            message: message,
+            reply_to: email
           }
-        );
-      } catch (emailError) {
-        console.error("SMTP error:", emailError);
-        
-        // Make sure to close the connection if it was opened
-        try {
-          await client.close();
-        } catch (closeError) {
-          console.error("Error closing SMTP connection:", closeError);
-        }
-        
-        throw emailError;
+        })
+      });
+
+      if (!artistEmailResponse.ok) {
+        throw new Error(`EmailJS artist notification failed: ${await artistEmailResponse.text()}`);
       }
-    } catch (smtpError) {
-      console.error("SMTP client error:", smtpError);
-      throw smtpError;
+      
+      console.log("Artist email sent successfully");
+      
+      // Send confirmation email to contact
+      const confirmationEmailResponse = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          service_id: emailjsServiceId,
+          user_id: emailjsUserId,
+          template_id: "template_75q0r4j", // Template for confirmation email
+          template_params: {
+            to_name: name,
+            to_email: email,
+            message: "Thank you for contacting me. I will get back to you as soon as possible.",
+            subject: "Thank you for contacting Raúl Álvarez",
+            reply_to: "raulalvarezjimenez@hotmail.com"
+          }
+        })
+      });
+
+      if (!confirmationEmailResponse.ok) {
+        throw new Error(`EmailJS confirmation email failed: ${await confirmationEmailResponse.text()}`);
+      }
+      
+      console.log("Confirmation email sent successfully");
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Contact message received. We'll be in touch soon." 
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      throw emailError;
     }
   } catch (error) {
     console.error("Error processing contact request:", error);
