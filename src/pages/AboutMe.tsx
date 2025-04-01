@@ -1,12 +1,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { User, FileText, Award, GraduationCap, Image } from "lucide-react";
+import { User, FileText, Award, GraduationCap, Image, MapPin, Book, Briefcase, Palette, Trophy, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { artistInfo, CVItem } from "@/utils/artist/artistData";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const AboutMe = () => {
   const [activeTab, setActiveTab] = useState<string>("bio");
@@ -22,6 +24,32 @@ const AboutMe = () => {
         return <GraduationCap className="h-5 w-5 text-blue-500" />;
       default:
         return <FileText className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  // Function to get section icon
+  const getSectionIcon = (section: string) => {
+    switch (section) {
+      case "ESTUDIOS":
+      case "FORMACIÓN COMPLEMENTARIA":
+        return <GraduationCap className="h-5 w-5" />;
+      case "PREMIOS Y MENCIONES":
+        return <Trophy className="h-5 w-5" />;
+      case "EXPOSICIONES INDIVIDUALES":
+      case "EXPOSICIONES COLECTIVAS":
+        return <Palette className="h-5 w-5" />;
+      case "ACTIVIDADES COMPLEMENTARIAS":
+        return <Briefcase className="h-5 w-5" />;
+      case "FERIAS DE ARTE":
+        return <Globe className="h-5 w-5" />;
+      case "OBRA EN GALERÍAS":
+      case "OBRA EN COLECCIONES":
+      case "OBRA EN PUBLICACIONES":
+        return <Book className="h-5 w-5" />;
+      case "DATOS PERSONALES":
+        return <User className="h-5 w-5" />;
+      default:
+        return <FileText className="h-5 w-5" />;
     }
   };
 
@@ -134,27 +162,26 @@ Be water, my friend.`;
                 <Card>
                   <CardHeader>
                     <CardTitle>Curriculum Vitae</CardTitle>
-                    <CardDescription>Exposiciones, premios y formación</CardDescription>
+                    <CardDescription>Formación, premios, exposiciones y trayectoria</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      {artistInfo.cvItems.map((item, index) => (
-                        <div 
-                          key={index}
-                          className={cn(
-                            "relative pl-8 pb-6 border-l",
-                            index === artistInfo.cvItems.length - 1 ? "border-transparent" : "border-border"
-                          )}
-                        >
-                          <div className="absolute left-0 top-0 -translate-x-1/2 w-6 h-6 rounded-full bg-background border-2 border-primary flex items-center justify-center">
-                            {getTypeIcon(item.type)}
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {artistInfo.cvSections.map((section, sectionIndex) => (
+                        <div key={sectionIndex} className="py-6 px-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            {getSectionIcon(section.title)}
+                            <h3 className="text-lg font-medium">{section.title}</h3>
                           </div>
-                          <div className="space-y-1">
-                            <div className="font-medium text-sm inline-block bg-primary/10 text-primary px-2 py-0.5 rounded">
-                              {item.year}
-                            </div>
-                            <h3 className="font-medium text-lg">{item.title}</h3>
-                            <p className="text-muted-foreground">{item.description}</p>
+                          
+                          <div className="ml-2 space-y-3">
+                            {section.items.map((item, itemIndex) => (
+                              <div key={itemIndex} className="flex gap-2">
+                                {item.year && (
+                                  <span className="font-medium text-sm min-w-20">{item.year}</span>
+                                )}
+                                <p className="text-muted-foreground">{item.content}</p>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       ))}
