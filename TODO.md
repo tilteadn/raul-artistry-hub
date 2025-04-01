@@ -9,18 +9,18 @@
 - [x] Set up database for storing artwork information
 
 ## SEO Improvements
-- [ ] Update LocalBusiness schema with accurate business information
-- [ ] Revise artist biography to correctly reflect A Coruña location
-- [ ] Update CV items to include local exhibitions and achievements
+- [x] Update LocalBusiness schema with accurate business information
+- [x] Revise artist biography to correctly reflect A Coruña location
+- [x] Update CV items to include local exhibitions and achievements
 - [ ] Implement proper meta tags for all pages
 - [ ] Ensure all images have proper alt tags
 
 ## Frontend Enhancements
-- [ ] Replace header image with iceberg image
-- [ ] Create and add custom favicon
+- [x] Replace header image with iceberg image
+- [x] Create and add custom favicon
 - [ ] Ensure contact form submission works correctly
 - [ ] Add proper validation to contact form
-- [ ] Link the physical studio location in the contact section
+- [x] Link the physical studio location in the contact section
 - [ ] Add loading states for all data fetching operations
 - [ ] Implement error handling for all API calls
 - [ ] Optimize images for faster loading
