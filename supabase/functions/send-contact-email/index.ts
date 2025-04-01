@@ -38,29 +38,14 @@ serve(async (req) => {
     console.log(`Sending email from ${name} (${email}): ${subject}`);
 
     try {
-      const artistEmailHtml = `
-        <h2>New contact from website</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, "<br>")}</p>
-      `;
-
-      const confirmationEmailHtml = `
-        <h2>Thank you for your message!</h2>
-        <p>Dear ${name},</p>
-        <p>This is a confirmation that we have received your message. We will get back to you as soon as possible.</p>
-        <p>Best regards,<br>Raúl Álvarez</p>
-      `;
-
-      // Updated EmailJS service configuration
-      // These are example values - use your own working values
-      const emailjsServiceId = "service_rh0w5tp";
-      const emailjsUserId = "vWZiUOBgPwHIQ90Sj";
+      // Updated EmailJS service configuration with your credentials
+      const emailjsServiceId = "service_dbp59e9";
+      const emailjsUserId = "chx-roi_Po5TumXx8";
+      const emailjsTemplateId = "cutomer.template";
       
-      // Send email to artist
-      const artistEmailResponse = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      // Send email using the provided template
+      // This template is configured to send to the customer and CC the artist
+      const emailResponse = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,53 +53,29 @@ serve(async (req) => {
         body: JSON.stringify({
           service_id: emailjsServiceId,
           user_id: emailjsUserId,
-          template_id: "template_7tz6ugx", // Update with your template ID
-          template_params: {
-            to_email: "raulalvarezjimenez@hotmail.com",
-            from_name: name,
-            from_email: email,
-            subject: `Web Contact: ${subject}`,
-            message: message,
-            reply_to: email
-          }
-        })
-      });
-
-      if (!artistEmailResponse.ok) {
-        const responseText = await artistEmailResponse.text();
-        console.error("EmailJS artist email failed:", responseText);
-        throw new Error(`EmailJS artist notification failed: ${responseText}`);
-      }
-      
-      console.log("Artist email sent successfully");
-      
-      // Send confirmation email to contact
-      const confirmationEmailResponse = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          service_id: emailjsServiceId,
-          user_id: emailjsUserId,
-          template_id: "template_v6ld1eo", // Update with your template ID
+          template_id: emailjsTemplateId,
           template_params: {
             to_name: name,
             to_email: email,
-            message: "Thank you for contacting me. I will get back to you as soon as possible.",
-            subject: "Thank you for contacting Raúl Álvarez",
-            reply_to: "raulalvarezjimenez@hotmail.com"
+            from_name: "Raúl Álvarez",
+            subject: `Web Contact: ${subject}`,
+            message: message,
+            reply_to: "raulalvarezjimenez@hotmail.com",
+            user_email: email,
+            user_name: name,
+            user_subject: subject,
+            user_message: message
           }
         })
       });
 
-      if (!confirmationEmailResponse.ok) {
-        const responseText = await confirmationEmailResponse.text();
-        console.error("EmailJS confirmation email failed:", responseText);
-        throw new Error(`EmailJS confirmation email failed: ${responseText}`);
+      if (!emailResponse.ok) {
+        const responseText = await emailResponse.text();
+        console.error("EmailJS email failed:", responseText);
+        throw new Error(`EmailJS email failed: ${responseText}`);
       }
       
-      console.log("Confirmation email sent successfully");
+      console.log("Email sent successfully");
 
       return new Response(
         JSON.stringify({ 
