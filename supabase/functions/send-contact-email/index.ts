@@ -8,19 +8,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Create SMTP client configuration
-const client = new SmtpClient({
-  connection: {
-    hostname: "smtp.gmail.com",
-    port: 465,
-    tls: true,
-    auth: {
-      username: "mailsenderwebraul@gmail.com",
-      password: "harj zozg ppkc xxwq",
-    },
-  },
-});
-
 interface ContactFormData {
   name: string;
   email: string;
@@ -50,6 +37,17 @@ serve(async (req) => {
 
     // Log for debugging
     console.log(`Sending email from ${name} (${email}): ${subject}`);
+
+    // Create a new SMTP client for each request to avoid connection issues
+    const client = new SmtpClient();
+    
+    // Connect to the server
+    await client.connectTLS({
+      hostname: "smtp.gmail.com",
+      port: 465,
+      username: "mailsenderwebraul@gmail.com",
+      password: "harj zozg ppkc xxwq",
+    });
 
     // Send email to the artist
     await client.send({
@@ -92,6 +90,9 @@ serve(async (req) => {
         <p>Best regards,<br>Raúl Álvarez</p>
       `,
     });
+
+    // Close the connection
+    await client.close();
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
