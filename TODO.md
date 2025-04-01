@@ -18,6 +18,7 @@
 ## Frontend Enhancements
 - [x] Replace header image with iceberg image
 - [x] Create and add custom favicon
+- [ ] Ensure the mail adress is correct
 - [ ] Ensure contact form submission works correctly
 - [ ] Add proper validation to contact form
 - [x] Link the physical studio location in the contact section
