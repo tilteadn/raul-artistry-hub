@@ -27,7 +27,7 @@ export interface CVSectionItem {
 
 export const artistInfo: ArtistInfo = {
   name: "Raúl Álvarez",
-  shortBio: "Artista plástico especializado en pintura figurativa contemporánea y tatuaje artístico",
+  shortBio: "Artista plástico especializado en pintura figurativa contemporánea",
   fullBio: "Nacido en Madrid en 1985, Raúl Álvarez es un artista multidisciplinar que combina la pintura tradicional con técnicas contemporáneas. Su obra explora la condición humana a través de retratos expresivos y escenas cotidianas transformadas por su particular visión estética.\n\nFormado en la Escuela de Bellas Artes de Madrid y posteriormente especializado en técnicas clásicas en Florencia, su trabajo ha evolucionado hacia un estilo personal que mezcla el realismo con elementos simbólicos y atmosféricos.\n\nActualmente divide su tiempo entre la creación de obra pictórica y su estudio de tatuaje artístico, donde traslada su sensibilidad estética al arte corporal, siempre manteniendo su inconfundible estilo personal.",
   image: "/lovable-uploads/raulRetrato.jpg",
   cvItems: [
