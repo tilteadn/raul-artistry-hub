@@ -31,7 +31,7 @@ const ContactInfo = () => {
                 style={{ border: 0 }} 
                 allowFullScreen 
                 loading="lazy" 
-                referrerPolicy="no-referrer-when-cross-origin"
+                referrerPolicy="no-referrer"
                 title="Ubicación de Raúl Álvarez en A Coruña"
                 className="rounded-md"
               ></iframe>
