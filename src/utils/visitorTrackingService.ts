@@ -1,4 +1,6 @@
 
+import { supabase } from "@/integrations/supabase/client";
+
 // Types for visitor data
 export interface CountryData {
   country: string;
@@ -19,81 +21,134 @@ export interface VisitorData {
   monthlyData: MonthlyData[];
 }
 
-// Get the visitor's country using a geolocation API
+// Get the visitor's country using the detect-country edge function
 const getUserCountry = async (): Promise<string> => {
   try {
-    // Using the free ipapi.co service to get visitor's country
-    const response = await fetch('https://ipapi.co/json/');
-    const data = await response.json();
+    // Using our Supabase edge function to get visitor's country
+    const { data, error } = await supabase.functions.invoke('detect-country');
+    
+    if (error) {
+      console.error("Error detecting country via edge function:", error);
+      return "Unknown";
+    }
     
     // Return the country name
-    return data.country_name || "Unknown";
+    return data.country || "Unknown";
   } catch (error) {
     console.error("Error detecting country:", error);
     return "Unknown";
   }
 };
 
+// Get user device and browser information
+const getUserDeviceInfo = (): { device: string | null, browser: string | null } => {
+  try {
+    const userAgent = navigator.userAgent;
+    
+    // Simple device detection
+    let device = null;
+    if (/Mobi|Android/i.test(userAgent)) {
+      device = "Mobile";
+    } else if (/iPad|Tablet/i.test(userAgent)) {
+      device = "Tablet";
+    } else {
+      device = "Desktop";
+    }
+    
+    // Simple browser detection
+    let browser = null;
+    if (/Firefox/i.test(userAgent)) {
+      browser = "Firefox";
+    } else if (/Chrome/i.test(userAgent) && !/Edg/i.test(userAgent)) {
+      browser = "Chrome";
+    } else if (/Edg/i.test(userAgent)) {
+      browser = "Edge";
+    } else if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) {
+      browser = "Safari";
+    } else {
+      browser = "Other";
+    }
+    
+    return { device, browser };
+  } catch (error) {
+    console.error("Error detecting device info:", error);
+    return { device: null, browser: null };
+  }
+};
+
 // Function to track a new visit if consent was given
 export const trackVisit = async (): Promise<void> => {
   try {
-    const now = new Date();
-    const month = now.toLocaleString('default', { month: 'short' });
     const country = await getUserCountry();
+    const { device, browser } = getUserDeviceInfo();
+    const path = window.location.pathname;
     
-    // Get existing tracking data
-    let trackingData = localStorage.getItem("visitor-tracking-data");
-    let data = trackingData ? JSON.parse(trackingData) : {
-      visits: [],
-      countries: {}
-    };
+    console.log(`Tracking visit from ${country} on ${path}`);
     
-    // Add new visit
-    data.visits.push({
-      timestamp: now.toISOString(),
-      month: month,
-      country: country,
-      path: window.location.pathname
-    });
+    // Insert the visit into Supabase
+    const { error } = await supabase
+      .from('visitors')
+      .insert({
+        country,
+        path,
+        device,
+        browser
+      });
     
-    // Update country counter
-    data.countries[country] = (data.countries[country] || 0) + 1;
+    if (error) {
+      throw error;
+    }
     
-    // Save updated data
-    localStorage.setItem("visitor-tracking-data", JSON.stringify(data));
-    console.log("Visit tracked for", country);
+    console.log("Visit tracked successfully");
   } catch (error) {
     console.error("Error tracking visit:", error);
   }
 };
 
-// Function to get visitor statistics from localStorage
+// Function to get visitor statistics from Supabase
 export const getVisitorStats = async (): Promise<VisitorData> => {
   try {
-    const trackingData = localStorage.getItem("visitor-tracking-data");
+    // Get current month statistics
+    const now = new Date();
+    const currentMonth = now.toLocaleString('default', { month: 'short' });
+    const currentYear = now.getFullYear();
     
-    if (!trackingData) {
+    // Get total visits
+    const { count: totalVisits, error: countError } = await supabase
+      .from('visitors')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      console.error("Error getting total visits:", countError);
       return getEmptyStats();
     }
     
-    const data = JSON.parse(trackingData);
-    const visits = data.visits || [];
-    const countries = data.countries || {};
+    // Get current month visits
+    const monthStart = new Date(currentYear, now.getMonth(), 1);
+    const { count: currentMonthVisits, error: monthCountError } = await supabase
+      .from('visitors')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', monthStart.toISOString());
     
-    // Calculate total visits
-    const totalVisits = visits.length;
+    if (monthCountError) {
+      console.error("Error getting current month visits:", monthCountError);
+      return getEmptyStats();
+    }
     
-    // Get current month and previous month visits
-    const now = new Date();
-    const currentMonth = now.toLocaleString('default', { month: 'short' });
+    // Get previous month visits for increase calculation
+    const previousMonth = new Date(currentYear, now.getMonth() - 1, 1);
+    const previousMonthEnd = new Date(currentYear, now.getMonth(), 0);
     
-    const currentMonthVisits = visits.filter(v => v.month === currentMonth).length;
+    const { count: previousMonthVisits, error: prevMonthError } = await supabase
+      .from('visitors')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', previousMonth.toISOString())
+      .lte('created_at', previousMonthEnd.toISOString());
     
-    // Calculate previous month (simple approach for demo)
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1)
-      .toLocaleString('default', { month: 'short' });
-    
-    const previousMonthVisits = visits.filter(v => v.month === lastMonth).length;
+    if (prevMonthError) {
+      console.error("Error getting previous month visits:", prevMonthError);
+      return getEmptyStats();
+    }
     
     // Calculate visit increase percentage
     const visitIncrease = previousMonthVisits 
@@ -101,17 +156,27 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
       : 100;
     
     // Get top countries
-    const topCountries = Object.entries(countries)
-      .map(([country, visits]) => ({
-        country,
-        visits: visits as number,
-        percentage: totalVisits ? ((visits as number) / totalVisits) * 100 : 0
+    const { data: countryData, error: countryError } = await supabase
+      .from('visitors')
+      .select('country, count(*)')
+      .group('country')
+      .order('count', { ascending: false });
+    
+    if (countryError) {
+      console.error("Error getting country data:", countryError);
+      return getEmptyStats();
+    }
+    
+    const topCountries: CountryData[] = (countryData || [])
+      .map(item => ({
+        country: item.country,
+        visits: parseInt(item.count as any),
+        percentage: totalVisits ? (parseInt(item.count as any) / totalVisits) * 100 : 0
       }))
-      .sort((a, b) => b.visits - a.visits)
       .slice(0, 5);
     
-    // If we have less than 6 countries, add "Otros" for the rest
-    if (Object.keys(countries).length > 5) {
+    // If we have more than 5 countries, add "Otros" for the rest
+    if ((countryData || []).length > 5) {
       const otherVisits = totalVisits - topCountries.reduce((sum, country) => sum + country.visits, 0);
       topCountries.push({
         country: "Otros",
@@ -120,16 +185,32 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
       });
     }
     
-    // Get monthly data
+    // Get monthly data - this is a bit more complex since we need to aggregate by month
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-    const monthlyData = months.map(month => {
-      const monthVisits = visits.filter(v => v.month === month).length;
-      return { month, visits: monthVisits };
-    });
+    const monthlyData: MonthlyData[] = [];
+    
+    // For each month, query the database
+    for (let i = 0; i < 12; i++) {
+      const monthStart = new Date(currentYear, i, 1);
+      const monthEnd = new Date(currentYear, i + 1, 0);
+      
+      const { count: monthVisits, error: monthError } = await supabase
+        .from('visitors')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', monthStart.toISOString())
+        .lte('created_at', monthEnd.toISOString());
+      
+      if (monthError) {
+        console.error(`Error getting visits for month ${i+1}:`, monthError);
+        monthlyData.push({ month: months[i], visits: 0 });
+      } else {
+        monthlyData.push({ month: months[i], visits: monthVisits || 0 });
+      }
+    }
     
     return {
-      totalVisits,
-      currentMonthVisits,
+      totalVisits: totalVisits || 0,
+      currentMonthVisits: currentMonthVisits || 0,
       visitIncrease,
       topCountries,
       monthlyData

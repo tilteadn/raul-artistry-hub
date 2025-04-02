@@ -75,6 +75,84 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_stats_countries: {
+        Row: {
+          country: string
+          created_at: string
+          id: string
+          updated_at: string
+          visits: number
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          visits?: number
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          visits?: number
+        }
+        Relationships: []
+      }
+      visitor_stats_monthly: {
+        Row: {
+          created_at: string
+          id: string
+          month: string
+          updated_at: string
+          visits: number
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month: string
+          updated_at?: string
+          visits?: number
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month?: string
+          updated_at?: string
+          visits?: number
+          year?: number
+        }
+        Relationships: []
+      }
+      visitors: {
+        Row: {
+          browser: string | null
+          country: string
+          created_at: string
+          device: string | null
+          id: string
+          path: string
+        }
+        Insert: {
+          browser?: string | null
+          country: string
+          created_at?: string
+          device?: string | null
+          id?: string
+          path: string
+        }
+        Update: {
+          browser?: string | null
+          country?: string
+          created_at?: string
+          device?: string | null
+          id?: string
+          path?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

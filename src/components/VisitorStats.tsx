@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MapPin, Calendar, Users, BarChart2, AlertTriangle } from "lucide-react";
+import { MapPin, Calendar, Users, BarChart2, AlertTriangle, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getVisitorStats, VisitorData } from "@/utils/visitorTrackingService";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -11,14 +12,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 const VisitorStats = () => {
   const [visitData, setVisitData] = useState<VisitorData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadVisitorData = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
         const data = await getVisitorStats();
         setVisitData(data);
       } catch (error) {
         console.error("Error loading visitor data:", error);
+        setError("No se pudieron cargar los datos de visitas. Por favor, inténtalo de nuevo más tarde.");
       } finally {
         setIsLoading(false);
       }
@@ -29,9 +34,19 @@ const VisitorStats = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
         <p className="text-muted-foreground">Cargando estadísticas...</p>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     );
   }
 
@@ -191,18 +206,26 @@ const VisitorStats = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {visitData.topCountries.map((country, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          {country.country}
-                        </div>
+                  {visitData.topCountries.length > 0 ? (
+                    visitData.topCountries.map((country, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            {country.country}
+                          </div>
+                        </TableCell>
+                        <TableCell>{country.visits}</TableCell>
+                        <TableCell className="text-right">{country.percentage.toFixed(1)}%</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground py-6">
+                        No hay datos de ubicaciones todavía
                       </TableCell>
-                      <TableCell>{country.visits}</TableCell>
-                      <TableCell className="text-right">{country.percentage}%</TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
