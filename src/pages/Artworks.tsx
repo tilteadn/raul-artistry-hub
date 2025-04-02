@@ -4,27 +4,35 @@ import { Artwork, Collection } from "@/types/artwork";
 import ArtworkGrid from "@/components/ArtworkGrid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAllArtworks, getCollections } from "@/utils/artworkService";
+import { Loader2 } from "lucide-react";
 
 const Artworks = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [activeCollection, setActiveCollection] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [collectionLoading, setCollectionLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      setCollectionLoading(true);
+      
       try {
-        // In a real app, these would be API calls
+        // Load the artworks
+        console.log("Loading artworks for Obras page...");
         const allArtworks = await getAllArtworks();
-        const allCollections = await getCollections();
-        
         setArtworks(allArtworks);
+        setLoading(false);
+        
+        // Load the collections
+        console.log("Loading collections for Obras page...");
+        const allCollections = await getCollections();
         setCollections(allCollections);
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
-        setLoading(false);
+        setCollectionLoading(false);
       }
     };
 
@@ -57,20 +65,27 @@ const Artworks = () => {
           className="mb-12"
         >
           <div className="overflow-x-auto pb-2">
-            <TabsList className="h-auto p-1 inline-flex min-w-full md:min-w-0">
-              <TabsTrigger value="all" className="px-4 py-2">
-                Todas
-              </TabsTrigger>
-              {collections.map((collection) => (
-                <TabsTrigger
-                  key={collection.id}
-                  value={collection.name}
-                  className="px-4 py-2"
-                >
-                  {collection.name}
+            {collectionLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-6 h-6 text-primary animate-spin mr-2" />
+                <span className="text-muted-foreground">Cargando colecciones...</span>
+              </div>
+            ) : (
+              <TabsList className="h-auto p-1 inline-flex min-w-full md:min-w-0">
+                <TabsTrigger value="all" className="px-4 py-2">
+                  Todas
                 </TabsTrigger>
-              ))}
-            </TabsList>
+                {collections.map((collection) => (
+                  <TabsTrigger
+                    key={collection.id}
+                    value={collection.name}
+                    className="px-4 py-2"
+                  >
+                    {collection.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            )}
           </div>
           
           <TabsContent value={activeCollection} className="mt-8">

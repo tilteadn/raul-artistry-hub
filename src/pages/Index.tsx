@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Hero from "@/components/Hero";
 import ArtworkGrid from "@/components/ArtworkGrid";
@@ -14,10 +14,12 @@ const Index = () => {
 
   useEffect(() => {
     const loadArtworks = async () => {
+      setLoading(true);
       try {
-        // In a real app, this would be an API call
+        console.log("Loading featured artworks for Home page...");
         const artworks = await getFeaturedArtworks();
         setFeaturedArtworks(artworks);
+        console.log(`Loaded ${artworks.length} featured artworks`);
       } catch (error) {
         console.error("Error loading artworks:", error);
       } finally {
@@ -51,7 +53,16 @@ const Index = () => {
           </Button>
         </div>
         
-        <ArtworkGrid artworks={featuredArtworks} loading={loading} />
+        {loading ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
+            <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+            <p className="text-center text-muted-foreground">
+              Cargando obras destacadas...
+            </p>
+          </div>
+        ) : (
+          <ArtworkGrid artworks={featuredArtworks} loading={false} />
+        )}
       </section>
       
       <section className="bg-secondary py-20">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -40,6 +41,9 @@ interface AdminPanelProps {
   onUpdateArtwork: (id: string, artwork: Omit<Artwork, "id" | "createdAt">) => void;
   onDeleteArtwork: (id: string) => void;
   isLoading?: boolean;
+  isAdding?: boolean;
+  isUpdating?: boolean;
+  isDeleting?: boolean;
 }
 
 const AdminPanel = ({
