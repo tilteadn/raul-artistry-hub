@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 const Admin = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { isAuthenticated, isLoading, logout, setIsAuthenticated } = useAdminAuth();
   const [showAuthForm, setShowAuthForm] = useState(!isAuthenticated);
 
@@ -59,6 +62,7 @@ const Admin = () => {
 
   const handleAddArtwork = async (artworkData: Omit<Artwork, "id" | "createdAt">) => {
     try {
+      setIsAdding(true);
       console.log("Adding new artwork:", artworkData.title);
       
       // For Supabase, we'll let the service generate the ID and createdAt
@@ -80,6 +84,8 @@ const Admin = () => {
       console.error("Error adding artwork:", error);
       toast.error("Error al añadir la obra");
       throw error;
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -88,6 +94,7 @@ const Admin = () => {
     artworkData: Omit<Artwork, "id" | "createdAt">
   ) => {
     try {
+      setIsUpdating(true);
       console.log(`Updating artwork ID: ${id}, Title: ${artworkData.title}`);
       const existingArtwork = artworks.find((a) => a.id === id);
       
@@ -112,11 +119,14 @@ const Admin = () => {
       console.error("Error updating artwork:", error);
       toast.error("Error al actualizar la obra");
       throw error;
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleDeleteArtwork = async (id: string) => {
     try {
+      setIsDeleting(true);
       console.log(`Deleting artwork ID: ${id}`);
       await deleteArtwork(id);
       
@@ -127,6 +137,8 @@ const Admin = () => {
       console.error("Error deleting artwork:", error);
       toast.error("Error al eliminar la obra");
       throw error;
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -134,7 +146,10 @@ const Admin = () => {
     return (
       <div className="container mx-auto px-6 py-16">
         <div className="h-96 flex items-center justify-center">
-          <p className="text-muted-foreground">Cargando...</p>
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="text-muted-foreground">Verificando autenticación...</p>
+          </div>
         </div>
       </div>
     );
@@ -174,6 +189,9 @@ const Admin = () => {
             onUpdateArtwork={handleUpdateArtwork}
             onDeleteArtwork={handleDeleteArtwork}
             isLoading={loading}
+            isAdding={isAdding}
+            isUpdating={isUpdating}
+            isDeleting={isDeleting}
           />
         )}
       </div>

@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { ImagePlus, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,9 +11,15 @@ interface ImageUploaderProps {
   onChange: (url: string) => void;
   initialImage?: string;
   className?: string;
+  isDisabled?: boolean;
 }
 
-const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps) => {
+const ImageUploader = ({ 
+  onChange, 
+  initialImage, 
+  className,
+  isDisabled = false 
+}: ImageUploaderProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialImage || null);
   const [isUploading, setIsUploading] = useState(false);
@@ -20,6 +27,7 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
   const isMobile = useIsMobile();
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isDisabled) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
@@ -32,6 +40,7 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isDisabled) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -95,12 +104,14 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
   };
 
   const handleClickUpload = (e: React.MouseEvent) => {
+    if (isDisabled) return;
     e.stopPropagation(); // Stop event propagation
     e.preventDefault(); // Prevent default behavior
     fileInputRef.current?.click();
   };
 
   const handleRemoveImage = () => {
+    if (isDisabled) return;
     setPreviewUrl(null);
     onChange("");
     if (fileInputRef.current) {
@@ -123,42 +134,50 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
         className="hidden"
         accept="image/*"
         onChange={handleFileInputChange}
+        disabled={isDisabled}
       />
 
       <div
         className={cn(
           "border-2 border-dashed rounded-md transition-all duration-200 overflow-hidden bg-background",
           isDragging ? "border-primary" : "border-border",
+          isDisabled ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
           className
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={previewUrl ? undefined : handleClickUpload}
+        onClick={previewUrl || isDisabled ? undefined : handleClickUpload}
       >
         {previewUrl ? (
           <div className="relative aspect-[3/4]" onContextMenu={handleContextMenu}>
             <img
               src={previewUrl}
               alt="Preview"
-              className="w-full h-full object-cover"
+              className={cn(
+                "w-full h-full object-cover",
+                isDisabled && "opacity-70"
+              )}
               onError={(e) => {
                 console.error("Image load error for:", previewUrl);
                 handleRemoveImage();
               }}
               draggable="false"
             />
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2 z-10 opacity-80 hover:opacity-100"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveImage();
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {!isDisabled && (
+              <Button
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 z-10 opacity-80 hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveImage();
+                }}
+                disabled={isDisabled}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
             
             {isUploading && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -171,7 +190,8 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
           </div>
         ) : (
           <div className={cn(
-            "flex flex-col items-center justify-center p-4 text-muted-foreground cursor-pointer",
+            "flex flex-col items-center justify-center p-4 text-muted-foreground",
+            !isDisabled && "cursor-pointer",
             isMobile ? "aspect-[4/3]" : "min-h-[220px]"
           )}>
             {isUploading ? (
@@ -184,18 +204,25 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
                 <ImagePlus className="mx-auto h-12 w-12 mb-4" />
                 <p className="font-medium">Sube una imagen</p>
                 <p className="text-sm text-center mt-2">
-                  {isMobile ? "Haz clic para seleccionar" : "Arrastra y suelta aquí o haz clic para seleccionar"}
+                  {isDisabled 
+                    ? "Carga no disponible en este momento" 
+                    : isMobile 
+                      ? "Haz clic para seleccionar" 
+                      : "Arrastra y suelta aquí o haz clic para seleccionar"}
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-4" 
-                  onClick={handleClickUpload}
-                  type="button"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Seleccionar archivo
-                </Button>
+                {!isDisabled && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-4" 
+                    onClick={handleClickUpload}
+                    type="button"
+                    disabled={isDisabled}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Seleccionar archivo
+                  </Button>
+                )}
               </>
             )}
           </div>
