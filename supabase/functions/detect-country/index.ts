@@ -21,15 +21,8 @@ serve(async (req) => {
   if (corsResponse) return corsResponse;
 
   try {
-    // Basic validation
-    if (req.method !== 'GET' && req.method !== 'POST') {
-      console.error(`Invalid method: ${req.method}`);
-      return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
-        status: 405, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
+    console.log(`Received ${req.method} request to detect-country function`);
+    
     // Get the IP address (Supabase automatically includes the IP in x-forwarded-for)
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
     

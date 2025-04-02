@@ -27,10 +27,7 @@ const getUserCountry = async (): Promise<string> => {
     console.log("Calling detect-country edge function...");
     
     // Using our Supabase edge function to get visitor's country
-    const { data, error } = await supabase.functions.invoke('detect-country', {
-      method: 'POST',
-      body: {}, // Add an empty body to ensure it's treated as POST
-    });
+    const { data, error } = await supabase.functions.invoke('detect-country');
     
     if (error) {
       console.error("Error detecting country via edge function:", error);
@@ -122,129 +119,116 @@ export const trackVisit = async (): Promise<void> => {
 // Function to get visitor statistics from Supabase
 export const getVisitorStats = async (): Promise<VisitorData> => {
   try {
+    console.log("Getting visitor statistics...");
+    
     // Get current month statistics
     const now = new Date();
     const currentMonth = now.toLocaleString('default', { month: 'short' });
     const currentYear = now.getFullYear();
     
-    // Get total visits
-    const { count: totalVisits, error: countError } = await supabase
+    // Get all visitors to perform calculations
+    const { data: allVisitors, error: visitorsError } = await supabase
       .from('visitors')
-      .select('*', { count: 'exact', head: true });
+      .select('*')
+      .order('created_at', { ascending: false });
     
-    if (countError) {
-      console.error("Error getting total visits:", countError);
+    if (visitorsError) {
+      console.error("Error getting visitor data:", visitorsError);
       return getEmptyStats();
     }
     
-    // Get current month visits
-    const monthStart = new Date(currentYear, now.getMonth(), 1);
-    const { count: currentMonthVisits, error: monthCountError } = await supabase
-      .from('visitors')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', monthStart.toISOString());
+    console.log(`Retrieved ${allVisitors?.length || 0} visitor records`);
     
-    if (monthCountError) {
-      console.error("Error getting current month visits:", monthCountError);
+    if (!allVisitors || allVisitors.length === 0) {
+      console.log("No visitor data found");
       return getEmptyStats();
     }
     
-    // Get previous month visits for increase calculation
-    const previousMonth = new Date(currentYear, now.getMonth() - 1, 1);
+    // Calculate total visits
+    const totalVisits = allVisitors.length;
+    
+    // Calculate current month visits
+    const currentMonthStart = new Date(currentYear, now.getMonth(), 1);
+    const currentMonthVisits = allVisitors.filter(
+      visitor => new Date(visitor.created_at) >= currentMonthStart
+    ).length;
+    
+    // Calculate previous month visits for increase calculation
+    const previousMonthStart = new Date(currentYear, now.getMonth() - 1, 1);
     const previousMonthEnd = new Date(currentYear, now.getMonth(), 0);
-    
-    const { count: previousMonthVisits, error: prevMonthError } = await supabase
-      .from('visitors')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', previousMonth.toISOString())
-      .lte('created_at', previousMonthEnd.toISOString());
-    
-    if (prevMonthError) {
-      console.error("Error getting previous month visits:", prevMonthError);
-      return getEmptyStats();
-    }
+    const previousMonthVisits = allVisitors.filter(
+      visitor => {
+        const date = new Date(visitor.created_at);
+        return date >= previousMonthStart && date <= previousMonthEnd;
+      }
+    ).length;
     
     // Calculate visit increase percentage
     const visitIncrease = previousMonthVisits 
       ? ((currentMonthVisits - previousMonthVisits) / previousMonthVisits) * 100
       : 100;
     
-    // Get top countries - using a different approach since .group() is not available
-    // We'll query all records and do the aggregation in JavaScript
-    const { data: countryRecords, error: countryError } = await supabase
-      .from('visitors')
-      .select('country');
-    
-    if (countryError) {
-      console.error("Error getting country data:", countryError);
-      return getEmptyStats();
-    }
-    
-    // Aggregate country data manually
+    // Group by country (manually since we can't use .group())
     const countryMap = new Map<string, number>();
-    countryRecords?.forEach(record => {
-      const country = record.country;
+    allVisitors.forEach(visitor => {
+      const country = visitor.country || "Unknown";
       countryMap.set(country, (countryMap.get(country) || 0) + 1);
     });
     
     // Convert to array and sort
-    const countryData = Array.from(countryMap.entries()).map(([country, count]) => ({
-      country,
-      count
-    }));
+    const countryData = Array.from(countryMap.entries())
+      .map(([country, visits]) => ({ country, visits }))
+      .sort((a, b) => b.visits - a.visits);
     
-    countryData.sort((a, b) => b.count - a.count);
-    
+    // Create top countries array with percentage calculation
     const topCountries: CountryData[] = countryData
       .slice(0, 5)
       .map(item => ({
         country: item.country,
-        visits: item.count,
-        percentage: totalVisits ? (item.count / totalVisits) * 100 : 0
+        visits: item.visits,
+        percentage: (item.visits / totalVisits) * 100
       }));
     
-    // If we have more than 5 countries, add "Otros" for the rest
+    // Add "Otros" category for remaining countries
     if (countryData.length > 5) {
       const otherVisits = totalVisits - topCountries.reduce((sum, country) => sum + country.visits, 0);
-      topCountries.push({
-        country: "Otros",
-        visits: otherVisits,
-        percentage: totalVisits ? (otherVisits / totalVisits) * 100 : 0
-      });
+      if (otherVisits > 0) {
+        topCountries.push({
+          country: "Otros",
+          visits: otherVisits,
+          percentage: (otherVisits / totalVisits) * 100
+        });
+      }
     }
     
-    // Get monthly data - this is a bit more complex since we need to aggregate by month
+    // Calculate monthly data
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
     const monthlyData: MonthlyData[] = [];
     
-    // For each month, query the database
+    // Count visits per month
     for (let i = 0; i < 12; i++) {
       const monthStart = new Date(currentYear, i, 1);
       const monthEnd = new Date(currentYear, i + 1, 0);
       
-      const { count: monthVisits, error: monthError } = await supabase
-        .from('visitors')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', monthStart.toISOString())
-        .lte('created_at', monthEnd.toISOString());
+      const monthVisits = allVisitors.filter(visitor => {
+        const date = new Date(visitor.created_at);
+        return date >= monthStart && date <= monthEnd;
+      }).length;
       
-      if (monthError) {
-        console.error(`Error getting visits for month ${i+1}:`, monthError);
-        monthlyData.push({ month: months[i], visits: 0 });
-      } else {
-        monthlyData.push({ month: months[i], visits: monthVisits || 0 });
-      }
+      monthlyData.push({ month: months[i], visits: monthVisits });
     }
     
+    console.log("Visitor statistics calculated successfully");
+    
     return {
-      totalVisits: totalVisits || 0,
-      currentMonthVisits: currentMonthVisits || 0,
+      totalVisits,
+      currentMonthVisits,
       visitIncrease,
       topCountries,
       monthlyData
     };
   } catch (error) {
-    console.error("Error getting visitor stats:", error);
+    console.error("Error calculating visitor stats:", error);
     return getEmptyStats();
   }
 };
