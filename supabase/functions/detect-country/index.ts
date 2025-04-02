@@ -5,23 +5,25 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
 // Define a standard response for handling CORS preflight requests
 const handleCors = (req: Request) => {
   if (req.method === 'OPTIONS') {
+    console.log("Handling OPTIONS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
   return null;
 };
 
 serve(async (req) => {
-  // Handle CORS
-  const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
-
   try {
     console.log(`Received ${req.method} request to detect-country function`);
+    
+    // Handle CORS
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
     
     // Get the IP address (Supabase automatically includes the IP in x-forwarded-for)
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
@@ -37,15 +39,16 @@ serve(async (req) => {
         country: "Unknown", 
         error: `API error: ${response.status}` 
       }), {
-        status: 200,
+        status: 200, // Still return 200 to not break client flow
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
     const data = await response.json();
+    console.log("API response data:", JSON.stringify(data));
     
     if (data.error) {
-      console.error("Error from ipapi:", data.error);
+      console.error("Error from ipapi:", data.error, "Full response:", JSON.stringify(data));
       return new Response(JSON.stringify({ 
         country: "Unknown", 
         error: data.error 
@@ -73,7 +76,7 @@ serve(async (req) => {
       country: "Unknown", 
       error: error.message 
     }), {
-      status: 200,
+      status: 200, // Still return 200 to prevent client from breaking
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }

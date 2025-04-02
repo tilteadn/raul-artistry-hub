@@ -121,11 +121,6 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
   try {
     console.log("Getting visitor statistics...");
     
-    // Get current month statistics
-    const now = new Date();
-    const currentMonth = now.toLocaleString('default', { month: 'short' });
-    const currentYear = now.getFullYear();
-    
     // Get all visitors to perform calculations
     const { data: allVisitors, error: visitorsError } = await supabase
       .from('visitors')
@@ -144,18 +139,23 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
       return getEmptyStats();
     }
     
+    // Calculate various statistics based on visitor data
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    
     // Calculate total visits
     const totalVisits = allVisitors.length;
     
     // Calculate current month visits
-    const currentMonthStart = new Date(currentYear, now.getMonth(), 1);
+    const currentMonthStart = new Date(currentYear, currentMonth, 1);
     const currentMonthVisits = allVisitors.filter(
       visitor => new Date(visitor.created_at) >= currentMonthStart
     ).length;
     
     // Calculate previous month visits for increase calculation
-    const previousMonthStart = new Date(currentYear, now.getMonth() - 1, 1);
-    const previousMonthEnd = new Date(currentYear, now.getMonth(), 0);
+    const previousMonthStart = new Date(currentYear, currentMonth - 1, 1);
+    const previousMonthEnd = new Date(currentYear, currentMonth, 0);
     const previousMonthVisits = allVisitors.filter(
       visitor => {
         const date = new Date(visitor.created_at);
@@ -164,9 +164,12 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
     ).length;
     
     // Calculate visit increase percentage
-    const visitIncrease = previousMonthVisits 
-      ? ((currentMonthVisits - previousMonthVisits) / previousMonthVisits) * 100
-      : 100;
+    let visitIncrease = 0;
+    if (previousMonthVisits > 0) {
+      visitIncrease = ((currentMonthVisits - previousMonthVisits) / previousMonthVisits) * 100;
+    } else if (currentMonthVisits > 0) {
+      visitIncrease = 100; // If no previous visits but we have current visits, that's a 100% increase
+    }
     
     // Group by country (manually since we can't use .group())
     const countryMap = new Map<string, number>();
@@ -205,7 +208,7 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
     const monthlyData: MonthlyData[] = [];
     
-    // Count visits per month
+    // Count visits per month for the current year
     for (let i = 0; i < 12; i++) {
       const monthStart = new Date(currentYear, i, 1);
       const monthEnd = new Date(currentYear, i + 1, 0);
@@ -219,6 +222,7 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
     }
     
     console.log("Visitor statistics calculated successfully");
+    console.log("Top countries:", topCountries);
     
     return {
       totalVisits,

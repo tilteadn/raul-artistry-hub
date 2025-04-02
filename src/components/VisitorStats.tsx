@@ -5,6 +5,7 @@ import { VisitorStatsSummaryCards } from "./stats/VisitorStatsSummaryCards";
 import { VisitorStatsTabs } from "./stats/VisitorStatsTabs";
 import { VisitorStatsLoading } from "./stats/VisitorStatsLoading";
 import { VisitorStatsEmpty } from "./stats/VisitorStatsEmpty";
+import { toast } from "sonner";
 
 const VisitorStats = () => {
   const [visitData, setVisitData] = useState<VisitorData | null>(null);
@@ -19,9 +20,17 @@ const VisitorStats = () => {
         console.log("VisitorStats: Loading visitor data...");
         const data = await getVisitorStats();
         console.log("VisitorStats: Visitor data loaded:", data);
+        
+        if (data.totalVisits === 0) {
+          console.log("VisitorStats: No visitor data found");
+        } else if (data.topCountries.length > 0 && data.topCountries[0].country === "Unknown") {
+          console.log("VisitorStats: Most visitors have unknown country. Country detection might not be working correctly.");
+        }
+        
         setVisitData(data);
       } catch (error) {
         console.error("VisitorStats: Error loading visitor data:", error);
+        toast.error("Error loading visitor statistics");
         setError("No se pudieron cargar los datos de visitas. Por favor, inténtalo de nuevo más tarde.");
       } finally {
         setIsLoading(false);
