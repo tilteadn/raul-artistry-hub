@@ -47,12 +47,6 @@ additional_redirect_urls = ["https://localhost:3000"]
 jwt_expiry = 3600
 # Allow/disallow new user signups to your project.
 enable_signup = true
-# If disabled, new users will not be able to sign up using email + password.
-enable_email_signup = true
-# If disabled, existing users will not be able to sign in using email + password.
-enable_email_signin = true
-# If enabled, users need to confirm their email address before signing in.
-enable_email_confirmation = true
 
 [functions]
 [functions.detect-country]
