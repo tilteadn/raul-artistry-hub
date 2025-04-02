@@ -1,129 +1,110 @@
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ArtworkDetail from "@/components/ArtworkDetail";
-import ArtworkGrid from "@/components/ArtworkGrid";
 import { Artwork } from "@/types/artwork";
-import { getArtworkById, getRelatedArtworks } from "@/utils/artworkService";
+import { getArtworkById } from "@/utils/artworkService";
+import ArtworkDetail from "@/components/ArtworkDetail";
 import { toast } from "@/hooks/use-toast";
+import MetaTags from "@/components/MetaTags";
+
+interface Params {
+  id: string;
+}
 
 const ArtworkPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<Params>();
   const [artwork, setArtwork] = useState<Artwork | null>(null);
-  const [relatedArtworks, setRelatedArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
-  const [relatedLoading, setRelatedLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [relatedError, setRelatedError] = useState<string | null>(null);
-
-  const loadArtwork = async () => {
-    if (!id) return;
-    
-    setLoading(true);
-    setError(null);
-    try {
-      const artworkData = await getArtworkById(id);
-      if (!artworkData) {
-        setError("No se encontró la obra solicitada");
-        toast({
-          title: "Error",
-          description: "No se encontró la obra solicitada",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setArtwork(artworkData);
-      
-      // Load related artworks
-      setRelatedLoading(true);
-      setRelatedError(null);
-      try {
-        const related = await getRelatedArtworks(artworkData.collection, id);
-        setRelatedArtworks(related);
-      } catch (relatedErr) {
-        console.error("Error loading related artworks:", relatedErr);
-        setRelatedError("No se pudieron cargar las obras relacionadas");
-        toast({
-          title: "Advertencia",
-          description: "No se pudieron cargar las obras relacionadas",
-        });
-      } finally {
-        setRelatedLoading(false);
-      }
-    } catch (err) {
-      console.error("Error loading artwork:", err);
-      setError("No se pudo cargar la obra. Por favor, intente nuevamente más tarde.");
-      toast({
-        title: "Error",
-        description: "No se pudo cargar la obra",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
+    if (!id) {
+      setError("ID de obra no válido.");
+      setLoading(false);
+      return;
+    }
+
+    const loadArtwork = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        console.log(`Loading artwork with ID: ${id}`);
+        const artworkData = await getArtworkById(id);
+        if (artworkData) {
+          setArtwork(artworkData);
+          console.log(`Artwork loaded successfully: ${artworkData.title}`);
+        } else {
+          setError("Obra no encontrada.");
+          console.warn(`Artwork with ID ${id} not found`);
+        }
+      } catch (err) {
+        console.error("Error loading artwork:", err);
+        setError("No se pudo cargar la obra. Por favor, intente nuevamente más tarde.");
+        toast({
+          title: "Error",
+          description: "No se pudo cargar la obra",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadArtwork();
   }, [id]);
-
-  if (!id) {
-    return (
-      <div className="container mx-auto px-6 py-16">
-        <div className="bg-destructive/10 p-8 rounded-lg text-center">
-          <h2 className="text-2xl font-medium text-destructive mb-4">ID de obra no válido</h2>
-          <Button asChild>
-            <Link to="/obras">Volver a Obras</Link>
+  
+  // Add meta tag content based on artwork data
+  const metaTitle = artwork ? `${artwork.title} | Raúl Álvarez` : "Obra | Raúl Álvarez";
+  const metaDescription = artwork 
+    ? `${artwork.title}${artwork.subtitle ? ` - ${artwork.subtitle}` : ''} - Obra de arte de Raúl Álvarez, ${artwork.technique || ''} (${artwork.year || 'n/a'})`
+    : "Detalle de obra artística de Raúl Álvarez, artista plástico y tatuador en A Coruña.";
+  const metaImage = artwork?.imageUrl || "/lovable-uploads/raulRetrato.jpg";
+  
+  return (
+    <div className="min-h-screen">
+      <MetaTags 
+        title={metaTitle}
+        description={metaDescription}
+        imageUrl={metaImage}
+        canonicalUrl={artwork ? `https://raulalvarezpintura.es/obras/${artwork.id}` : undefined}
+        type="article"
+      />
+      
+      <div className="bg-secondary py-8">
+        <div className="container mx-auto px-6">
+          <Button asChild variant="ghost" className="hover:bg-secondary/80">
+            <Link to="/obras" className="flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Volver a Obras
+            </Link>
           </Button>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen">
       <div className="container mx-auto px-6 py-16">
-        <Button asChild variant="ghost" className="mb-8">
-          <Link to="/obras" className="group flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Volver a Obras
-          </Link>
-        </Button>
-
-        {error ? (
+        {loading ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
+            <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+            <p className="text-center text-muted-foreground">
+              Cargando obra...
+            </p>
+          </div>
+        ) : error ? (
           <div className="flex flex-col items-center justify-center p-12 bg-destructive/10 rounded-lg">
-            <p className="text-center text-destructive mb-4">
+            <p className="text-center text-destructive">
               {error}
             </p>
             <Button 
               variant="outline" 
-              onClick={loadArtwork}
-              className="flex items-center"
+              className="mt-4"
+              onClick={() => window.location.reload()}
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
               Reintentar
             </Button>
           </div>
         ) : (
-          <ArtworkDetail artwork={artwork as Artwork} loading={loading} />
-        )}
-        
-        {relatedArtworks.length > 0 && (
-          <div className="mt-24">
-            <h2 className="font-serif text-2xl font-medium text-primary mb-8">
-              Obras relacionadas
-            </h2>
-            {relatedError ? (
-              <div className="p-6 bg-destructive/10 rounded-lg">
-                <p className="text-destructive text-center">{relatedError}</p>
-              </div>
-            ) : (
-              <ArtworkGrid artworks={relatedArtworks} loading={relatedLoading} />
-            )}
-          </div>
+          <ArtworkDetail artwork={artwork} />
         )}
       </div>
     </div>

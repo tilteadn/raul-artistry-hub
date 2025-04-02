@@ -107,6 +107,9 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
   // Use a fallback image color or pattern when image fails to load
   const fallbackBgColor = `hsl(${parseInt(artwork.id) * 60 % 360}, 70%, 80%)`;
 
+  // Create comprehensive alt text for the artwork
+  const altText = `${artwork.title}${artwork.subtitle ? ` - ${artwork.subtitle}` : ''}${artwork.collection ? ` - Colección: ${artwork.collection}` : ''} - Obra de Raúl Álvarez`;
+
   return (
     <Link to={`/obras/${artwork.id}`}>
       <Card 
@@ -129,7 +132,7 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
           {hasError ? (
             <div className="w-full h-full flex items-center justify-center bg-muted">
               <div className="text-center">
-                <ImageOff className="w-12 h-12 mx-auto text-muted-foreground opacity-50" />
+                <ImageOff className="w-12 h-12 mx-auto text-muted-foreground opacity-50" aria-hidden="true" />
                 <p className="mt-2 text-sm text-muted-foreground">{artwork.title}</p>
               </div>
             </div>
@@ -137,7 +140,7 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
             <>
               <img
                 src={artwork.imageUrl}
-                alt={artwork.title}
+                alt={altText}
                 className={cn(
                   "w-full h-full object-cover transition-transform duration-700 group-hover:scale-105",
                   isLoaded ? "opacity-100" : "opacity-50"

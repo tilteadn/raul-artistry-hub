@@ -92,6 +92,8 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
     );
   }
 
+  const artworkAltText = `${artwork.title}${artwork.subtitle ? ` - ${artwork.subtitle}` : ''}${artwork.technique ? ` (${artwork.technique})` : ''}${artwork.year ? ` (${artwork.year})` : ''} - Obra de Raúl Álvarez`;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
       <div className="w-full md:sticky md:top-24 h-fit">
@@ -101,7 +103,7 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
             style={{ backgroundColor: fallbackBgColor }}
           >
             <div className="text-center p-8">
-              <ImageOff className="w-16 h-16 mx-auto text-primary/20 mb-4" />
+              <ImageOff className="w-16 h-16 mx-auto text-primary/20 mb-4" aria-hidden="true" />
               <h3 className="text-xl font-medium text-primary/60">{artwork.title}</h3>
               <p className="text-sm text-primary/60 mt-2">La imagen no está disponible</p>
             </div>
@@ -116,7 +118,7 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
           >
             <img
               src={artwork.imageUrl}
-              alt={artwork.title}
+              alt={artworkAltText}
               className="w-full h-full object-cover transition-opacity duration-700"
               onError={() => setHasImageError(true)}
               onLoad={() => setIsImageLoaded(true)}

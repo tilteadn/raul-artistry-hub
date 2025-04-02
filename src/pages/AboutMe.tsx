@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { User, FileText, Award, GraduationCap, Image, MapPin, Book, Briefcase, Palette, Trophy, Globe } from "lucide-react";
@@ -9,11 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import MetaTags from "@/components/MetaTags";
 
 const AboutMe = () => {
   const [activeTab, setActiveTab] = useState<string>("bio");
 
-  // Function to get the appropriate icon for CV item type
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "exhibition":
@@ -27,7 +26,6 @@ const AboutMe = () => {
     }
   };
 
-  // Function to get section icon
   const getSectionIcon = (section: string) => {
     switch (section) {
       case "ESTUDIOS":
@@ -58,7 +56,6 @@ const AboutMe = () => {
     visible: { opacity: 1, transition: { duration: 0.6 } }
   };
 
-  // New biography text
   const biographyText = `Pintar y dibujar es mi VIDA. Una ley innata.
 
 Algo grabado a fuego en mi ADN que me atrapa día tras día. Algo de lo
@@ -81,10 +78,7 @@ por su dificultad a la hora de plasmarla de manera creíble y el gran
 abanico de posibilidades de representación que abarca. Crear ese binomio
 junto con la figura humana la cual representa también ese aspecto
 cercano, misterioso, complejo, tanto en forma como en contenido y con el
-que todos nos identificamos me parece muy interesante de cara al
-espectador. Cada una de mis series habla de distintas cosas u estados de
-ánimo de las personas, aspectos personales o psicológicos con los que
-cualquiera nos podemos sentir identificados pero siempre con un
+que todos nos podemos sentir identificados pero siempre con un
 elemento en común que aparece de una manera más o menos directa o
 protagonista, el agua.
 
@@ -96,109 +90,118 @@ mi camino, me dejo fluir.
 Be water, my friend.`;
 
   return (
-    <div className="container mx-auto px-6 py-12">
-      <motion.div 
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-        className="max-w-5xl mx-auto"
-      >
-        <header className="mb-12 text-center">
-          <h1 className="text-4xl font-serif mb-4">Sobre mí</h1>
-          <div className="w-48 mx-auto mt-4">
-            <img 
-              src="/lovable-uploads/Firma sin fondo.jpg" 
-              alt="Firma de Raúl Álvarez" 
-              className="w-full h-auto"
-              draggable="false"
-              onContextMenu={(e) => e.preventDefault()}
-            />
-          </div>
-        </header>
+    <div className="min-h-screen">
+      <MetaTags 
+        title="Sobre Mí | Raúl Álvarez - Artista Plástico y Tatuador"
+        description="Conoce a Raúl Álvarez, artista plástico y tatuador con estudio en A Coruña. Trayectoria artística, formación y estilo pictórico."
+        keywords="Raúl Álvarez, biografía artista, trayectoria, arte gallego, pintor A Coruña, tatuador"
+        canonicalUrl="https://raulalvarezpintura.es/sobre-mi"
+        type="profile"
+      />
+      
+      <div className="container mx-auto px-6 py-12">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          className="max-w-5xl mx-auto"
+        >
+          <header className="mb-12 text-center">
+            <h1 className="text-4xl font-serif mb-4">Sobre mí</h1>
+            <div className="w-48 mx-auto mt-4">
+              <img 
+                src="/lovable-uploads/Firma sin fondo.jpg" 
+                alt="Firma de Raúl Álvarez" 
+                className="w-full h-auto"
+                draggable="false"
+                onContextMenu={(e) => e.preventDefault()}
+              />
+            </div>
+          </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <div className="aspect-square rounded-md overflow-hidden mb-6 shadow-md relative">
-                <img 
-                  src={artistInfo.image} 
-                  alt={artistInfo.name}
-                  className="object-cover w-full h-full"
-                  draggable="false"
-                  onContextMenu={(e) => e.preventDefault()}
-                />
-                {/* Protective overlay */}
-                <div className="absolute inset-0 bg-transparent pointer-events-none"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                <div className="aspect-square rounded-md overflow-hidden mb-6 shadow-md relative">
+                  <img 
+                    src={artistInfo.image} 
+                    alt={artistInfo.name}
+                    className="object-cover w-full h-full"
+                    draggable="false"
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
+                  <div className="absolute inset-0 bg-transparent pointer-events-none"></div>
+                </div>
+                <h2 className="text-2xl font-serif mb-2">{artistInfo.name}</h2>
+                <p className="text-muted-foreground">{artistInfo.shortBio}</p>
               </div>
-              <h2 className="text-2xl font-serif mb-2">{artistInfo.name}</h2>
-              <p className="text-muted-foreground">{artistInfo.shortBio}</p>
+            </div>
+
+            <div className="lg:col-span-2">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="mb-6 grid w-full grid-cols-2">
+                  <TabsTrigger value="bio" className="text-lg">
+                    <User className="mr-2 h-4 w-4" />
+                    Biografía
+                  </TabsTrigger>
+                  <TabsTrigger value="cv" className="text-lg">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Curriculum
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="bio" className="mt-0">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Biografía</CardTitle>
+                      <CardDescription>Trayectoria artística y personal</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="prose max-w-none">
+                        {biographyText.split('\n\n').map((paragraph, index) => (
+                          <p key={index} className="mb-4">{paragraph}</p>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="cv" className="mt-0">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Curriculum Vitae</CardTitle>
+                      <CardDescription>Formación, premios, exposiciones y trayectoria</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="divide-y">
+                        {artistInfo.cvSections.map((section, sectionIndex) => (
+                          <div key={sectionIndex} className="py-6 px-6">
+                            <div className="flex items-center gap-2 mb-4">
+                              {getSectionIcon(section.title)}
+                              <h3 className="text-lg font-medium">{section.title}</h3>
+                            </div>
+                            
+                            <div className="ml-2 space-y-3">
+                              {section.items.map((item, itemIndex) => (
+                                <div key={itemIndex} className="flex gap-2">
+                                  {item.year && (
+                                    <span className="font-medium text-sm min-w-20">{item.year}</span>
+                                  )}
+                                  <p className="text-muted-foreground">{item.content}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
-
-          <div className="lg:col-span-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="mb-6 grid w-full grid-cols-2">
-                <TabsTrigger value="bio" className="text-lg">
-                  <User className="mr-2 h-4 w-4" />
-                  Biografía
-                </TabsTrigger>
-                <TabsTrigger value="cv" className="text-lg">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Curriculum
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="bio" className="mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Biografía</CardTitle>
-                    <CardDescription>Trayectoria artística y personal</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose max-w-none">
-                      {biographyText.split('\n\n').map((paragraph, index) => (
-                        <p key={index} className="mb-4">{paragraph}</p>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="cv" className="mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Curriculum Vitae</CardTitle>
-                    <CardDescription>Formación, premios, exposiciones y trayectoria</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="divide-y">
-                      {artistInfo.cvSections.map((section, sectionIndex) => (
-                        <div key={sectionIndex} className="py-6 px-6">
-                          <div className="flex items-center gap-2 mb-4">
-                            {getSectionIcon(section.title)}
-                            <h3 className="text-lg font-medium">{section.title}</h3>
-                          </div>
-                          
-                          <div className="ml-2 space-y-3">
-                            {section.items.map((item, itemIndex) => (
-                              <div key={itemIndex} className="flex gap-2">
-                                {item.year && (
-                                  <span className="font-medium text-sm min-w-20">{item.year}</span>
-                                )}
-                                <p className="text-muted-foreground">{item.content}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };

@@ -17,7 +17,7 @@ const Hero = ({
   title = "Raúl Álvarez",
   subtitle = "Arte y expresión visual",
   image = "/lovable-uploads/iceberg.jpg",
-  imageAlt = "Obra de arte de Raúl Álvarez",
+  imageAlt = "Obra de arte de Raúl Álvarez representando un iceberg - arte figurativo contemporáneo",
   ctaText = "Ver Obras",
   ctaLink = "/obras",
 }: HeroProps) => {
@@ -39,9 +39,10 @@ const Hero = ({
           isLoaded ? "opacity-100" : "opacity-0"
         )}
         style={{ backgroundImage: `url(${image})` }}
-        aria-hidden="true"
+        role="img"
+        aria-label={imageAlt}
       />
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
       
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6">
         <div className={cn(

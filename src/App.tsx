@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Artworks from "./pages/Artworks";
@@ -37,24 +38,26 @@ const VisitTracker = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <Layout>
-          <VisitTracker />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/obras" element={<Artworks />} />
-            <Route path="/obras/:id" element={<ArtworkPage />} />
-            <Route path="/sobre-mi" element={<AboutMe />} />
-            <Route path="/contacto" element={<Contact />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
-      <CookieConsent />
-      <Toaster />
-    </TooltipProvider>
+    <HelmetProvider>
+      <TooltipProvider>
+        <BrowserRouter>
+          <Layout>
+            <VisitTracker />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/obras" element={<Artworks />} />
+              <Route path="/obras/:id" element={<ArtworkPage />} />
+              <Route path="/sobre-mi" element={<AboutMe />} />
+              <Route path="/contacto" element={<Contact />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+        <CookieConsent />
+        <Toaster />
+      </TooltipProvider>
+    </HelmetProvider>
   </QueryClientProvider>
 );
 

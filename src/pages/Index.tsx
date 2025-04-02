@@ -8,6 +8,7 @@ import ArtworkGrid from "@/components/ArtworkGrid";
 import { Artwork } from "@/types/artwork";
 import { getFeaturedArtworks } from "@/utils/artworkService";
 import { toast } from "@/hooks/use-toast";
+import MetaTags from "@/components/MetaTags";
 
 const Index = () => {
   const [featuredArtworks, setFeaturedArtworks] = useState<Artwork[]>([]);
@@ -41,6 +42,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <MetaTags 
+        title="Raúl Álvarez | Artista Plástico y Tatuador en A Coruña"
+        description="Bienvenido a la web oficial de Raúl Álvarez, artista plástico y tatuador en A Coruña. Explora su obra artística y conoce su estudio."
+        keywords="Raúl Álvarez, pintura, arte, tatuaje, A Coruña, Galicia, artista plástico"
+        canonicalUrl="https://raulalvarezpintura.es/"
+      />
+      
       <Hero />
       
       <section className="container mx-auto px-6 py-20">

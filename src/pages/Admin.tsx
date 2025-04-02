@@ -1,7 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { LogOut, RefreshCw } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
+import MetaTags from "@/components/MetaTags";
 
 import AdminPanel from "@/components/AdminPanel";
 import AdminAuth from "@/components/AdminAuth";
@@ -72,17 +72,15 @@ const Admin = () => {
       setIsAdding(true);
       console.log("Adding new artwork:", artworkData.title);
       
-      // For Supabase, we'll let the service generate the ID and createdAt
       const newArtwork: Artwork = {
         ...artworkData,
-        id: uuidv4(), // This ID might be overridden by the database
+        id: uuidv4(),
         createdAt: new Date(),
       };
       
       const savedArtwork = await saveArtwork(newArtwork);
       console.log("Artwork saved successfully:", savedArtwork.id);
       
-      // Refresh the artworks list after adding
       await loadArtworks();
       
       toast({
@@ -124,7 +122,6 @@ const Admin = () => {
       const result = await updateArtwork(updatedArtwork);
       console.log("Artwork updated successfully:", result.id);
       
-      // Refresh the artworks list after updating
       await loadArtworks();
       
       toast({
@@ -151,7 +148,6 @@ const Admin = () => {
       console.log(`Deleting artwork ID: ${id}`);
       await deleteArtwork(id);
       
-      // Update the local state after successful deletion
       setArtworks((prev) => prev.filter((a) => a.id !== id));
       toast({
         title: "Éxito",
@@ -185,6 +181,12 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen">
+      <MetaTags 
+        title="Administración | Raúl Álvarez"
+        description="Panel de administración privado para gestionar el contenido del sitio web."
+        canonicalUrl="https://raulalvarezpintura.es/admin"
+      />
+      
       <div className="bg-secondary py-16">
         <div className="container mx-auto px-6">
           <h1 className="font-serif text-4xl md:text-5xl font-medium text-primary text-center mb-4">
