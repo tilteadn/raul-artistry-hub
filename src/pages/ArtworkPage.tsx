@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -8,12 +9,13 @@ import ArtworkDetail from "@/components/ArtworkDetail";
 import { toast } from "@/hooks/use-toast";
 import MetaTags from "@/components/MetaTags";
 
-interface Params {
+// Change the interface to use Record<string, string>
+type ArtworkParams = {
   id: string;
-}
+};
 
 const ArtworkPage = () => {
-  const { id } = useParams<Params>();
+  const { id } = useParams<ArtworkParams>();
   const [artwork, setArtwork] = useState<Artwork | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
