@@ -42,17 +42,20 @@ const ContactSection = () => {
     setIsSubmitting(true);
     
     try {
+      console.log("Submitting contact form:", values);
+      
       const { error } = await supabase.functions.invoke('send-contact-email', {
         body: values
       });
       
       if (error) {
-        throw new Error(error.message);
+        console.error("Supabase function error:", error);
+        throw new Error(error.message || "Error al enviar el mensaje");
       }
       
       toast.success("Mensaje enviado correctamente");
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending contact form:", error);
       toast.error("Error al enviar el mensaje. Por favor, inténtalo de nuevo.");
     } finally {
