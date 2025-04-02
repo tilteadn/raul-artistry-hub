@@ -155,28 +155,42 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
       ? ((currentMonthVisits - previousMonthVisits) / previousMonthVisits) * 100
       : 100;
     
-    // Get top countries
-    const { data: countryData, error: countryError } = await supabase
+    // Get top countries - using a different approach since .group() is not available
+    // We'll query all records and do the aggregation in JavaScript
+    const { data: countryRecords, error: countryError } = await supabase
       .from('visitors')
-      .select('country, count(*)')
-      .group('country')
-      .order('count', { ascending: false });
+      .select('country');
     
     if (countryError) {
       console.error("Error getting country data:", countryError);
       return getEmptyStats();
     }
     
-    const topCountries: CountryData[] = (countryData || [])
+    // Aggregate country data manually
+    const countryMap = new Map<string, number>();
+    countryRecords?.forEach(record => {
+      const country = record.country;
+      countryMap.set(country, (countryMap.get(country) || 0) + 1);
+    });
+    
+    // Convert to array and sort
+    const countryData = Array.from(countryMap.entries()).map(([country, count]) => ({
+      country,
+      count
+    }));
+    
+    countryData.sort((a, b) => b.count - a.count);
+    
+    const topCountries: CountryData[] = countryData
+      .slice(0, 5)
       .map(item => ({
         country: item.country,
-        visits: parseInt(item.count as any),
-        percentage: totalVisits ? (parseInt(item.count as any) / totalVisits) * 100 : 0
-      }))
-      .slice(0, 5);
+        visits: item.count,
+        percentage: totalVisits ? (item.count / totalVisits) * 100 : 0
+      }));
     
     // If we have more than 5 countries, add "Otros" for the rest
-    if ((countryData || []).length > 5) {
+    if (countryData.length > 5) {
       const otherVisits = totalVisits - topCountries.reduce((sum, country) => sum + country.visits, 0);
       topCountries.push({
         country: "Otros",
