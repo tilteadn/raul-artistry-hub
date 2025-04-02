@@ -11,6 +11,7 @@ const VisitorStats = () => {
   const [visitData, setVisitData] = useState<VisitorData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const loadVisitorData = async () => {
@@ -23,14 +24,26 @@ const VisitorStats = () => {
         
         if (data.totalVisits === 0) {
           console.log("VisitorStats: No visitor data found");
-        } else if (data.topCountries.length > 0 && data.topCountries[0].country === "Unknown") {
-          console.log("VisitorStats: Most visitors have unknown country. Country detection might not be working correctly.");
+        } else if (data.topCountries.length > 0) {
+          // Log country breakdown for debugging
+          console.log("VisitorStats: Countries breakdown:", 
+            data.topCountries.map(c => `${c.country}: ${c.visits} (${c.percentage.toFixed(1)}%)`).join(', ')
+          );
+          
+          // Check if most visitors have unknown country
+          const unknownCountry = data.topCountries.find(c => c.country === "Unknown");
+          if (unknownCountry && unknownCountry.percentage > 80) {
+            console.log("VisitorStats: Most visitors have unknown country. Country detection might not be working optimally.");
+            toast.info("La detección de países puede no funcionar correctamente en este momento", {
+              duration: 5000,
+            });
+          }
         }
         
         setVisitData(data);
       } catch (error) {
         console.error("VisitorStats: Error loading visitor data:", error);
-        toast.error("Error loading visitor statistics");
+        toast.error("Error al cargar estadísticas de visitas");
         setError("No se pudieron cargar los datos de visitas. Por favor, inténtalo de nuevo más tarde.");
       } finally {
         setIsLoading(false);
@@ -38,24 +51,46 @@ const VisitorStats = () => {
     };
 
     loadVisitorData();
-  }, []);
+    
+    // Set up auto-refresh every 5 minutes if there was an error
+    // This helps recover from temporary API issues
+    const intervalId = setInterval(() => {
+      if (error || (visitData?.topCountries.length === 1 && visitData.topCountries[0].country === "Unknown")) {
+        console.log("VisitorStats: Auto-refreshing stats due to previous errors");
+        setRetryCount(count => count + 1);
+        loadVisitorData();
+      }
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, [retryCount]);
+
+  const handleManualRefresh = () => {
+    setRetryCount(count => count + 1);
+  };
 
   if (isLoading) {
     return <VisitorStatsLoading />;
   }
 
   if (error) {
-    return <VisitorStatsEmpty hasVisitors={false} error={error} />;
+    return (
+      <VisitorStatsEmpty 
+        hasVisitors={false} 
+        error={error} 
+        onRetry={handleManualRefresh} 
+      />
+    );
   }
 
   if (!visitData) {
-    return <VisitorStatsEmpty hasVisitors={false} />;
+    return <VisitorStatsEmpty hasVisitors={false} onRetry={handleManualRefresh} />;
   }
 
   // Even if totalVisits is 0, we still want to show the empty state with hasVisitors=true
   // This indicates that the visitor tracking is working but no visits have been recorded yet
   if (visitData.totalVisits === 0) {
-    return <VisitorStatsEmpty hasVisitors={true} />;
+    return <VisitorStatsEmpty hasVisitors={true} onRetry={handleManualRefresh} />;
   }
 
   return (

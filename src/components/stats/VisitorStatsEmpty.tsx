@@ -1,18 +1,27 @@
 
-import { Users, AlertTriangle } from "lucide-react";
+import { Users, AlertTriangle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 interface VisitorStatsEmptyProps {
   hasVisitors: boolean;
   error?: string | null;
+  onRetry?: () => void;
 }
 
-export function VisitorStatsEmpty({ hasVisitors, error }: VisitorStatsEmptyProps) {
+export function VisitorStatsEmpty({ hasVisitors, error, onRetry }: VisitorStatsEmptyProps) {
   if (error) {
     return (
       <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription className="flex flex-col gap-4">
+          <p>{error}</p>
+          {onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry}>
+              <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+            </Button>
+          )}
+        </AlertDescription>
       </Alert>
     );
   }
@@ -21,9 +30,16 @@ export function VisitorStatsEmpty({ hasVisitors, error }: VisitorStatsEmptyProps
     return (
       <Alert className="bg-card">
         <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          No hay datos de visitas todavía. Una vez que los usuarios acepten las cookies
-          y naveguen por tu sitio, comenzarás a ver estadísticas aquí.
+        <AlertDescription className="flex flex-col gap-4">
+          <p>
+            No hay datos de visitas todavía. Una vez que los usuarios acepten las cookies
+            y naveguen por tu sitio, comenzarás a ver estadísticas aquí.
+          </p>
+          {onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry}>
+              <RefreshCw className="h-4 w-4 mr-2" /> Actualizar datos
+            </Button>
+          )}
         </AlertDescription>
       </Alert>
     );
@@ -35,6 +51,11 @@ export function VisitorStatsEmpty({ hasVisitors, error }: VisitorStatsEmptyProps
       <p className="text-center text-muted-foreground">
         No hay datos de visitantes disponibles.
       </p>
+      {onRetry && (
+        <Button variant="outline" className="mt-4" onClick={onRetry}>
+          <RefreshCw className="h-4 w-4 mr-2" /> Actualizar datos
+        </Button>
+      )}
     </div>
   );
 }
