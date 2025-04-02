@@ -44,14 +44,25 @@ const ContactSection = () => {
     try {
       console.log("Submitting contact form:", values);
       
-      const { error } = await supabase.functions.invoke('send-contact-email', {
-        body: values
+      // Using a direct fetch request instead of supabase.functions.invoke
+      const response = await fetch("https://kpsahmaxljekrpmpbejt.supabase.co/functions/v1/send-contact-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabase.auth.getSession() ? 
+            (await supabase.auth.getSession()).data.session?.access_token : ""}`,
+        },
+        body: JSON.stringify(values)
       });
       
-      if (error) {
-        console.error("Supabase function error:", error);
-        throw new Error(error.message || "Error al enviar el mensaje");
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        throw new Error(errorData.details || "Error al enviar el mensaje");
       }
+      
+      const data = await response.json();
+      console.log("Response data:", data);
       
       toast.success("Mensaje enviado correctamente");
       form.reset();

@@ -2,7 +2,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Check if the API key is set
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
+if (!resendApiKey) {
+  console.error("RESEND_API_KEY environment variable is not set");
+}
+
+const resend = new Resend(resendApiKey);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +36,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // First check if the API key is set
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+
     const formData: ContactFormData = await req.json();
     const { name, email, subject, message } = formData;
     
@@ -40,7 +51,8 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields");
     }
 
-    // Send email to the artist with the contact information
+    // Try to send email to the artist with the contact information
+    console.log("Sending email to artist...");
     const emailResponse = await resend.emails.send({
       from: "Contacto Web <onboarding@resend.dev>",
       to: ["eduxeiroa@gmail.com"],
@@ -54,9 +66,15 @@ const handler = async (req: Request): Promise<Response> => {
         <p><strong>Mensaje:</strong></p>
         <p>${message}</p>
       `,
+    }).catch(error => {
+      console.error("Error sending email to artist:", error);
+      throw error;
     });
 
+    console.log("Email to artist sent successfully:", emailResponse);
+
     // Send confirmation email to the user
+    console.log("Sending confirmation email to user...");
     await resend.emails.send({
       from: "Raúl Álvarez <onboarding@resend.dev>",
       to: [email],
@@ -66,9 +84,12 @@ const handler = async (req: Request): Promise<Response> => {
         <p>Hemos recibido tu mensaje con asunto "${subject}" y nos pondremos en contacto contigo lo antes posible.</p>
         <p>Atentamente,<br>Raúl Álvarez</p>
       `,
+    }).catch(error => {
+      console.error("Error sending confirmation email to user:", error);
+      // We still continue if this fails, since the main email was sent
     });
 
-    console.log("Emails sent successfully:", emailResponse);
+    console.log("Emails sent successfully");
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
