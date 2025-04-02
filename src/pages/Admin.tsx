@@ -22,7 +22,9 @@ const Admin = () => {
     
     setLoading(true);
     try {
+      console.log("Loading artworks from database...");
       const data = await getAllArtworks();
+      console.log(`Loaded ${data.length} artworks`);
       setArtworks(data);
     } catch (error) {
       console.error("Error loading artworks:", error);
@@ -57,6 +59,8 @@ const Admin = () => {
 
   const handleAddArtwork = async (artworkData: Omit<Artwork, "id" | "createdAt">) => {
     try {
+      console.log("Adding new artwork:", artworkData.title);
+      
       // For Supabase, we'll let the service generate the ID and createdAt
       const newArtwork: Artwork = {
         ...artworkData,
@@ -65,7 +69,10 @@ const Admin = () => {
       };
       
       const savedArtwork = await saveArtwork(newArtwork);
+      console.log("Artwork saved successfully:", savedArtwork.id);
+      
       setArtworks((prev) => [savedArtwork, ...prev]); // Add to the beginning for newest-first sorting
+      toast.success("Obra añadida correctamente");
       return savedArtwork;
     } catch (error) {
       console.error("Error adding artwork:", error);
@@ -79,6 +86,7 @@ const Admin = () => {
     artworkData: Omit<Artwork, "id" | "createdAt">
   ) => {
     try {
+      console.log(`Updating artwork ID: ${id}, Title: ${artworkData.title}`);
       const existingArtwork = artworks.find((a) => a.id === id);
       
       if (!existingArtwork) {
@@ -91,10 +99,13 @@ const Admin = () => {
       };
       
       const result = await updateArtwork(updatedArtwork);
+      console.log("Artwork updated successfully:", result.id);
+      
       setArtworks((prev) =>
         prev.map((a) => (a.id === id ? result : a))
       );
       
+      toast.success("Obra actualizada correctamente");
       return result;
     } catch (error) {
       console.error("Error updating artwork:", error);
@@ -105,7 +116,9 @@ const Admin = () => {
 
   const handleDeleteArtwork = async (id: string) => {
     try {
+      console.log(`Deleting artwork ID: ${id}`);
       await deleteArtwork(id);
+      
       setArtworks((prev) => prev.filter((a) => a.id !== id));
       toast.success("Obra eliminada correctamente");
     } catch (error) {

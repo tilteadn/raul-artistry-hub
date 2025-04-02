@@ -57,26 +57,23 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
     }
 
     try {
-      // Create a local preview only - don't upload yet
+      console.log("Processing file:", file.name, file.type, file.size);
+      
+      // Create a local preview
       const localUrl = URL.createObjectURL(file);
       setPreviewUrl(localUrl);
       
-      // Just store the file for later upload
-      const fileObj = {
-        file,
-        localUrl
-      };
-      
-      // Pass the local URL to parent component for preview
-      onChange(localUrl);
-      
-      // Store file in localStorage for form submission
+      // Store file info in localStorage for later upload
       localStorage.setItem('pendingArtworkImage', JSON.stringify({
         localUrl,
         fileName: file.name,
         type: file.type
       }));
       
+      console.log("Image set for preview:", localUrl);
+      
+      // Pass the local URL to parent component for preview
+      onChange(localUrl);
     } catch (error) {
       console.error("Error handling file:", error);
       toast.error("Error al procesar la imagen");
@@ -131,7 +128,7 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
               src={previewUrl}
               alt="Preview"
               className="w-full h-full object-cover"
-              onError={() => {
+              onError={(e) => {
                 console.error("Image load error for:", previewUrl);
                 handleRemoveImage();
               }}
