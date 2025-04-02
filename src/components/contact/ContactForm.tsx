@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "El nombre es requerido" }),
@@ -44,26 +43,28 @@ const ContactForm = () => {
     try {
       console.log("Submitting contact form:", values);
       
-      // Using a direct fetch request instead of supabase.functions.invoke
+      // Direct fetch with improved error handling
       const response = await fetch("https://kpsahmaxljekrpmpbejt.supabase.co/functions/v1/send-contact-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabase.auth.getSession() ? 
-            (await supabase.auth.getSession()).data.session?.access_token : ""}`,
         },
         body: JSON.stringify(values)
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error response:", errorData);
-        throw new Error(errorData.details || "Error al enviar el mensaje");
+        // Try to get error details if available
+        try {
+          const errorData = await response.json();
+          console.error("Error response:", errorData);
+          throw new Error(errorData.details || `Error ${response.status}: ${response.statusText}`);
+        } catch (jsonError) {
+          // If we can't parse the JSON, use the status text
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
       }
       
-      const data = await response.json();
-      console.log("Response data:", data);
-      
+      console.log("Form submitted successfully");
       toast.success("Mensaje enviado correctamente");
       form.reset();
     } catch (error: any) {

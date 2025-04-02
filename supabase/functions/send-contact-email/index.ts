@@ -8,7 +8,8 @@ if (!resendApiKey) {
   console.error("RESEND_API_KEY environment variable is not set");
 }
 
-const resend = new Resend(resendApiKey);
+// Initialize Resend only if API key is available
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,8 +38,18 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     // First check if the API key is set
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY is not configured");
+    if (!resendApiKey || !resend) {
+      console.error("RESEND_API_KEY is not configured");
+      return new Response(
+        JSON.stringify({ 
+          error: "Email service is not properly configured", 
+          details: "The email service API key is not set. Contact the site administrator." 
+        }), 
+        {
+          status: 503,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     const formData: ContactFormData = await req.json();
@@ -48,7 +59,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate form data
     if (!name || !email || !subject || !message) {
-      throw new Error("Missing required fields");
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     // Try to send email to the artist with the contact information
@@ -101,7 +118,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-contact-email function:", error);
     return new Response(
-      JSON.stringify({ error: "Failed to process contact request", details: error.message }),
+      JSON.stringify({ 
+        error: "Failed to process contact request", 
+        details: error.message 
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
