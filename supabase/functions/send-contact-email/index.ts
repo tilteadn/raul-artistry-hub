@@ -35,7 +35,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to the artist with the contact information
     const emailResponse = await resend.emails.send({
       from: "Contacto Web <onboarding@resend.dev>",
-      to: ["raulalvarezjimenez@hotmail.com"],
+      to: ["eduxeiroa@gmail.com"],
       subject: `Nuevo mensaje de contacto: ${subject}`,
       reply_to: email,
       html: `
