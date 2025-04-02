@@ -36,7 +36,7 @@ export const uploadImage = async (fileOrDataUrl: File | string): Promise<string>
       .from(STORAGE_BUCKET)
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: true // Changed to true to allow overwriting existing files
       });
     
     if (error) {
@@ -104,8 +104,8 @@ export const getAllArtworksFromDb = async (): Promise<Artwork[]> => {
       throw error;
     }
     
-    console.log(`Retrieved ${data.length} artworks from database`);
-    return data.map(mapDbArtworkToArtwork);
+    console.log(`Retrieved ${data?.length || 0} artworks from database`);
+    return data ? data.map(mapDbArtworkToArtwork) : [];
   } catch (error) {
     console.error('Error in getAllArtworksFromDb:', error);
     throw error;
@@ -146,7 +146,7 @@ export const saveArtworkToDb = async (artwork: Omit<Artwork, "id" | "createdAt">
         console.log('Uploaded image URL:', imageUrl);
       } catch (uploadError) {
         console.error('Error uploading stored image:', uploadError);
-        throw uploadError;
+        throw new Error(`Failed to upload image: ${uploadError.message}`);
       }
     } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image');
@@ -170,7 +170,11 @@ export const saveArtworkToDb = async (artwork: Omit<Artwork, "id" | "createdAt">
     
     if (error) {
       console.error('Error saving artwork:', error);
-      throw error;
+      throw new Error(`Failed to save artwork: ${error.message}`);
+    }
+    
+    if (!data) {
+      throw new Error('No data returned after saving artwork');
     }
     
     console.log('Artwork saved successfully:', data.id);
@@ -215,7 +219,7 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
         console.log('Uploaded image URL for update:', imageUrl);
       } catch (uploadError) {
         console.error('Error uploading stored image for update:', uploadError);
-        throw uploadError;
+        throw new Error(`Failed to upload image: ${uploadError.message}`);
       }
     } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image for update');
@@ -241,7 +245,11 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
     
     if (error) {
       console.error('Error updating artwork:', error);
-      throw error;
+      throw new Error(`Failed to update artwork: ${error.message}`);
+    }
+    
+    if (!data) {
+      throw new Error('No data returned after updating artwork');
     }
     
     console.log('Artwork updated successfully:', data.id);
@@ -265,7 +273,7 @@ export const deleteArtworkFromDb = async (id: string): Promise<void> => {
     
     if (error) {
       console.error('Error deleting artwork:', error);
-      throw error;
+      throw new Error(`Failed to delete artwork: ${error.message}`);
     }
     
     console.log('Artwork deleted successfully');

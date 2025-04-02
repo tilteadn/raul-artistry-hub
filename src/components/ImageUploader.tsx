@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { ImagePlus, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -62,21 +61,36 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
       // Create a local preview
       const localUrl = URL.createObjectURL(file);
       setPreviewUrl(localUrl);
+      setIsUploading(true);
       
-      // Store file info in localStorage for later upload
-      localStorage.setItem('pendingArtworkImage', JSON.stringify({
-        localUrl,
-        fileName: file.name,
-        type: file.type
-      }));
-      
-      console.log("Image set for preview:", localUrl);
-      
-      // Pass the local URL to parent component for preview
-      onChange(localUrl);
+      // Upload the file immediately instead of storing in localStorage
+      try {
+        console.log("Uploading image to Supabase storage");
+        const uploadedUrl = await uploadImage(file);
+        console.log("Image uploaded successfully:", uploadedUrl);
+        
+        // Pass the actual uploaded URL to parent component
+        onChange(uploadedUrl);
+        setIsUploading(false);
+      } catch (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        toast.error("Error al subir la imagen");
+        // Still keep the preview but mark as not uploading
+        setIsUploading(false);
+        // Even though upload failed, we'll pass the local URL for now
+        onChange(localUrl);
+        
+        // Store file info in localStorage for later upload as a fallback
+        localStorage.setItem('pendingArtworkImage', JSON.stringify({
+          localUrl,
+          fileName: file.name,
+          type: file.type
+        }));
+      }
     } catch (error) {
       console.error("Error handling file:", error);
       toast.error("Error al procesar la imagen");
+      setIsUploading(false);
     }
   };
 
@@ -145,6 +159,15 @@ const ImageUploader = ({ onChange, initialImage, className }: ImageUploaderProps
             >
               <X className="h-4 w-4" />
             </Button>
+            
+            {isUploading && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="bg-background p-4 rounded-md text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-sm">Subiendo imagen...</p>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className={cn(

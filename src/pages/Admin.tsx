@@ -71,7 +71,9 @@ const Admin = () => {
       const savedArtwork = await saveArtwork(newArtwork);
       console.log("Artwork saved successfully:", savedArtwork.id);
       
-      setArtworks((prev) => [savedArtwork, ...prev]); // Add to the beginning for newest-first sorting
+      // Refresh the artworks list after adding
+      await loadArtworks();
+      
       toast.success("Obra añadida correctamente");
       return savedArtwork;
     } catch (error) {
@@ -101,9 +103,8 @@ const Admin = () => {
       const result = await updateArtwork(updatedArtwork);
       console.log("Artwork updated successfully:", result.id);
       
-      setArtworks((prev) =>
-        prev.map((a) => (a.id === id ? result : a))
-      );
+      // Refresh the artworks list after updating
+      await loadArtworks();
       
       toast.success("Obra actualizada correctamente");
       return result;
@@ -119,6 +120,7 @@ const Admin = () => {
       console.log(`Deleting artwork ID: ${id}`);
       await deleteArtwork(id);
       
+      // Update the local state after successful deletion
       setArtworks((prev) => prev.filter((a) => a.id !== id));
       toast.success("Obra eliminada correctamente");
     } catch (error) {
