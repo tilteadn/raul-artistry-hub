@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "El nombre es requerido" }),
@@ -37,16 +38,26 @@ const ContactSection = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
+    try {
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: values
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
       toast.success("Mensaje enviado correctamente");
       form.reset();
+    } catch (error) {
+      console.error("Error sending contact form:", error);
+      toast.error("Error al enviar el mensaje. Por favor, inténtalo de nuevo.");
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   }
 
   return (
