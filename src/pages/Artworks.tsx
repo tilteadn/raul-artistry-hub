@@ -4,7 +4,9 @@ import { Artwork, Collection } from "@/types/artwork";
 import ArtworkGrid from "@/components/ArtworkGrid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAllArtworks, getCollections } from "@/utils/artworkService";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 const Artworks = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -12,30 +14,51 @@ const Artworks = () => {
   const [activeCollection, setActiveCollection] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [collectionLoading, setCollectionLoading] = useState(true);
+  const [artworksError, setArtworksError] = useState<string | null>(null);
+  const [collectionsError, setCollectionsError] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    setCollectionLoading(true);
+    setArtworksError(null);
+    setCollectionsError(null);
+    
+    try {
+      // Load the artworks
+      console.log("Loading artworks for Obras page...");
+      const allArtworks = await getAllArtworks();
+      setArtworks(allArtworks);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading artworks:", error);
+      setArtworksError("No se pudieron cargar las obras. Por favor, intente nuevamente más tarde.");
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las obras",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+    
+    try {
+      // Load the collections
+      console.log("Loading collections for Obras page...");
+      const allCollections = await getCollections();
+      setCollections(allCollections);
+    } catch (error) {
+      console.error("Error loading collections:", error);
+      setCollectionsError("No se pudieron cargar las colecciones. Por favor, intente nuevamente más tarde.");
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las colecciones",
+        variant: "destructive",
+      });
+    } finally {
+      setCollectionLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setCollectionLoading(true);
-      
-      try {
-        // Load the artworks
-        console.log("Loading artworks for Obras page...");
-        const allArtworks = await getAllArtworks();
-        setArtworks(allArtworks);
-        setLoading(false);
-        
-        // Load the collections
-        console.log("Loading collections for Obras page...");
-        const allCollections = await getCollections();
-        setCollections(allCollections);
-      } catch (error) {
-        console.error("Error loading data:", error);
-      } finally {
-        setCollectionLoading(false);
-      }
-    };
-
     loadData();
   }, []);
 
@@ -70,6 +93,19 @@ const Artworks = () => {
                 <Loader2 className="w-6 h-6 text-primary animate-spin mr-2" />
                 <span className="text-muted-foreground">Cargando colecciones...</span>
               </div>
+            ) : collectionsError ? (
+              <div className="flex items-center justify-center py-4 px-6 bg-destructive/10 rounded-lg">
+                <p className="text-destructive text-sm mr-4">{collectionsError}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={loadData}
+                  className="flex items-center"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reintentar
+                </Button>
+              </div>
             ) : (
               <TabsList className="h-auto p-1 inline-flex min-w-full md:min-w-0">
                 <TabsTrigger value="all" className="px-4 py-2">
@@ -89,11 +125,27 @@ const Artworks = () => {
           </div>
           
           <TabsContent value={activeCollection} className="mt-8">
-            <ArtworkGrid 
-              artworks={filteredArtworks} 
-              collection={activeCollection === "all" ? undefined : activeCollection}
-              loading={loading} 
-            />
+            {artworksError ? (
+              <div className="flex flex-col items-center justify-center p-12 bg-destructive/10 rounded-lg">
+                <p className="text-center text-destructive mb-4">
+                  {artworksError}
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={loadData}
+                  className="flex items-center"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reintentar
+                </Button>
+              </div>
+            ) : (
+              <ArtworkGrid 
+                artworks={filteredArtworks} 
+                collection={activeCollection === "all" ? undefined : activeCollection}
+                loading={loading} 
+              />
+            )}
           </TabsContent>
         </Tabs>
       </div>

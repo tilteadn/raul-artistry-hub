@@ -1,8 +1,7 @@
 
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { v4 as uuidv4 } from 'uuid';
 import { LogOut } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid';
 
 import AdminPanel from "@/components/AdminPanel";
 import AdminAuth from "@/components/AdminAuth";
@@ -10,6 +9,7 @@ import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Artwork } from "@/types/artwork";
 import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork } from "@/utils/artworkService";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 const Admin = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -17,6 +17,7 @@ const Admin = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { isAuthenticated, isLoading, logout, setIsAuthenticated } = useAdminAuth();
   const [showAuthForm, setShowAuthForm] = useState(!isAuthenticated);
 
@@ -24,14 +25,20 @@ const Admin = () => {
     if (!isAuthenticated) return;
     
     setLoading(true);
+    setError(null);
     try {
       console.log("Loading artworks from database...");
       const data = await getAllArtworks();
       console.log(`Loaded ${data.length} artworks`);
       setArtworks(data);
-    } catch (error) {
-      console.error("Error loading artworks:", error);
-      toast.error("Error al cargar las obras");
+    } catch (err) {
+      console.error("Error loading artworks:", err);
+      setError("Error al cargar las obras");
+      toast({
+        title: "Error",
+        description: "Error al cargar las obras desde la base de datos",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -78,11 +85,18 @@ const Admin = () => {
       // Refresh the artworks list after adding
       await loadArtworks();
       
-      toast.success("Obra añadida correctamente");
+      toast({
+        title: "Éxito",
+        description: "Obra añadida correctamente",
+      });
       return savedArtwork;
     } catch (error) {
       console.error("Error adding artwork:", error);
-      toast.error("Error al añadir la obra");
+      toast({
+        title: "Error",
+        description: "Error al añadir la obra",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsAdding(false);
@@ -113,11 +127,18 @@ const Admin = () => {
       // Refresh the artworks list after updating
       await loadArtworks();
       
-      toast.success("Obra actualizada correctamente");
+      toast({
+        title: "Éxito",
+        description: "Obra actualizada correctamente",
+      });
       return result;
     } catch (error) {
       console.error("Error updating artwork:", error);
-      toast.error("Error al actualizar la obra");
+      toast({
+        title: "Error",
+        description: "Error al actualizar la obra",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsUpdating(false);
@@ -132,10 +153,17 @@ const Admin = () => {
       
       // Update the local state after successful deletion
       setArtworks((prev) => prev.filter((a) => a.id !== id));
-      toast.success("Obra eliminada correctamente");
+      toast({
+        title: "Éxito",
+        description: "Obra eliminada correctamente",
+      });
     } catch (error) {
       console.error("Error deleting artwork:", error);
-      toast.error("Error al eliminar la obra");
+      toast({
+        title: "Error",
+        description: "Error al eliminar la obra",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsDeleting(false);
@@ -182,6 +210,20 @@ const Admin = () => {
       <div className="container mx-auto px-6 py-16">
         {showAuthForm ? (
           <AdminAuth onAuthenticated={handleSuccessfulAuthentication} />
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-destructive/10 rounded-lg">
+            <p className="text-center text-destructive mb-4">
+              {error}
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={loadArtworks}
+              className="flex items-center"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reintentar
+            </Button>
+          </div>
         ) : (
           <AdminPanel
             artworks={artworks}

@@ -7,21 +7,30 @@ import Hero from "@/components/Hero";
 import ArtworkGrid from "@/components/ArtworkGrid";
 import { Artwork } from "@/types/artwork";
 import { getFeaturedArtworks } from "@/utils/artworkService";
+import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [featuredArtworks, setFeaturedArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadArtworks = async () => {
       setLoading(true);
+      setError(null);
       try {
         console.log("Loading featured artworks for Home page...");
         const artworks = await getFeaturedArtworks();
         setFeaturedArtworks(artworks);
         console.log(`Loaded ${artworks.length} featured artworks`);
-      } catch (error) {
-        console.error("Error loading artworks:", error);
+      } catch (err) {
+        console.error("Error loading artworks:", err);
+        setError("No se pudieron cargar las obras destacadas. Por favor, intente nuevamente más tarde.");
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las obras destacadas",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -59,6 +68,19 @@ const Index = () => {
             <p className="text-center text-muted-foreground">
               Cargando obras destacadas...
             </p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-destructive/10 rounded-lg">
+            <p className="text-center text-destructive">
+              {error}
+            </p>
+            <Button 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => window.location.reload()}
+            >
+              Reintentar
+            </Button>
           </div>
         ) : (
           <ArtworkGrid artworks={featuredArtworks} loading={false} />
