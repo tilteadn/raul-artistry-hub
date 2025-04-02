@@ -22,7 +22,8 @@ serve(async (req) => {
 
   try {
     // Basic validation
-    if (req.method !== 'GET') {
+    if (req.method !== 'GET' && req.method !== 'POST') {
+      console.error(`Invalid method: ${req.method}`);
       return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
         status: 405, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -36,6 +37,18 @@ serve(async (req) => {
     
     // Call ipapi.co to get detailed location data
     const response = await fetch(`https://ipapi.co/${ip}/json/`);
+    
+    if (!response.ok) {
+      console.error(`Error from ipapi: ${response.status} ${response.statusText}`);
+      return new Response(JSON.stringify({ 
+        country: "Unknown", 
+        error: `API error: ${response.status}` 
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
     const data = await response.json();
     
     if (data.error) {
@@ -48,6 +61,8 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    console.log(`Successfully detected country: ${data.country_name || "Unknown"}`);
 
     // Return the country data
     return new Response(JSON.stringify({

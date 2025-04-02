@@ -24,18 +24,30 @@ export interface VisitorData {
 // Get the visitor's country using the detect-country edge function
 const getUserCountry = async (): Promise<string> => {
   try {
+    console.log("Calling detect-country edge function...");
+    
     // Using our Supabase edge function to get visitor's country
-    const { data, error } = await supabase.functions.invoke('detect-country');
+    const { data, error } = await supabase.functions.invoke('detect-country', {
+      method: 'POST',
+      body: {}, // Add an empty body to ensure it's treated as POST
+    });
     
     if (error) {
       console.error("Error detecting country via edge function:", error);
       return "Unknown";
     }
     
+    if (!data || !data.country) {
+      console.error("Invalid response from detect-country:", data);
+      return "Unknown";
+    }
+    
+    console.log("Country detected:", data.country);
+    
     // Return the country name
     return data.country || "Unknown";
   } catch (error) {
-    console.error("Error detecting country:", error);
+    console.error("Exception in getUserCountry:", error);
     return "Unknown";
   }
 };
@@ -79,11 +91,12 @@ const getUserDeviceInfo = (): { device: string | null, browser: string | null } 
 // Function to track a new visit if consent was given
 export const trackVisit = async (): Promise<void> => {
   try {
+    console.log("Starting visit tracking...");
     const country = await getUserCountry();
     const { device, browser } = getUserDeviceInfo();
     const path = window.location.pathname;
     
-    console.log(`Tracking visit from ${country} on ${path}`);
+    console.log(`Tracking visit from ${country} on ${path} (${device}/${browser})`);
     
     // Insert the visit into Supabase
     const { error } = await supabase
@@ -96,6 +109,7 @@ export const trackVisit = async (): Promise<void> => {
       });
     
     if (error) {
+      console.error("Error inserting visit record:", error);
       throw error;
     }
     
