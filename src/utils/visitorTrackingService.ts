@@ -21,10 +21,21 @@ export interface VisitorData {
   monthlyData: MonthlyData[];
 }
 
+// Session storage key for country
+const SESSION_COUNTRY_KEY = "visitor_country";
+
 // Get the visitor's country using the detect-country edge function
+// with session-based caching to avoid redundant API calls
 const getUserCountry = async (): Promise<string> => {
   try {
-    console.log("Calling detect-country edge function...");
+    // Check if we already have the country in sessionStorage
+    const cachedCountry = sessionStorage.getItem(SESSION_COUNTRY_KEY);
+    if (cachedCountry) {
+      console.log("Using cached country from session:", cachedCountry);
+      return cachedCountry;
+    }
+    
+    console.log("No cached country found, calling detect-country edge function...");
     
     // Using our Supabase edge function to get visitor's country
     const { data, error } = await supabase.functions.invoke('detect-country');
@@ -40,6 +51,9 @@ const getUserCountry = async (): Promise<string> => {
     }
     
     console.log("Country detected:", data.country);
+    
+    // Store the country in sessionStorage for future use
+    sessionStorage.setItem(SESSION_COUNTRY_KEY, data.country);
     
     // Return the country name
     return data.country || "Unknown";

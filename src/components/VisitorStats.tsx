@@ -34,9 +34,15 @@ const VisitorStats = () => {
           const unknownCountry = data.topCountries.find(c => c.country === "Unknown");
           if (unknownCountry && unknownCountry.percentage > 80) {
             console.log("VisitorStats: Most visitors have unknown country. Country detection might not be working optimally.");
-            toast.info("La detección de países puede no funcionar correctamente en este momento", {
-              duration: 5000,
-            });
+            
+            // Check if we've already shown this toast in this session
+            const toastShown = sessionStorage.getItem('unknown_country_toast_shown');
+            if (!toastShown) {
+              toast.info("La detección de países puede no funcionar correctamente en este momento", {
+                duration: 5000,
+              });
+              sessionStorage.setItem('unknown_country_toast_shown', 'true');
+            }
           }
         }
         
@@ -52,8 +58,7 @@ const VisitorStats = () => {
 
     loadVisitorData();
     
-    // Set up auto-refresh every 5 minutes if there was an error
-    // This helps recover from temporary API issues
+    // Set up auto-refresh every 5 minutes if there was an error or if most visitors have unknown country
     const intervalId = setInterval(() => {
       if (error || (visitData?.topCountries.length === 1 && visitData.topCountries[0].country === "Unknown")) {
         console.log("VisitorStats: Auto-refreshing stats due to previous errors");
@@ -66,6 +71,8 @@ const VisitorStats = () => {
   }, [retryCount]);
 
   const handleManualRefresh = () => {
+    // When manually refreshing, clear the country cache to force a new check
+    sessionStorage.removeItem('visitor_country');
     setRetryCount(count => count + 1);
   };
 
