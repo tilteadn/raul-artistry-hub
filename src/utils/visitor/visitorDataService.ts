@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { VisitorData, MonthlyData, CountryData } from "./types";
+import { getEmptyStats } from "./statsCalculation";
 
 /**
  * Fetches raw visitor records from the database
@@ -103,5 +104,4 @@ export async function calculateVisitorStats(): Promise<VisitorData> {
   }
 }
 
-// Re-export getEmptyStats for consistency
-export { getEmptyStats } from "./statsCalculation";
+// We don't need to re-export getEmptyStats from here anymore since we're importing it directly

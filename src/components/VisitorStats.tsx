@@ -5,8 +5,9 @@ import { VisitorStatsTabs } from "./stats/VisitorStatsTabs";
 import { VisitorStatsLoading } from "./stats/VisitorStatsLoading";
 import { VisitorStatsEmpty } from "./stats/VisitorStatsEmpty";
 import { SESSION_COUNTRY_KEY } from "@/utils/visitor/countryDetection";
-import { calculateVisitorStats } from "@/utils/visitorTrackingService";
+import { calculateVisitorStats, getEmptyStats } from "@/utils/visitorTrackingService";
 import type { VisitorData } from "@/utils/visitorTrackingService";
+import { toast } from "sonner";
 
 const VisitorStats = () => {
   const [loading, setLoading] = useState(true);
@@ -20,11 +21,19 @@ const VisitorStats = () => {
         setLoading(true);
         setError(null);
         
+        console.log("Starting to load visitor statistics...");
         const stats = await calculateVisitorStats();
+        console.log("Visitor stats loaded:", stats);
         setVisitData(stats);
       } catch (err) {
         console.error("Error loading visitor stats:", err);
         setError("Hubo un error al cargar las estadísticas de visitantes.");
+        // Let's show a toast for better visibility of the error
+        toast.error("Error loading visitor statistics", {
+          description: "Please try refreshing the page."
+        });
+        // Fallback to empty stats when there's an error
+        setVisitData(getEmptyStats());
       } finally {
         setLoading(false);
       }
@@ -36,6 +45,7 @@ const VisitorStats = () => {
   const handleManualRefresh = () => {
     // Clear the country cache to force a new check on next visit
     sessionStorage.removeItem(SESSION_COUNTRY_KEY);
+    toast.info("Refreshing visitor data...");
     setRetryCount(count => count + 1);
   };
   
@@ -43,7 +53,7 @@ const VisitorStats = () => {
     return <VisitorStatsLoading />;
   }
   
-  if (error) {
+  if (error && !visitData) {
     return <VisitorStatsEmpty hasVisitors={false} error={error} onRetry={handleManualRefresh} />;
   }
   
