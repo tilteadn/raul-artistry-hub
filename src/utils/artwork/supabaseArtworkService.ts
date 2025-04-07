@@ -21,6 +21,33 @@ const sanitizeFilename = (filename: string): string => {
 };
 
 /**
+ * Extracts the file path from a public URL
+ * @param publicUrl The public URL of the file
+ * @returns The file path in storage
+ */
+const extractFilePathFromUrl = (publicUrl: string): string | null => {
+  try {
+    // Extract the file path from the URL
+    const url = new URL(publicUrl);
+    const pathSegments = url.pathname.split('/');
+    
+    // Find the index of the bucket name in the path
+    const bucketIndex = pathSegments.findIndex(segment => segment === STORAGE_BUCKET);
+    
+    if (bucketIndex === -1 || bucketIndex >= pathSegments.length - 1) {
+      console.error('Could not find bucket in URL path:', publicUrl);
+      return null;
+    }
+    
+    // Join the remaining segments to form the file path
+    return pathSegments.slice(bucketIndex + 1).join('/');
+  } catch (error) {
+    console.error('Error extracting file path from URL:', error);
+    return null;
+  }
+};
+
+/**
  * Uploads an image to Supabase storage
  * @param file File or data URL to upload
  * @returns URL of the uploaded file
@@ -282,14 +309,53 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
 export const deleteArtworkFromDb = async (id: string): Promise<void> => {
   try {
     console.log(`Deleting artwork ID: ${id}`);
-    const { error } = await supabase
+    
+    // First, get the artwork to retrieve its image URL
+    const { data: artwork, error: fetchError } = await supabase
+      .from('artworks')
+      .select('image_url')
+      .eq('id', id)
+      .single();
+    
+    if (fetchError) {
+      console.error('Error fetching artwork for deletion:', fetchError);
+      throw new Error(`Failed to fetch artwork: ${fetchError.message}`);
+    }
+    
+    // Delete the artwork record from the database
+    const { error: deleteError } = await supabase
       .from('artworks')
       .delete()
       .eq('id', id);
     
-    if (error) {
-      console.error('Error deleting artwork:', error);
-      throw new Error(`Failed to delete artwork: ${error.message}`);
+    if (deleteError) {
+      console.error('Error deleting artwork from database:', deleteError);
+      throw new Error(`Failed to delete artwork: ${deleteError.message}`);
+    }
+    
+    // If the artwork has an image, delete it from storage
+    if (artwork && artwork.image_url) {
+      const filePath = extractFilePathFromUrl(artwork.image_url);
+      
+      if (filePath) {
+        console.log(`Deleting image file from storage: ${filePath}`);
+        const { error: storageError } = await supabase
+          .storage
+          .from(STORAGE_BUCKET)
+          .remove([filePath]);
+        
+        if (storageError) {
+          // Log the error but don't throw, as we've already deleted the artwork record
+          console.error('Error deleting image from storage:', storageError);
+          console.warn(`Image file ${filePath} may need manual deletion`);
+        } else {
+          console.log('Image file deleted successfully from storage');
+        }
+      } else {
+        console.warn(`Could not extract file path from URL: ${artwork.image_url}`);
+      }
+    } else {
+      console.log('No image to delete from storage');
     }
     
     console.log('Artwork deleted successfully');
