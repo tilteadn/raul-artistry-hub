@@ -19,7 +19,7 @@ const AboutMe = () => {
 
   useEffect(() => {
     // Pre-load the signature image to detect any loading issues
-    const img = new Image();
+    const img = document.createElement('img');
     img.src = "/lovable-uploads/Firma sin fondo.jpg";
     img.onload = () => setSignatureLoaded(true);
     img.onerror = () => {
