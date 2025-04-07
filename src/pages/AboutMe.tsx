@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { User, FileText, Award, GraduationCap, Image, MapPin, Book, Briefcase, Palette, Trophy, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,9 +10,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import MetaTags from "@/components/MetaTags";
+import { toast } from "sonner";
 
 const AboutMe = () => {
   const [activeTab, setActiveTab] = useState<string>("bio");
+  const [signatureLoaded, setSignatureLoaded] = useState(false);
+  const [signatureError, setSignatureError] = useState(false);
+
+  useEffect(() => {
+    // Pre-load the signature image to detect any loading issues
+    const img = new Image();
+    img.src = "/lovable-uploads/Firma sin fondo.jpg";
+    img.onload = () => setSignatureLoaded(true);
+    img.onerror = () => {
+      setSignatureError(true);
+      console.error("Failed to load signature image");
+      toast.error("Error al cargar la firma", {
+        description: "No se ha podido cargar la imagen de la firma"
+      });
+    };
+  }, []);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -108,14 +126,27 @@ Be water, my friend.`;
         >
           <header className="mb-12 text-center">
             <h1 className="text-4xl font-serif mb-4">Sobre mí</h1>
-            <div className="w-48 mx-auto mt-4">
-              <img 
-                src="/lovable-uploads/Firma sin fondo.jpg" 
-                alt="Firma de Raúl Álvarez" 
-                className="w-full h-auto"
-                draggable="false"
-                onContextMenu={(e) => e.preventDefault()}
-              />
+            <div className="w-48 mx-auto mt-4 relative min-h-[60px]">
+              {signatureError ? (
+                <div className="text-muted-foreground text-sm py-4">
+                  Firma de Raúl Álvarez
+                </div>
+              ) : (
+                <img 
+                  src="/lovable-uploads/Firma sin fondo.jpg" 
+                  alt="Firma de Raúl Álvarez" 
+                  className={cn(
+                    "w-full h-auto transition-opacity duration-300",
+                    signatureLoaded ? "opacity-100" : "opacity-0"
+                  )}
+                  draggable="false"
+                  onContextMenu={(e) => e.preventDefault()}
+                  onError={() => {
+                    setSignatureError(true);
+                    console.error("Image failed to load on render");
+                  }}
+                />
+              )}
             </div>
           </header>
 
