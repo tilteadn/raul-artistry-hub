@@ -126,28 +126,6 @@ Be water, my friend.`;
         >
           <header className="mb-12 text-center">
             <h1 className="text-4xl font-serif mb-4">Sobre mí</h1>
-            <div className="w-48 mx-auto mt-4 relative min-h-[60px]">
-              {signatureError ? (
-                <div className="text-muted-foreground text-sm py-4">
-                  Firma de Raúl Álvarez
-                </div>
-              ) : (
-                <img 
-                  src="/lovable-uploads/Firma sin fondo.jpg" 
-                  alt="Firma de Raúl Álvarez" 
-                  className={cn(
-                    "w-full h-auto transition-opacity duration-300",
-                    signatureLoaded ? "opacity-100" : "opacity-0"
-                  )}
-                  draggable="false"
-                  onContextMenu={(e) => e.preventDefault()}
-                  onError={() => {
-                    setSignatureError(true);
-                    console.error("Image failed to load on render");
-                  }}
-                />
-              )}
-            </div>
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
