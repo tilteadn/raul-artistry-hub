@@ -238,21 +238,22 @@ export const getCollectionsFromDb = async (): Promise<Collection[]> => {
     const { data: collectionsData, error: collectionsError } = await supabase
       .from('artworks')
       .select('collection')
-      .order('collection')
-      .distinctOn('collection');
+      .order('collection');
     
     if (collectionsError) {
       console.error('Error fetching collections:', collectionsError);
       throw collectionsError;
     }
     
+    // Filter for unique collections
+    const uniqueCollections = Array.from(
+      new Set(collectionsData?.map(item => item.collection) || [])
+    ).filter(Boolean);
+    
     // For each collection, find an artwork to use as thumbnail
     const collections: Collection[] = [];
     
-    for (const item of collectionsData || []) {
-      const collection = item.collection;
-      if (!collection) continue;
-      
+    for (const collection of uniqueCollections) {
       // Get first artwork in this collection to use as thumbnail
       const { data: artworkData } = await supabase
         .from('artworks')
@@ -282,39 +283,16 @@ export const saveArtworkToDb = async (artwork: Artwork): Promise<Artwork> => {
   try {
     console.log('Saving new artwork to database:', artwork.title);
     
-    // Handle image upload if it's a local URL (starts with blob:)
+    // Handle image upload if it's a data URL
     let imageUrl = artwork.imageUrl;
     
-    // Check if there's a pending image in localStorage
-    const pendingImage = localStorage.getItem('pendingArtworkImage');
-    console.log('Pending image in localStorage:', pendingImage ? 'Yes' : 'No');
-    
-    if (pendingImage && imageUrl.startsWith('blob:')) {
-      try {
-        console.log('Processing pending image from localStorage');
-        const imageData = JSON.parse(pendingImage);
-        // Fetch the image as a blob and upload it
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], imageData.fileName || 'artwork.jpg', { 
-          type: imageData.type || 'image/jpeg' 
-        });
-        
-        // Upload the actual file
-        console.log('Uploading blob image to Supabase storage');
-        imageUrl = await uploadImage(file);
-        
-        // Clear the pending image
-        localStorage.removeItem('pendingArtworkImage');
-        console.log('Uploaded image URL:', imageUrl);
-      } catch (uploadError) {
-        console.error('Error uploading stored image:', uploadError);
-        throw new Error(`Failed to upload image: ${uploadError.message}`);
-      }
-    } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
+    if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image');
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded data URL image:', imageUrl);
+    } else if (artwork.imageUrl.startsWith('blob:')) {
+      console.error('Blob URLs are not supported without the associated File object');
+      throw new Error('Blob URLs are not supported for upload. Please provide the original file.');
     } else {
       console.log('Using existing image URL:', imageUrl);
     }
@@ -355,39 +333,16 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
   try {
     console.log(`Updating artwork ID: ${id}, Title: ${artwork.title}`);
     
-    // Handle image upload if it's a local URL (starts with blob:)
+    // Handle image upload if it's a data URL
     let imageUrl = artwork.imageUrl;
     
-    // Check if there's a pending image in localStorage
-    const pendingImage = localStorage.getItem('pendingArtworkImage');
-    console.log('Pending image in localStorage:', pendingImage ? 'Yes' : 'No');
-    
-    if (pendingImage && imageUrl.startsWith('blob:')) {
-      try {
-        console.log('Processing pending image from localStorage for update');
-        const imageData = JSON.parse(pendingImage);
-        // Fetch the image as a blob and upload it
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], imageData.fileName || 'artwork.jpg', { 
-          type: imageData.type || 'image/jpeg' 
-        });
-        
-        // Upload the actual file
-        console.log('Uploading blob image to Supabase storage for update');
-        imageUrl = await uploadImage(file);
-        
-        // Clear the pending image
-        localStorage.removeItem('pendingArtworkImage');
-        console.log('Uploaded image URL for update:', imageUrl);
-      } catch (uploadError) {
-        console.error('Error uploading stored image for update:', uploadError);
-        throw new Error(`Failed to upload image: ${uploadError.message}`);
-      }
-    } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
+    if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image for update');
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded data URL image for update:', imageUrl);
+    } else if (artwork.imageUrl.startsWith('blob:')) {
+      console.error('Blob URLs are not supported without the associated File object');
+      throw new Error('Blob URLs are not supported for upload. Please provide the original file.');
     } else {
       console.log('Using existing image URL for update:', imageUrl);
     }

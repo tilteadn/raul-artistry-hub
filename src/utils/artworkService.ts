@@ -3,20 +3,20 @@
 
 import { 
   getAllArtworksFromDb,
-  getFeaturedArtworks,
-  getArtworkById,
-  getRelatedArtworks,
-  getCollections,
+  getFeaturedArtworksFromDb,
+  getArtworkByIdFromDb,
+  getRelatedArtworksFromDb,
+  getCollectionsFromDb,
   saveArtworkToDb,
   updateArtworkInDb,
   deleteArtworkFromDb
 } from './artwork/supabaseArtworkService';
 
 export const getAllArtworks = getAllArtworksFromDb;
-export const getFeaturedArtworks = getFeaturedArtworks;
-export const getArtworkById = getArtworkById;
-export const getRelatedArtworks = getRelatedArtworks;
-export const getCollections = getCollections;
+export const getFeaturedArtworks = getFeaturedArtworksFromDb;
+export const getArtworkById = getArtworkByIdFromDb;
+export const getRelatedArtworks = getRelatedArtworksFromDb;
+export const getCollections = getCollectionsFromDb;
 export const saveArtwork = saveArtworkToDb;
 export const updateArtwork = updateArtworkInDb;
 export const deleteArtwork = deleteArtworkFromDb;
