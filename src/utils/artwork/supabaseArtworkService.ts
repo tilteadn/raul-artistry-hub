@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Artwork } from "@/types/artwork";
+import { Artwork, Collection } from "@/types/artwork";
 import { v4 as uuidv4 } from 'uuid';
 
 const STORAGE_BUCKET = 'artwork_images';
@@ -79,7 +79,7 @@ export const uploadImage = async (fileOrDataUrl: File | string): Promise<string>
       .from(STORAGE_BUCKET)
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: true // Changed to true to allow overwriting existing files
+        upsert: true
       });
     
     if (error) {
@@ -156,9 +156,129 @@ export const getAllArtworksFromDb = async (): Promise<Artwork[]> => {
 };
 
 /**
+ * Retrieves featured artworks from Supabase
+ */
+export const getFeaturedArtworksFromDb = async (): Promise<Artwork[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(3);
+    
+    if (error) {
+      console.error('Error fetching featured artworks:', error);
+      throw error;
+    }
+    
+    return data ? data.map(mapDbArtworkToArtwork) : [];
+  } catch (error) {
+    console.error('Error in getFeaturedArtworksFromDb:', error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves a specific artwork by ID from Supabase
+ */
+export const getArtworkByIdFromDb = async (id: string): Promise<Artwork | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned (not found)
+        return null;
+      }
+      console.error('Error fetching artwork by ID:', error);
+      throw error;
+    }
+    
+    return data ? mapDbArtworkToArtwork(data) : null;
+  } catch (error) {
+    console.error(`Error in getArtworkByIdFromDb for ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves artworks related to a given collection from Supabase
+ */
+export const getRelatedArtworksFromDb = async (collection: string, excludeId: string): Promise<Artwork[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select('*')
+      .eq('collection', collection)
+      .neq('id', excludeId)
+      .limit(3);
+    
+    if (error) {
+      console.error('Error fetching related artworks:', error);
+      throw error;
+    }
+    
+    return data ? data.map(mapDbArtworkToArtwork) : [];
+  } catch (error) {
+    console.error(`Error in getRelatedArtworksFromDb for collection ${collection}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves all unique collections from Supabase
+ */
+export const getCollectionsFromDb = async (): Promise<Collection[]> => {
+  try {
+    // Get distinct collections
+    const { data: collectionsData, error: collectionsError } = await supabase
+      .from('artworks')
+      .select('collection')
+      .order('collection')
+      .distinctOn('collection');
+    
+    if (collectionsError) {
+      console.error('Error fetching collections:', collectionsError);
+      throw collectionsError;
+    }
+    
+    // For each collection, find an artwork to use as thumbnail
+    const collections: Collection[] = [];
+    
+    for (const item of collectionsData || []) {
+      const collection = item.collection;
+      if (!collection) continue;
+      
+      // Get first artwork in this collection to use as thumbnail
+      const { data: artworkData } = await supabase
+        .from('artworks')
+        .select('image_url')
+        .eq('collection', collection)
+        .limit(1)
+        .single();
+      
+      collections.push({
+        id: collection.toLowerCase().replace(/\s+/g, "-"),
+        name: collection,
+        thumbnail: artworkData?.image_url || undefined,
+      });
+    }
+    
+    return collections;
+  } catch (error) {
+    console.error('Error in getCollectionsFromDb:', error);
+    throw error;
+  }
+};
+
+/**
  * Saves a new artwork to Supabase
  */
-export const saveArtworkToDb = async (artwork: Omit<Artwork, "id" | "createdAt">): Promise<Artwork> => {
+export const saveArtworkToDb = async (artwork: Artwork): Promise<Artwork> => {
   try {
     console.log('Saving new artwork to database:', artwork.title);
     

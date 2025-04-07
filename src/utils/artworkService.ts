@@ -1,25 +1,22 @@
 
-// This file is now just a facade for the refactored modules
-// to maintain backward compatibility with existing imports
+// This file is just a facade for the Supabase artwork service module
 
 import { 
-  getAllArtworks,
+  getAllArtworksFromDb,
   getFeaturedArtworks,
   getArtworkById,
   getRelatedArtworks,
   getCollections,
-  saveArtwork,
-  updateArtwork,
-  deleteArtwork
-} from './artwork/artworkService';
+  saveArtworkToDb,
+  updateArtworkInDb,
+  deleteArtworkFromDb
+} from './artwork/supabaseArtworkService';
 
-export {
-  getAllArtworks,
-  getFeaturedArtworks,
-  getArtworkById,
-  getRelatedArtworks,
-  getCollections,
-  saveArtwork,
-  updateArtwork,
-  deleteArtwork
-};
+export const getAllArtworks = getAllArtworksFromDb;
+export const getFeaturedArtworks = getFeaturedArtworks;
+export const getArtworkById = getArtworkById;
+export const getRelatedArtworks = getRelatedArtworks;
+export const getCollections = getCollections;
+export const saveArtwork = saveArtworkToDb;
+export const updateArtwork = updateArtworkInDb;
+export const deleteArtwork = deleteArtworkFromDb;
