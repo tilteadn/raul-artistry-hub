@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +23,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "El título es requerido" }).max(100, { message: "El título es demasiado largo, máximo 100 caracteres" }),
-  subtitle: z.string().optional().max(200, { message: "El subtítulo es demasiado largo, máximo 200 caracteres" }),
+  subtitle: z.string().optional(),
   collection: z.string().min(1, { message: "La colección es requerida" }).max(50, { message: "El nombre de la colección es demasiado largo" }),
   imageUrl: z.string().min(1, { message: "La imagen es requerida" }),
   year: z.string().optional(),
@@ -65,7 +64,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
       dimensions: editArtwork?.dimensions || "",
       description: editArtwork?.description || "",
     },
-    mode: "onChange", // Use onChange to prevent focus issues
+    mode: "onChange",
   });
 
   const handleImageChange = (url: string) => {
@@ -115,7 +114,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
             <ScrollArea className="h-[calc(100vh-250px)]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
                 <div className="space-y-6">
-                  {/* Title field */}
                   <FormField
                     control={form.control}
                     name="title"
@@ -130,7 +128,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                     )}
                   />
                   
-                  {/* Subtitle field - now optional */}
                   <FormField
                     control={form.control}
                     name="subtitle"
@@ -145,7 +142,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                     )}
                   />
                   
-                  {/* Collection field */}
                   <FormField
                     control={form.control}
                     name="collection"
@@ -160,7 +156,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                     )}
                   />
                   
-                  {/* Year and Technique fields */}
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -191,7 +186,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                     />
                   </div>
                   
-                  {/* Dimensions field */}
                   <FormField
                     control={form.control}
                     name="dimensions"
@@ -208,7 +202,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                 </div>
                 
                 <div className="space-y-6">
-                  {/* Image uploader */}
                   <FormField
                     control={form.control}
                     name="imageUrl"
@@ -229,7 +222,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                     )}
                   />
                   
-                  {/* Description field */}
                   <FormField
                     control={form.control}
                     name="description"
@@ -252,7 +244,6 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
             </ScrollArea>
           </div>
           
-          {/* Submit button - fixed at the bottom */}
           <div className="pt-4 mt-auto border-t">
             <Button 
               type="submit" 
