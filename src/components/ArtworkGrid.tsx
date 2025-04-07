@@ -90,7 +90,7 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
       setHasError(false);
       
       // Reset the error state when artwork changes
-      const img = new Image();
+      const img = document.createElement('img');
       img.src = artwork.imageUrl;
       img.onload = () => {
         setIsLoaded(true);
