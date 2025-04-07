@@ -2,7 +2,7 @@
 export interface Artwork {
   id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   collection: string;
   imageUrl: string;
   thumbnailUrl?: string;

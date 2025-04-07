@@ -24,7 +24,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "El título es requerido" }).max(100, { message: "El título es demasiado largo, máximo 100 caracteres" }),
-  subtitle: z.string().min(1, { message: "El subtítulo es requerido" }).max(200, { message: "El subtítulo es demasiado largo, máximo 200 caracteres" }),
+  subtitle: z.string().optional().max(200, { message: "El subtítulo es demasiado largo, máximo 200 caracteres" }),
   collection: z.string().min(1, { message: "La colección es requerida" }).max(50, { message: "El nombre de la colección es demasiado largo" }),
   imageUrl: z.string().min(1, { message: "La imagen es requerida" }),
   year: z.string().optional(),
@@ -39,6 +39,7 @@ const enhancedFormSchema = formSchema
     technique: z.string().optional().transform(val => val || ""),
     dimensions: z.string().optional().transform(val => val || ""),
     description: z.string().optional().transform(val => val || ""),
+    subtitle: z.string().optional().transform(val => val || ""),
   });
 
 type FormValues = z.infer<typeof enhancedFormSchema>;
@@ -78,7 +79,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     try {
       const artworkData: Omit<Artwork, "id" | "createdAt"> = {
         title: values.title.trim(),
-        subtitle: values.subtitle.trim(),
+        subtitle: values.subtitle,
         collection: values.collection.trim(),
         imageUrl: values.imageUrl,
         year: values.year ? values.year.trim() : undefined,
@@ -129,15 +130,15 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                     )}
                   />
                   
-                  {/* Subtitle field */}
+                  {/* Subtitle field - now optional */}
                   <FormField
                     control={form.control}
                     name="subtitle"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Subtítulo <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>Subtítulo</FormLabel>
                         <FormControl>
-                          <Input placeholder="Subtítulo de la obra" {...field} />
+                          <Input placeholder="Subtítulo de la obra (opcional)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
