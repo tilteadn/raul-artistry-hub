@@ -104,4 +104,4 @@ export async function calculateVisitorStats(): Promise<VisitorData> {
   }
 }
 
-// We don't need to re-export getEmptyStats from here anymore since we're importing it directly
+// No need to re-export getEmptyStats here
