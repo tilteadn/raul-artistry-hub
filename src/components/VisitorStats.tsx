@@ -24,30 +24,14 @@ const VisitorStats = () => {
         
         if (data.totalVisits === 0) {
           console.log("VisitorStats: No visitor data found");
-        } else if (data.topCountries.length > 0) {
-          // Log country breakdown for debugging
-          console.log("VisitorStats: Countries breakdown:", 
-            data.topCountries.map(c => `${c.country}: ${c.visits} (${c.percentage.toFixed(1)}%)`).join(', ')
-          );
-          
-          // Check if most visitors have unknown country
-          const unknownCountry = data.topCountries.find(c => c.country === "Unknown");
-          if (unknownCountry && unknownCountry.percentage > 80) {
-            console.log("VisitorStats: Most visitors have unknown country. Country detection might not be working optimally.");
-            
-            // Check if we've already shown this toast in this session
-            const toastShown = sessionStorage.getItem('unknown_country_toast_shown');
-            if (!toastShown) {
-              toast.info("La detección de países puede no funcionar correctamente en este momento", {
-                duration: 5000,
-              });
-              sessionStorage.setItem('unknown_country_toast_shown', 'true');
-            }
-          }
+        } else {
+          // Log some data for debugging
+          console.log(`VisitorStats: Total visits: ${data.totalVisits}`);
+          console.log(`VisitorStats: Countries: ${data.topCountries.map(c => c.country).join(', ')}`);
         }
         
         setVisitData(data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("VisitorStats: Error loading visitor data:", error);
         toast.error("Error al cargar estadísticas de visitas");
         setError("No se pudieron cargar los datos de visitas. Por favor, inténtalo de nuevo más tarde.");
@@ -57,17 +41,6 @@ const VisitorStats = () => {
     };
 
     loadVisitorData();
-    
-    // Set up auto-refresh every 5 minutes if there was an error or if most visitors have unknown country
-    const intervalId = setInterval(() => {
-      if (error || (visitData?.topCountries.length === 1 && visitData.topCountries[0].country === "Unknown")) {
-        console.log("VisitorStats: Auto-refreshing stats due to previous errors");
-        setRetryCount(count => count + 1);
-        loadVisitorData();
-      }
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(intervalId);
   }, [retryCount]);
 
   const handleManualRefresh = () => {

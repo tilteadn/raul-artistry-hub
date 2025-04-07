@@ -135,18 +135,20 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
   try {
     console.log("Getting visitor statistics...");
     
-    // Use the correct API key and fetch all visitors without any filters
+    // DEBUG: Log full details of the request to help diagnose issues
+    console.log("Calling Supabase to get visitor data...");
+    
+    // Directly fetch from visitors table without any filters to ensure we get all data
     const { data: allVisitors, error: visitorsError } = await supabase
       .from('visitors')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
     
     if (visitorsError) {
       console.error("Error getting visitor data:", visitorsError);
       throw visitorsError;
     }
     
-    console.log(`Retrieved ${allVisitors?.length || 0} visitor records`);
+    console.log(`Retrieved ${allVisitors?.length || 0} visitor records:`, allVisitors);
     
     if (!allVisitors || allVisitors.length === 0) {
       console.log("No visitor data found");
@@ -237,6 +239,7 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
     
     console.log("Visitor statistics calculated successfully");
     console.log("Top countries:", topCountries);
+    console.log("Monthly data:", monthlyData);
     
     return {
       totalVisits,
