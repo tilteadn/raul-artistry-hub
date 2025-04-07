@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { ImagePlus, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ const ImageUploader = ({
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialImage || null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
@@ -65,39 +65,47 @@ const ImageUploader = ({
     }
 
     try {
+      setUploadError(null);
       console.log("Processing file:", file.name, file.type, file.size);
       
-      // Create a local preview
       const localUrl = URL.createObjectURL(file);
       setPreviewUrl(localUrl);
       setIsUploading(true);
       
-      // Upload the file immediately instead of storing in localStorage
       try {
         console.log("Uploading image to Supabase storage");
         const uploadedUrl = await uploadImage(file);
         console.log("Image uploaded successfully:", uploadedUrl);
         
-        // Pass the actual uploaded URL to parent component
         onChange(uploadedUrl);
         setIsUploading(false);
-      } catch (uploadError) {
+      } catch (uploadError: any) {
         console.error("Error uploading image:", uploadError);
-        toast.error("Error al subir la imagen");
-        // Still keep the preview but mark as not uploading
+        
+        let errorMessage = "Error al subir la imagen";
+        
+        if (uploadError.error === "InvalidKey") {
+          errorMessage = "El nombre del archivo contiene caracteres no permitidos";
+        } else if (uploadError.message) {
+          errorMessage = `Error: ${uploadError.message}`;
+        }
+        
+        setUploadError(errorMessage);
+        toast.error(errorMessage);
+        
         setIsUploading(false);
-        // Even though upload failed, we'll pass the local URL for now
+        
         onChange(localUrl);
         
-        // Store file info in localStorage for later upload as a fallback
         localStorage.setItem('pendingArtworkImage', JSON.stringify({
           localUrl,
           fileName: file.name,
           type: file.type
         }));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error handling file:", error);
+      setUploadError(`Error al procesar la imagen: ${error.message || "Error desconocido"}`);
       toast.error("Error al procesar la imagen");
       setIsUploading(false);
     }
@@ -105,14 +113,15 @@ const ImageUploader = ({
 
   const handleClickUpload = (e: React.MouseEvent) => {
     if (isDisabled) return;
-    e.stopPropagation(); // Stop event propagation
-    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation();
+    e.preventDefault();
     fileInputRef.current?.click();
   };
 
   const handleRemoveImage = () => {
     if (isDisabled) return;
     setPreviewUrl(null);
+    setUploadError(null);
     onChange("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -120,7 +129,6 @@ const ImageUploader = ({
     localStorage.removeItem('pendingArtworkImage');
   };
 
-  // Handler to prevent right-click
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
@@ -141,6 +149,7 @@ const ImageUploader = ({
         className={cn(
           "border-2 border-dashed rounded-md transition-all duration-200 overflow-hidden bg-background",
           isDragging ? "border-primary" : "border-border",
+          uploadError ? "border-destructive" : "",
           isDisabled ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
           className
         )}
@@ -187,6 +196,12 @@ const ImageUploader = ({
                 </div>
               </div>
             )}
+            
+            {uploadError && (
+              <div className="absolute bottom-0 left-0 right-0 bg-destructive/90 text-destructive-foreground p-2 text-sm">
+                {uploadError}
+              </div>
+            )}
           </div>
         ) : (
           <div className={cn(
@@ -210,6 +225,9 @@ const ImageUploader = ({
                       ? "Haz clic para seleccionar" 
                       : "Arrastra y suelta aquí o haz clic para seleccionar"}
                 </p>
+                {uploadError && (
+                  <p className="text-sm text-destructive mt-2">{uploadError}</p>
+                )}
                 {!isDisabled && (
                   <Button 
                     variant="outline" 

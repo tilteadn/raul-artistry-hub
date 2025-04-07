@@ -6,6 +6,21 @@ import { v4 as uuidv4 } from 'uuid';
 const STORAGE_BUCKET = 'artwork_images';
 
 /**
+ * Sanitizes a filename to make it storage-safe
+ * @param filename Original filename
+ * @returns Sanitized filename
+ */
+const sanitizeFilename = (filename: string): string => {
+  // Replace accented characters with non-accented versions
+  const withoutAccents = filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  // Replace spaces and special characters with dashes
+  return withoutAccents
+    .replace(/[^a-zA-Z0-9.]/g, '-')
+    .replace(/-+/g, '-'); // Replace multiple consecutive dashes with a single dash
+};
+
+/**
  * Uploads an image to Supabase storage
  * @param file File or data URL to upload
  * @returns URL of the uploaded file
@@ -26,8 +41,9 @@ export const uploadImage = async (fileOrDataUrl: File | string): Promise<string>
       throw new Error('Invalid file format');
     }
     
-    // Generate a unique file path
-    const filePath = `${uuidv4()}-${file.name.replace(/\s+/g, '-')}`;
+    // Generate a unique file path with sanitized filename
+    const sanitizedName = sanitizeFilename(file.name);
+    const filePath = `${uuidv4()}-${sanitizedName}`;
     
     console.log(`Uploading file to ${STORAGE_BUCKET}/${filePath}`);
     
