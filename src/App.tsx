@@ -14,7 +14,7 @@ import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import CookieConsent, { useCookieConsent } from "./components/CookieConsent";
-import { trackVisit } from "./utils/visitorTrackingService";
+import { trackVisit } from "./utils/visitor/trackVisit";
 
 const queryClient = new QueryClient();
 
