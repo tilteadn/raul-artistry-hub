@@ -135,7 +135,7 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
   try {
     console.log("Getting visitor statistics...");
     
-    // Get all visitors to perform calculations
+    // Use the correct API key and fetch all visitors without any filters
     const { data: allVisitors, error: visitorsError } = await supabase
       .from('visitors')
       .select('*')
@@ -143,7 +143,7 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
     
     if (visitorsError) {
       console.error("Error getting visitor data:", visitorsError);
-      return getEmptyStats();
+      throw visitorsError;
     }
     
     console.log(`Retrieved ${allVisitors?.length || 0} visitor records`);
@@ -247,7 +247,7 @@ export const getVisitorStats = async (): Promise<VisitorData> => {
     };
   } catch (error) {
     console.error("Error calculating visitor stats:", error);
-    return getEmptyStats();
+    throw error;
   }
 };
 
