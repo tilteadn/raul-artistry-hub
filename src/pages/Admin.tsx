@@ -7,7 +7,7 @@ import AdminPanel from "@/components/AdminPanel";
 import AdminAuth from "@/components/AdminAuth";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Artwork } from "@/types/artwork";
-import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork } from "@/utils/artworkService";
+import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork } from "@/utils/artwork/artworkService";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
@@ -114,12 +114,8 @@ const Admin = () => {
         throw new Error("Artwork not found");
       }
       
-      const updatedArtwork: Artwork = {
-        ...existingArtwork,
-        ...artworkData,
-      };
-      
-      const result = await updateArtwork(updatedArtwork);
+      // Fix: Pass id and artwork data as separate arguments
+      const result = await updateArtwork(id, artworkData);
       console.log("Artwork updated successfully:", result.id);
       
       await loadArtworks();
