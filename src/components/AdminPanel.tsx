@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/drawer";
 import VisitorStats from "./VisitorStats";
 import BatchUploadTab from "./admin/BatchUploadTab";
+import { getImageUrl } from "@/utils/artwork/artworkService";
 
 interface AdminPanelProps {
   artworks: Artwork[];
@@ -206,7 +207,7 @@ const AdminPanel = ({
                 <Card key={artwork.id} className="overflow-hidden">
                   <div className="relative aspect-[3/4]">
                     <img
-                      src={artwork.imageUrl}
+                      src={getImageUrl(artwork.imageUrl)}
                       alt={artwork.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -286,7 +287,7 @@ const AdminPanel = ({
                     <div className="relative aspect-[3/4]">
                       {thumbnailArtwork ? (
                         <img
-                          src={thumbnailArtwork.imageUrl}
+                          src={getImageUrl(thumbnailArtwork.imageUrl)}
                           alt={collection}
                           className="w-full h-full object-cover"
                           onError={(e) => {

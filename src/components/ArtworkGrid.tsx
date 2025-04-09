@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Artwork } from "@/types/artwork";
@@ -6,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ImageOff } from "lucide-react";
+import { getImageUrl } from "@/utils/artwork/artworkService";
 
 interface ArtworkGridProps {
   artworks: Artwork[];
@@ -17,7 +17,6 @@ const ArtworkGrid = ({ artworks, collection, loading = false }: ArtworkGridProps
   return (
     <div className="artwork-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {loading ? (
-        // Loading skeletons
         Array.from({ length: 6 }).map((_, i) => (
           <Card key={i} className="overflow-hidden">
             <Skeleton className="w-full aspect-[3/4]" />
@@ -53,7 +52,8 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // Handler to prevent right-click
+  const imageUrlString = getImageUrl(artwork.imageUrl);
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
@@ -84,14 +84,11 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
 
   useEffect(() => {
     if (isInView) {
-      // For all images, we'll set them to loaded immediately
-      // but still keep error handling for safety
       setIsLoaded(false);
       setHasError(false);
       
-      // Reset the error state when artwork changes
       const img = document.createElement('img');
-      img.src = artwork.imageUrl;
+      img.src = imageUrlString;
       img.onload = () => {
         setIsLoaded(true);
         setHasError(false);
@@ -99,15 +96,13 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
       img.onerror = () => {
         console.error(`Failed to load image for artwork: ${artwork.title}`);
         setHasError(true);
-        setIsLoaded(true); // Consider it "loaded" even though it errored
+        setIsLoaded(true);
       };
     }
-  }, [isInView, artwork.imageUrl, artwork.title]);
+  }, [isInView, imageUrlString, artwork.title]);
 
-  // Use a fallback image color or pattern when image fails to load
   const fallbackBgColor = `hsl(${parseInt(artwork.id) * 60 % 360}, 70%, 80%)`;
 
-  // Create comprehensive alt text for the artwork
   const altText = `${artwork.title}${artwork.subtitle ? ` - ${artwork.subtitle}` : ''}${artwork.collection ? ` - Colección: ${artwork.collection}` : ''} - Obra de Raúl Álvarez`;
 
   return (
@@ -139,7 +134,7 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
           ) : (
             <>
               <img
-                src={artwork.imageUrl}
+                src={imageUrlString}
                 alt={altText}
                 className={cn(
                   "w-full h-full object-cover transition-transform duration-700 group-hover:scale-105",

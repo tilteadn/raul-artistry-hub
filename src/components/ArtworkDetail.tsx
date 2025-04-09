@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { ImageOff } from "lucide-react";
 import { Artwork } from "@/types/artwork";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { getImageUrl } from "@/utils/artwork/artworkService";
 
 interface ArtworkDetailProps {
   artwork: Artwork;
@@ -13,6 +13,9 @@ interface ArtworkDetailProps {
 const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
+
+  // Get the safe image URL string
+  const imageUrlString = artwork ? getImageUrl(artwork.imageUrl) : '';
 
   // Handler to prevent right-click
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -26,7 +29,7 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
       setHasImageError(false);
       
       const img = new Image();
-      img.src = artwork.imageUrl;
+      img.src = imageUrlString;
       
       img.onload = () => {
         setIsImageLoaded(true);
@@ -39,7 +42,7 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
         setIsImageLoaded(true); // Consider it "loaded" even though it errored
       };
     }
-  }, [artwork]);
+  }, [artwork, imageUrlString]);
 
   // Disable keyboard shortcuts for saving images
   useEffect(() => {
@@ -117,7 +120,7 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
             onContextMenu={handleContextMenu}
           >
             <img
-              src={artwork.imageUrl}
+              src={imageUrlString}
               alt={artworkAltText}
               className="w-full h-full object-cover transition-opacity duration-700"
               onError={() => setHasImageError(true)}

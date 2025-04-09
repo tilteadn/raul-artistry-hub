@@ -12,6 +12,16 @@ import {
 } from "./supabaseArtworkService";
 
 /**
+ * Helper function to safely get string URL from imageUrl which could be File or string
+ */
+export const getImageUrl = (imageUrl: string | File): string => {
+  if (imageUrl instanceof File) {
+    return URL.createObjectURL(imageUrl);
+  }
+  return imageUrl;
+};
+
+/**
  * Retrieves all artworks, sorted by creation date (newest first)
  */
 export const getAllArtworks = async (): Promise<Artwork[]> => {

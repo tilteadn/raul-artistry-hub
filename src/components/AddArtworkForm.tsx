@@ -25,7 +25,7 @@ const formSchema = z.object({
   title: z.string().min(1, { message: "El título es requerido" }).max(100, { message: "El título es demasiado largo, máximo 100 caracteres" }),
   subtitle: z.string().optional(),
   collection: z.string().min(1, { message: "La colección es requerida" }).max(50, { message: "El nombre de la colección es demasiado largo" }),
-  imageUrl: z.string().min(1, { message: "La imagen es requerida" }),
+  imageUrl: z.union([z.string(), z.instanceof(File)]).refine(val => val !== "", { message: "La imagen es requerida" }),
   year: z.string().optional(),
   technique: z.string().optional(),
   dimensions: z.string().optional(),
@@ -67,7 +67,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     mode: "onChange",
   });
 
-  const handleImageChange = (url: string) => {
+  const handleImageChange = (url: string | File) => {
     form.setValue("imageUrl", url);
     form.trigger("imageUrl");
   };

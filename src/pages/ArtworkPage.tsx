@@ -1,15 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Artwork } from "@/types/artwork";
-import { getArtworkById } from "@/utils/artworkService";
+import { getArtworkById, getImageUrl } from "@/utils/artwork/artworkService";
 import ArtworkDetail from "@/components/ArtworkDetail";
 import { toast } from "@/hooks/use-toast";
 import MetaTags from "@/components/MetaTags";
 
-// Change the interface to use Record<string, string>
 type ArtworkParams = {
   id: string;
 };
@@ -56,12 +54,11 @@ const ArtworkPage = () => {
     loadArtwork();
   }, [id]);
   
-  // Add meta tag content based on artwork data
   const metaTitle = artwork ? `${artwork.title} | Raúl Álvarez` : "Obra | Raúl Álvarez";
   const metaDescription = artwork 
     ? `${artwork.title}${artwork.subtitle ? ` - ${artwork.subtitle}` : ''} - Obra de arte de Raúl Álvarez, ${artwork.technique || ''} (${artwork.year || 'n/a'})`
     : "Detalle de obra artística de Raúl Álvarez, artista plástico y tatuador en A Coruña.";
-  const metaImage = artwork?.imageUrl || "/lovable-uploads/raulRetrato.jpg";
+  const metaImage = artwork ? getImageUrl(artwork.imageUrl) : "/lovable-uploads/raulRetrato.jpg";
   
   return (
     <div className="min-h-screen">
