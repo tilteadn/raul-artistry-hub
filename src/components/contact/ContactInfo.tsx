@@ -1,4 +1,3 @@
-
 import { Instagram, Mail, MapPin } from "lucide-react";
 
 const ContactInfo = () => {
@@ -15,7 +14,12 @@ const ContactInfo = () => {
           <Mail className="w-5 h-5 text-primary mt-1" />
           <div>
             <h3 className="font-medium">Email</h3>
-            <p className="text-muted-foreground">raulalvarezjimenez@hotmail.com</p>
+            <a 
+              href="mailto:raulalvarezjimenez@hotmail.com"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              raulalvarezjimenez@hotmail.com
+            </a>
           </div>
         </div>
         
