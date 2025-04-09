@@ -14,22 +14,6 @@ import { toast } from "sonner";
 
 const AboutMe = () => {
   const [activeTab, setActiveTab] = useState<string>("bio");
-  const [signatureLoaded, setSignatureLoaded] = useState(false);
-  const [signatureError, setSignatureError] = useState(false);
-
-  useEffect(() => {
-    // Pre-load the signature image to detect any loading issues
-    const img = document.createElement('img');
-    img.src = "/lovable-uploads/Firma sin fondo.jpg";
-    img.onload = () => setSignatureLoaded(true);
-    img.onerror = () => {
-      setSignatureError(true);
-      console.error("Failed to load signature image");
-      toast.error("Error al cargar la firma", {
-        description: "No se ha podido cargar la imagen de la firma"
-      });
-    };
-  }, []);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
