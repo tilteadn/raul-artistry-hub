@@ -115,12 +115,14 @@ const Admin = () => {
         throw new Error("Artwork not found");
       }
       
-      // Fix: updateArtwork expects a single artwork argument with id included
-      const updatedArtwork = {
-        id,
+      // Create complete artwork object with all required fields
+      const updatedArtwork: Artwork = {
         ...artworkData,
+        id: id,
         createdAt: existingArtwork.createdAt,
       };
+      
+      // Pass the complete artwork object to updateArtwork
       const result = await updateArtwork(updatedArtwork);
       console.log("Artwork updated successfully:", result.id);
       

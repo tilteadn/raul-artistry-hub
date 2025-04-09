@@ -88,10 +88,16 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     const fetchCollections = async () => {
       try {
         const artworks = await getAllArtworks();
-        const collections = Array.from(new Set(artworks.map(artwork => artwork.collection)));
-        setExistingCollections(collections);
+        // Make sure we handle the case when artworks might be undefined or empty
+        if (artworks && artworks.length > 0) {
+          const collections = Array.from(new Set(artworks.map(artwork => artwork.collection)));
+          setExistingCollections(collections);
+        } else {
+          setExistingCollections([]);
+        }
       } catch (error) {
         console.error("Error fetching collections:", error);
+        setExistingCollections([]);
       }
     };
 
@@ -205,7 +211,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                               />
                               <CommandEmpty>No se encontraron colecciones.</CommandEmpty>
                               <CommandGroup>
-                                {existingCollections.map((collection) => (
+                                {existingCollections.length > 0 ? existingCollections.map((collection) => (
                                   <CommandItem
                                     key={collection}
                                     value={collection}
@@ -223,7 +229,7 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                                     />
                                     {collection}
                                   </CommandItem>
-                                ))}
+                                )) : null}
                               </CommandGroup>
                             </Command>
                           </PopoverContent>
