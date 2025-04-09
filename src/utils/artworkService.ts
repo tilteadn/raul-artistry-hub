@@ -18,5 +18,5 @@ export const getArtworkById = getArtworkByIdFromDb;
 export const getRelatedArtworks = getRelatedArtworksFromDb;
 export const getCollections = getCollectionsFromDb;
 export const saveArtwork = saveArtworkToDb;
-export const updateArtwork = updateArtworkInDb; // This function expects (id, artwork)
+export const updateArtwork = updateArtworkInDb;
 export const deleteArtwork = deleteArtworkFromDb;

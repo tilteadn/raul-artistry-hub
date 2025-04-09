@@ -1,9 +1,10 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,6 +21,20 @@ import { Artwork } from "@/types/artwork";
 import ImageUploader from "./ImageUploader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { 
+  Command, 
+  CommandEmpty, 
+  CommandGroup, 
+  CommandInput, 
+  CommandItem 
+} from "@/components/ui/command";
+import { getAllArtworks } from "@/utils/artworkService";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "El título es requerido" }).max(100, { message: "El título es demasiado largo, máximo 100 caracteres" }),
@@ -50,6 +65,7 @@ interface AddArtworkFormProps {
 
 const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingCollections, setExistingCollections] = useState<string[]>([]);
   const isMobile = useIsMobile();
 
   const form = useForm<FormValues>({
@@ -66,6 +82,21 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
     },
     mode: "onChange",
   });
+
+  useEffect(() => {
+    // Fetch existing collections for autocompletion
+    const fetchCollections = async () => {
+      try {
+        const artworks = await getAllArtworks();
+        const collections = Array.from(new Set(artworks.map(artwork => artwork.collection)));
+        setExistingCollections(collections);
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+      }
+    };
+
+    fetchCollections();
+  }, []);
 
   const handleImageChange = (url: string) => {
     form.setValue("imageUrl", url);
@@ -146,11 +177,60 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                     control={form.control}
                     name="collection"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>Colección <span className="text-destructive">*</span></FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nombre de la colección" {...field} />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value || "Selecciona una colección"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput 
+                                placeholder="Busca una colección o escribe una nueva" 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                }}
+                              />
+                              <CommandEmpty>No se encontraron colecciones.</CommandEmpty>
+                              <CommandGroup>
+                                {existingCollections.map((collection) => (
+                                  <CommandItem
+                                    key={collection}
+                                    value={collection}
+                                    onSelect={() => {
+                                      form.setValue("collection", collection);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        collection === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {collection}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormDescription>
+                          Selecciona una colección existente o escribe una nueva
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
