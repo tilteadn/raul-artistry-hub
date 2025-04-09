@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2 } from "lucide-react";
+import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Artwork } from "@/types/artwork";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import VisitorStats from "./VisitorStats";
+import BatchUploadTab from "./admin/BatchUploadTab";
 
 interface AdminPanelProps {
   artworks: Artwork[];
@@ -187,6 +187,10 @@ const AdminPanel = ({
             <Grid3X3 className="h-4 w-4 mr-2" />
             Colecciones
           </TabsTrigger>
+          <TabsTrigger value="cargaMasiva">
+            <Upload className="h-4 w-4 mr-2" />
+            Carga Masiva
+          </TabsTrigger>
           <TabsTrigger value="estadisticas">
             <Users className="h-4 w-4 mr-2" />
             Estadísticas
@@ -313,6 +317,14 @@ const AdminPanel = ({
               )}
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="cargaMasiva" className="mt-6">
+          <BatchUploadTab onComplete={() => onAddArtwork && onAddArtwork({
+            title: "", 
+            collection: "", 
+            imageUrl: ""
+          })} />
         </TabsContent>
         
         <TabsContent value="estadisticas" className="mt-6">
