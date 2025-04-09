@@ -109,15 +109,21 @@ const Admin = () => {
       setIsUpdating(true);
       console.log(`Updating artwork ID: ${id}, Title: ${artworkData.title}`);
       const existingArtwork = artworks.find((a) => a.id === id);
-      
+  
       if (!existingArtwork) {
         throw new Error("Artwork not found");
       }
       
-      // Fix: Pass id and artwork data as separate arguments
-      const result = await updateArtwork(id, artworkData);
+      // Create complete artwork object with all required fields
+      const updatedArtwork: Artwork = {
+        ...artworkData,
+        id: id,
+        createdAt: existingArtwork.createdAt,
+      };
+  
+      const result = await updateArtwork(updatedArtwork);
       console.log("Artwork updated successfully:", result.id);
-      
+  
       await loadArtworks();
       
       toast({

@@ -87,22 +87,16 @@ export const saveArtwork = async (artwork: Artwork): Promise<Artwork> => {
 };
 
 /**
- * Updates an existing artwork by id and new data.
- * Note: artworkData omits id and createdAt as those should not be modified.
+ * Updates an existing artwork
  */
-export const updateArtwork = async (
-  id: string,
-  artworkData: Omit<Artwork, "id" | "createdAt">
-): Promise<Artwork> => {
+export const updateArtwork = async (artwork: Artwork): Promise<Artwork> => {
   try {
-    // Call the underlying DB service which expects the id and the data to update
-    return await updateArtworkInDb(id, artworkData);
+    return await updateArtworkInDb(artwork.id, artwork);
   } catch (error) {
-    console.error(`Error updating artwork with ID ${id}:`, error);
+    console.error(`Error updating artwork with ID ${artwork.id}:`, error);
     throw error;
   }
 };
-
 
 /**
  * Deletes an artwork by ID
