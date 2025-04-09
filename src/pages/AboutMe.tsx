@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import MetaTags from "@/components/MetaTags";
-import { toast } from "sonner";
+// Remove the toast import since we don't need it
+// import { toast } from "sonner";
 
 const AboutMe = () => {
   const [activeTab, setActiveTab] = useState<string>("bio");
@@ -122,6 +123,7 @@ Be water, my friend.`;
                     className="object-cover w-full h-full"
                     draggable="false"
                     onContextMenu={(e) => e.preventDefault()}
+                    // Remove any error handling that might show toasts
                   />
                   <div className="absolute inset-0 bg-transparent pointer-events-none"></div>
                 </div>
@@ -200,3 +202,4 @@ Be water, my friend.`;
 };
 
 export default AboutMe;
+
