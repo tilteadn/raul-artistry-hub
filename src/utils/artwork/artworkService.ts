@@ -76,6 +76,7 @@ export const getCollections = async (): Promise<Collection[]> => {
 
 /**
  * Saves a new artwork
+ * Note: imageUrl can be a string URL, data URL, or File object
  */
 export const saveArtwork = async (artwork: Artwork): Promise<Artwork> => {
   try {

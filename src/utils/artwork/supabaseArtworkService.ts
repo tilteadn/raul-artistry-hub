@@ -283,14 +283,18 @@ export const saveArtworkToDb = async (artwork: Artwork): Promise<Artwork> => {
   try {
     console.log('Saving new artwork to database:', artwork.title);
     
-    // Handle image upload if it's a data URL
+    // Handle image upload if it's a File object or data URL
     let imageUrl = artwork.imageUrl;
     
     if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image');
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded data URL image:', imageUrl);
-    } else if (artwork.imageUrl.startsWith('blob:')) {
+    } else if (artwork.imageUrl instanceof File) {
+      console.log('Processing File object');
+      imageUrl = await uploadImage(artwork.imageUrl);
+      console.log('Uploaded File image:', imageUrl);
+    } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('blob:')) {
       console.error('Blob URLs are not supported without the associated File object');
       throw new Error('Blob URLs are not supported for upload. Please provide the original file.');
     } else {
@@ -298,8 +302,11 @@ export const saveArtworkToDb = async (artwork: Artwork): Promise<Artwork> => {
     }
     
     const dbArtwork = {
-      ...mapArtworkToDbArtwork(artwork),
-      image_url: imageUrl
+      ...mapArtworkToDbArtwork({
+        ...artwork,
+        imageUrl: typeof imageUrl === 'string' ? imageUrl : ''
+      }),
+      image_url: typeof imageUrl === 'string' ? imageUrl : ''
     };
     
     console.log('Inserting artwork into database:', dbArtwork);
@@ -333,14 +340,18 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
   try {
     console.log(`Updating artwork ID: ${id}, Title: ${artwork.title}`);
     
-    // Handle image upload if it's a data URL
+    // Handle image upload if it's a File object or data URL
     let imageUrl = artwork.imageUrl;
     
     if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image for update');
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded data URL image for update:', imageUrl);
-    } else if (artwork.imageUrl.startsWith('blob:')) {
+    } else if (artwork.imageUrl instanceof File) {
+      console.log('Processing File object for update');
+      imageUrl = await uploadImage(artwork.imageUrl);
+      console.log('Uploaded File image for update:', imageUrl);
+    } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('blob:')) {
       console.error('Blob URLs are not supported without the associated File object');
       throw new Error('Blob URLs are not supported for upload. Please provide the original file.');
     } else {
@@ -348,8 +359,11 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
     }
     
     const dbArtwork = {
-      ...mapArtworkToDbArtwork(artwork),
-      image_url: imageUrl,
+      ...mapArtworkToDbArtwork({
+        ...artwork,
+        imageUrl: typeof imageUrl === 'string' ? imageUrl : ''
+      }),
+      image_url: typeof imageUrl === 'string' ? imageUrl : '',
       updated_at: new Date().toISOString()
     };
     

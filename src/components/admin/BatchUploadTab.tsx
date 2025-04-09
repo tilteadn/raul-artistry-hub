@@ -195,18 +195,25 @@ const BatchUploadTab = ({ onComplete }: { onComplete: () => void }) => {
       try {
         const artwork = pendingArtworks[i];
         
-        // Create artwork object
-        const newArtwork: Omit<Artwork, "id" | "createdAt"> = {
+        // Create a temporary mock ID and createdAt for type compatibility
+        // These will be properly generated in the backend
+        const tempId = uuidv4();
+        const tempCreatedAt = new Date();
+        
+        // Create complete artwork object that matches the Artwork type
+        const newArtwork: Artwork = {
+          id: tempId,
           title: artwork.title,
           subtitle: artwork.subtitle,
           collection: effectiveCollection,
-          imageUrl: artwork.file, // Pass the file directly
+          imageUrl: artwork.file, // This will be handled by the backend which accepts File
           year: artwork.year,
           technique: artwork.technique,
           dimensions: artwork.dimensions,
+          createdAt: tempCreatedAt
         };
         
-        // Save artwork to DB
+        // Save artwork to DB - the backend will handle the File object
         await saveArtwork(newArtwork);
         successCount++;
       } catch (error) {

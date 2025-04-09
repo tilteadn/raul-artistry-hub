@@ -4,7 +4,7 @@ export interface Artwork {
   title: string;
   subtitle?: string;
   collection: string;
-  imageUrl: string;
+  imageUrl: string | File; // Updated to accept File objects
   thumbnailUrl?: string;
   year?: string;
   technique?: string;
