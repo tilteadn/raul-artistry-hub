@@ -66,6 +66,7 @@ interface AddArtworkFormProps {
 const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingCollections, setExistingCollections] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState("");
   const isMobile = useIsMobile();
 
   const form = useForm<FormValues>({
@@ -205,31 +206,36 @@ const AddArtworkForm = ({ onSubmit, editArtwork }: AddArtworkFormProps) => {
                             <Command>
                               <CommandInput 
                                 placeholder="Busca una colección o escribe una nueva" 
+                                value={inputValue}
                                 onValueChange={(value) => {
+                                  setInputValue(value);
                                   field.onChange(value);
                                 }}
                               />
                               <CommandEmpty>No se encontraron colecciones.</CommandEmpty>
                               <CommandGroup>
-                                {existingCollections.length > 0 ? existingCollections.map((collection) => (
-                                  <CommandItem
-                                    key={collection}
-                                    value={collection}
-                                    onSelect={() => {
-                                      form.setValue("collection", collection);
-                                    }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        collection === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                    {collection}
-                                  </CommandItem>
-                                )) : null}
+                                {existingCollections && existingCollections.length > 0 && 
+                                  existingCollections.map((collection) => (
+                                    <CommandItem
+                                      key={collection}
+                                      value={collection}
+                                      onSelect={() => {
+                                        form.setValue("collection", collection);
+                                        setInputValue("");
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          collection === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {collection}
+                                    </CommandItem>
+                                  ))
+                                }
                               </CommandGroup>
                             </Command>
                           </PopoverContent>
