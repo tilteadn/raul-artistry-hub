@@ -7,8 +7,8 @@ import { uploadImage } from "@/utils/artwork/supabaseArtworkService";
 import { toast } from "sonner";
 
 interface ImageUploaderProps {
-  onChange: (url: string) => void;
-  initialImage?: string;
+  onChange: (url: string | File) => void;
+  initialImage?: string | File;
   className?: string;
   isDisabled?: boolean;
 }
@@ -20,7 +20,10 @@ const ImageUploader = ({
   isDisabled = false 
 }: ImageUploaderProps) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(initialImage || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initialImage instanceof File ? URL.createObjectURL(initialImage) : 
+    typeof initialImage === 'string' ? initialImage : null
+  );
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,44 +73,13 @@ const ImageUploader = ({
       
       const localUrl = URL.createObjectURL(file);
       setPreviewUrl(localUrl);
-      setIsUploading(true);
       
-      try {
-        console.log("Uploading image to Supabase storage");
-        const uploadedUrl = await uploadImage(file);
-        console.log("Image uploaded successfully:", uploadedUrl);
-        
-        onChange(uploadedUrl);
-        setIsUploading(false);
-      } catch (uploadError: any) {
-        console.error("Error uploading image:", uploadError);
-        
-        let errorMessage = "Error al subir la imagen";
-        
-        if (uploadError.error === "InvalidKey") {
-          errorMessage = "El nombre del archivo contiene caracteres no permitidos";
-        } else if (uploadError.message) {
-          errorMessage = `Error: ${uploadError.message}`;
-        }
-        
-        setUploadError(errorMessage);
-        toast.error(errorMessage);
-        
-        setIsUploading(false);
-        
-        onChange(localUrl);
-        
-        localStorage.setItem('pendingArtworkImage', JSON.stringify({
-          localUrl,
-          fileName: file.name,
-          type: file.type
-        }));
-      }
+      onChange(file);
+      
     } catch (error: any) {
       console.error("Error handling file:", error);
       setUploadError(`Error al procesar la imagen: ${error.message || "Error desconocido"}`);
       toast.error("Error al procesar la imagen");
-      setIsUploading(false);
     }
   };
 

@@ -74,17 +74,39 @@ const BatchUploadTab = ({ onComplete }: { onComplete: () => void }) => {
       // Remove file extension
       const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
       
-      // Try to match pattern: Title Dimensions Technique Year
-      // Example: "Aqua Lineae II 29x21 Grafito sobre papel 2024"
-      const regex = /^(.+?)\s+(\d+x\d+)?\s*(.+?)?\s+(\d{4})?$/;
-      const match = nameWithoutExt.match(regex);
+      // Find first occurrence of a dimension pattern (e.g., 29x21)
+      const dimensionMatch = nameWithoutExt.match(/\d+x\d+/);
       
-      if (match) {
+      if (dimensionMatch && dimensionMatch.index !== undefined) {
+        const dimensionStartIndex = dimensionMatch.index;
+        const dimensions = dimensionMatch[0]; // e.g., "29x21"
+        
+        // Everything before the dimension is title
+        const title = nameWithoutExt.substring(0, dimensionStartIndex).trim();
+        
+        // Extract the part after dimensions
+        const afterDimensions = nameWithoutExt.substring(dimensionStartIndex + dimensions.length).trim();
+        
+        // Look for year pattern at the end (4-digit number)
+        const yearMatch = afterDimensions.match(/\b(\d{4})\b$/);
+        
+        let technique: string | undefined;
+        let year: string | undefined;
+        
+        if (yearMatch) {
+          // If there's a year, everything between dimensions and year is technique
+          year = yearMatch[1];
+          technique = afterDimensions.substring(0, afterDimensions.length - year.length).trim();
+        } else {
+          // No year found, everything after dimensions is technique
+          technique = afterDimensions;
+        }
+        
         return {
-          title: match[1]?.trim() || nameWithoutExt,
-          dimensions: match[2]?.trim(),
-          technique: match[3]?.trim(),
-          year: match[4]?.trim()
+          title,
+          dimensions,
+          technique: technique || undefined,
+          year: year || undefined
         };
       }
       
