@@ -55,8 +55,13 @@ const ContactForm = () => {
       }
       
       console.log("Form submitted successfully", data);
-      toast.success("Mensaje enviado correctamente");
-      form.reset();
+      
+      if (data?.success) {
+        toast.success("Mensaje enviado correctamente. Te hemos enviado una confirmación por email.");
+        form.reset();
+      } else {
+        throw new Error("No se recibió confirmación del servidor");
+      }
     } catch (error: any) {
       console.error("Error sending contact form:", error);
       toast.error("Error al enviar el mensaje. Por favor, inténtalo de nuevo.");
@@ -147,6 +152,6 @@ const ContactForm = () => {
       </Form>
     </div>
   );
-};
+}
 
 export default ContactForm;

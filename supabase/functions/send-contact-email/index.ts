@@ -70,9 +70,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Try to send email to the artist with the contact information
     console.log("Sending email to artist...");
+    
+    // Store the recipient in a variable for debugging
+    const artistEmail = "rauloalvarez@gmail.com";
+    console.log("Artist email recipient:", artistEmail);
+    
     const emailResponse = await resend.emails.send({
       from: "Contacto Web <onboarding@resend.dev>",
-      to: ["rauloalvarez@gmail.com"],
+      to: [artistEmail], // Using the variable to ensure it's correct
       subject: `Nuevo mensaje de contacto: ${subject}`,
       reply_to: email,
       html: `
@@ -89,6 +94,12 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email to artist sent successfully:", emailResponse);
+    
+    // Check if the artist email was actually sent
+    if (!emailResponse || !emailResponse.id) {
+      console.error("Email to artist failed to send properly");
+      throw new Error("Failed to send email to artist");
+    }
 
     // Send confirmation email to the user
     console.log("Sending confirmation email to user...");
@@ -108,7 +119,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Emails sent successfully");
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: "Emails sent successfully to both artist and requester" 
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
