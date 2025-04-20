@@ -144,11 +144,6 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
                 onError={() => setHasError(true)}
                 draggable="false"
               />
-              <div className="absolute inset-0 bg-transparent select-none pointer-events-none">
-                <div className="absolute bottom-0 right-0 p-2 text-white text-opacity-70 text-xs font-light rotate-[-30deg] transform origin-bottom-right">
-                  © Raúl Álvarez
-                </div>
-              </div>
             </>
           )}
         </div>

@@ -14,10 +14,8 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
 
-  // Get the safe image URL string
   const imageUrlString = artwork ? getImageUrl(artwork.imageUrl) : '';
 
-  // Handler to prevent right-click
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
@@ -39,15 +37,13 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
       img.onerror = () => {
         console.error(`Failed to load image for artwork: ${artwork.title}`);
         setHasImageError(true);
-        setIsImageLoaded(true); // Consider it "loaded" even though it errored
+        setIsImageLoaded(true);
       };
     }
   }, [artwork, imageUrlString]);
 
-  // Disable keyboard shortcuts for saving images
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Block Ctrl+S, Ctrl+U and other saving-related shortcuts
       if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'u')) {
         e.preventDefault();
         return false;
@@ -127,15 +123,6 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
               onLoad={() => setIsImageLoaded(true)}
               draggable="false"
             />
-            <div className="absolute inset-0 select-none pointer-events-none">
-              {/* Visible watermark */}
-              <div className="absolute bottom-0 right-0 p-3 text-white text-sm font-light rotate-[-30deg] transform origin-bottom-right">
-                © Raúl Álvarez
-              </div>
-              
-              {/* Invisible overlay to help prevent screen capture */}
-              <div className="absolute inset-0 bg-transparent"></div>
-            </div>
           </div>
         )}
       </div>
