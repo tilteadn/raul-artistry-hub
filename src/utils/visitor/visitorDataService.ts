@@ -15,10 +15,12 @@ export async function fetchVisitorRecords() {
     
     if (!session) {
       console.warn("No authenticated session found when fetching visitor records");
-    } else {
-      console.log("Authenticated session found, proceeding with visitor records fetch");
+      throw new Error("Authentication required to access visitor data");
     }
     
+    console.log("Authenticated session found, proceeding with visitor records fetch");
+    
+    // Use the authenticated client to fetch visitor data
     const { data: visitors, error } = await supabase
       .from('visitors')
       .select('*')
