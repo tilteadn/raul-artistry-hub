@@ -2,6 +2,14 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+
+// Define the shape of the user object returned from Supabase admin API
+interface AdminUser {
+  id: string;
+  email?: string;
+  created_at?: string;
+}
 
 export const useAdminAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -73,7 +81,7 @@ export const useAdminAuth = () => {
         const adminEmail = `admin_${username}@example.com`;
         
         // First check if the user already exists in the auth system
-        const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers();
+        const { data, error: getUserError } = await supabase.auth.admin.listUsers();
         
         if (getUserError) {
           console.error("Error checking if admin user exists:", getUserError);
@@ -119,7 +127,8 @@ export const useAdminAuth = () => {
           }
         } else {
           // Check if admin user exists in the returned list
-          const adminUser = users?.find(user => user.email === adminEmail);
+          const users = data?.users as AdminUser[] || [];
+          const adminUser = users.find(user => user.email === adminEmail);
           
           if (adminUser) {
             console.log("Found existing admin user in auth system, signing in");

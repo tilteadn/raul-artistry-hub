@@ -51,12 +51,12 @@ const VisitorStats = () => {
         const stats = await calculateVisitorStats();
         console.log("Visitor stats loaded:", stats);
         setVisitData(stats);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error loading visitor stats:", err);
-        setError("Hubo un error al cargar las estadísticas de visitantes.");
+        setError(err?.message || "Hubo un error al cargar las estadísticas de visitantes.");
         // Let's show a toast for better visibility of the error
         toast.error("Error loading visitor statistics", {
-          description: "Please try refreshing the page."
+          description: err?.message || "Please try refreshing the page."
         });
         // Fallback to empty stats when there's an error
         setVisitData(getEmptyStats());
