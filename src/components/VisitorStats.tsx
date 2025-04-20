@@ -5,10 +5,10 @@ import { VisitorStatsTabs } from "./stats/VisitorStatsTabs";
 import { VisitorStatsLoading } from "./stats/VisitorStatsLoading";
 import { VisitorStatsEmpty } from "./stats/VisitorStatsEmpty";
 import { SESSION_COUNTRY_KEY } from "@/utils/visitor/countryDetection";
-import { calculateVisitorStats, getEmptyStats } from "@/utils/visitorTrackingService";
-import type { VisitorData } from "@/utils/visitorTrackingService";
+import { calculateVisitorStats } from "@/utils/visitor/visitorDataService";
+import { getEmptyStats } from "@/utils/visitor/statsCalculation";
+import type { VisitorData } from "@/utils/visitor/types";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 
 const VisitorStats = () => {
@@ -22,6 +22,8 @@ const VisitorStats = () => {
     async function loadVisitorStats() {
       try {
         if (!isAuthenticated) {
+          console.log("Not authenticated, not loading visitor stats");
+          setLoading(false);
           return;
         }
         
@@ -56,10 +58,6 @@ const VisitorStats = () => {
     setRetryCount(count => count + 1);
   };
   
-  if (loading && !visitData) {
-    return <VisitorStatsLoading />;
-  }
-  
   if (!isAuthenticated) {
     return (
       <VisitorStatsEmpty 
@@ -67,6 +65,10 @@ const VisitorStats = () => {
         error="Necesitas iniciar sesión como administrador para ver las estadísticas." 
       />
     );
+  }
+  
+  if (loading && !visitData) {
+    return <VisitorStatsLoading />;
   }
   
   if (error && !visitData) {

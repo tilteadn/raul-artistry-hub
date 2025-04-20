@@ -20,7 +20,7 @@ export async function fetchVisitorRecords() {
     
     console.log("Authenticated session found, proceeding with visitor records fetch");
     
-    // Use the authenticated client to fetch visitor data
+    // Use the authenticated client to fetch visitor data with GET request
     const { data: visitors, error } = await supabase
       .from('visitors')
       .select('*')
@@ -44,12 +44,15 @@ export async function fetchVisitorRecords() {
  */
 export async function calculateVisitorStats(): Promise<VisitorData> {
   try {
+    console.log("Starting to calculate visitor stats...");
     const visitors = await fetchVisitorRecords();
     
     if (!visitors || visitors.length === 0) {
       console.log("No visitor records found, returning empty stats");
       return getEmptyStats();
     }
+    
+    console.log(`Processing ${visitors.length} visitor records for stats`);
     
     // Get current month and year for filtering
     const now = new Date();
@@ -103,6 +106,8 @@ export async function calculateVisitorStats(): Promise<VisitorData> {
       return { month, visits: visitsInMonth };
     });
     
+    console.log("Visitor stats calculation complete");
+    
     return {
       totalVisits: visitors.length,
       currentMonthVisits,
@@ -115,5 +120,3 @@ export async function calculateVisitorStats(): Promise<VisitorData> {
     throw error;
   }
 }
-
-// No need to re-export getEmptyStats here
