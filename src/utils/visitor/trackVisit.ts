@@ -14,6 +14,7 @@ export const trackVisit = async (): Promise<void> => {
     console.log(`Tracking visit from ${country} on ${path} (${device}/${browser})`);
     
     // Insert the visit into Supabase
+    // Note: This works with the "Anyone can insert visitors" RLS policy
     const { error } = await supabase
       .from('visitors')
       .insert({

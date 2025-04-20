@@ -9,6 +9,16 @@ import { getEmptyStats } from "./statsCalculation";
 export async function fetchVisitorRecords() {
   try {
     console.log("Fetching visitor records from database...");
+    
+    // Check if we have an active session for the admin user
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      console.warn("No authenticated session found when fetching visitor records");
+    } else {
+      console.log("Authenticated session found, proceeding with visitor records fetch");
+    }
+    
     const { data: visitors, error } = await supabase
       .from('visitors')
       .select('*')
@@ -19,8 +29,8 @@ export async function fetchVisitorRecords() {
       throw error;
     }
     
-    console.log(`Retrieved ${visitors.length} visitor records`);
-    return visitors;
+    console.log(`Retrieved ${visitors?.length || 0} visitor records`);
+    return visitors || [];
   } catch (error) {
     console.error("Failed to fetch visitor records:", error);
     throw error;

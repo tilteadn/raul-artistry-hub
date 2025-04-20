@@ -8,16 +8,36 @@ import { SESSION_COUNTRY_KEY } from "@/utils/visitor/countryDetection";
 import { calculateVisitorStats, getEmptyStats } from "@/utils/visitorTrackingService";
 import type { VisitorData } from "@/utils/visitorTrackingService";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const VisitorStats = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visitData, setVisitData] = useState<VisitorData | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check if the admin is authenticated
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(!!data.session);
+      
+      if (!data.session) {
+        setError("Usuario no autenticado. Necesitas iniciar sesión como administrador para ver las estadísticas.");
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     async function loadVisitorStats() {
       try {
+        if (isAuthenticated === false) {
+          return;
+        }
+        
         setLoading(true);
         setError(null);
         
@@ -39,8 +59,11 @@ const VisitorStats = () => {
       }
     }
     
-    loadVisitorStats();
-  }, [retryCount]);
+    // Only load stats when we know authentication state
+    if (isAuthenticated !== null) {
+      loadVisitorStats();
+    }
+  }, [retryCount, isAuthenticated]);
 
   const handleManualRefresh = () => {
     // Clear the country cache to force a new check on next visit
@@ -49,8 +72,17 @@ const VisitorStats = () => {
     setRetryCount(count => count + 1);
   };
   
-  if (loading) {
+  if (isAuthenticated === null || loading) {
     return <VisitorStatsLoading />;
+  }
+  
+  if (isAuthenticated === false) {
+    return (
+      <VisitorStatsEmpty 
+        hasVisitors={false} 
+        error="Necesitas iniciar sesión como administrador para ver las estadísticas." 
+      />
+    );
   }
   
   if (error && !visitData) {
