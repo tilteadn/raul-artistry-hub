@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -50,9 +51,16 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting login with username:", data.username);
       const isSuccessful = await login(data.username, data.password);
       
       if (isSuccessful) {
+        console.log("Login successful, checking session...");
+        
+        // Verify that we have a valid session after login
+        const { data: { session } } = await (window as any).supabase.auth.getSession();
+        console.log("Session after login:", { hasSession: !!session, userId: session?.user?.id });
+        
         toast.success("Inicio de sesión exitoso");
         
         // Call the callback function to notify the parent component with rememberMe flag

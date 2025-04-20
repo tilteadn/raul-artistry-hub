@@ -15,12 +15,20 @@ export async function fetchVisitorRecords() {
     
     if (!session) {
       console.warn("No authenticated session found when fetching visitor records");
+      console.log("Authentication state details:", { 
+        hasSession: !!session,
+        sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'No expiry'
+      });
       throw new Error("Authentication required to access visitor data");
     }
     
-    console.log("Authenticated session found, proceeding with visitor records fetch");
+    console.log("Authenticated session found, proceeding with visitor records fetch", { 
+      userId: session.user?.id,
+      expiresAt: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'unknown'
+    });
     
-    // Use the authenticated client to fetch visitor data with GET request
+    // Use the authenticated client to fetch visitor data with explicit GET request
+    console.log("Sending GET request to visitors table...");
     const { data: visitors, error } = await supabase
       .from('visitors')
       .select('*')

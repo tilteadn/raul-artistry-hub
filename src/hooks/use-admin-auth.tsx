@@ -9,14 +9,41 @@ export const useAdminAuth = () => {
 
   // Check authentication status on mount
   useEffect(() => {
-    // Check for authentication in localStorage or sessionStorage
-    const storedAuth = localStorage.getItem("adminAuthenticated") || sessionStorage.getItem("adminAuthenticated");
+    const checkAuth = async () => {
+      try {
+        // First check for stored auth in localStorage/sessionStorage
+        const storedAuth = localStorage.getItem("adminAuthenticated") || sessionStorage.getItem("adminAuthenticated");
+        
+        // Then verify with Supabase to confirm auth is still valid
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        console.log("Admin auth check:", {
+          hasStoredAuth: storedAuth === "true",
+          hasValidSession: !!session
+        });
+        
+        // Only consider authenticated if both local storage AND session are valid
+        if (storedAuth === "true" && session) {
+          setIsAuthenticated(true);
+          console.log("Admin authentication confirmed");
+        } else {
+          // If there's a mismatch, clear local storage
+          if (storedAuth === "true" && !session) {
+            console.warn("Stored auth exists but no valid session found. Clearing stored auth.");
+            localStorage.removeItem("adminAuthenticated");
+            sessionStorage.removeItem("adminAuthenticated");
+          }
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Error checking authentication status:", error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    if (storedAuth === "true") {
-      setIsAuthenticated(true);
-    }
-    
-    setIsLoading(false);
+    checkAuth();
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -36,8 +63,24 @@ export const useAdminAuth = () => {
       }
       
       if (data === true) {
+        // Log the successful authentication
+        console.log("Admin credentials verified successfully");
+        
+        // Create a session for the admin user
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: `admin_${username}@example.com`, // Use a consistent email based on username
+          password: password
+        });
+        
+        if (signInError) {
+          console.error("Error creating session:", signInError);
+          toast.error("Error creating session");
+          return false;
+        }
+        
         // Update the authentication state
         setIsAuthenticated(true);
+        console.log("Admin authentication complete and session created");
         
         // Store auth status based on remember me preference
         // This will be handled in the component
@@ -55,10 +98,22 @@ export const useAdminAuth = () => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("adminAuthenticated");
-    sessionStorage.removeItem("adminAuthenticated");
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      console.log("Admin signed out from Supabase");
+      
+      // Clear local storage
+      localStorage.removeItem("adminAuthenticated");
+      sessionStorage.removeItem("adminAuthenticated");
+      
+      // Update state
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Error al cerrar sesión");
+    }
   };
 
   return {

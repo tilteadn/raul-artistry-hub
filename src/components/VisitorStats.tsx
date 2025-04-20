@@ -10,6 +10,7 @@ import { getEmptyStats } from "@/utils/visitor/statsCalculation";
 import type { VisitorData } from "@/utils/visitor/types";
 import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const VisitorStats = () => {
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,22 @@ const VisitorStats = () => {
         setError(null);
         
         console.log("Starting to load visitor statistics...");
+        
+        // Check authentication status explicitly
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Authentication check before loading stats:", { 
+          isAuthenticated: !!session,
+          sessionExists: !!session,
+          userId: session?.user?.id || 'no user'
+        });
+        
+        if (!session) {
+          console.warn("No active session found in VisitorStats component");
+          setError("No se encontró una sesión de administrador activa. Por favor, inicia sesión de nuevo.");
+          setLoading(false);
+          return;
+        }
+        
         const stats = await calculateVisitorStats();
         console.log("Visitor stats loaded:", stats);
         setVisitData(stats);
