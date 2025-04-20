@@ -50,30 +50,126 @@ export const useAdminAuth = () => {
     try {
       setIsLoading(true);
       
+      console.log("Starting admin authentication process for user:", username);
+      
       // Call the Supabase function to verify admin credentials
-      const { data, error } = await supabase.rpc('verify_admin_credentials', {
+      const { data: isValidAdmin, error: verifyError } = await supabase.rpc('verify_admin_credentials', {
         username_input: username,
         password_input: password
       });
       
-      if (error) {
-        console.error("Authentication error:", error);
+      console.log("Admin credential verification result:", { isValid: isValidAdmin, error: verifyError });
+      
+      if (verifyError) {
+        console.error("Authentication error during verification:", verifyError);
         toast.error("Error de autenticación");
         return false;
       }
       
-      if (data === true) {
-        // Log the successful authentication
+      if (isValidAdmin === true) {
         console.log("Admin credentials verified successfully");
         
-        // Create a session for the admin user
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: `admin_${username}@example.com`, // Use a consistent email based on username
-          password: password
-        });
+        // Generate a consistent email for the admin user based on username
+        const adminEmail = `admin_${username}@example.com`;
         
-        if (signInError) {
-          console.error("Error creating session:", signInError);
+        // First check if the user already exists in the auth system
+        const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers();
+        
+        if (getUserError) {
+          console.error("Error checking if admin user exists:", getUserError);
+          
+          // Fall back to trying to sign in directly
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: adminEmail,
+            password: password
+          });
+          
+          if (signInError) {
+            console.error("Error signing in admin:", signInError);
+            
+            // Try to create the user if sign-in fails
+            console.log("Attempting to create admin user in auth system");
+            const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
+              email: adminEmail,
+              password: password,
+              email_confirm: true
+            });
+            
+            if (createUserError) {
+              console.error("Failed to create admin user:", createUserError);
+              toast.error("Error creating admin user");
+              return false;
+            }
+            
+            console.log("Admin user created successfully, signing in");
+            
+            // Now sign in with the newly created user
+            const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+              email: adminEmail,
+              password: password
+            });
+            
+            if (finalSignInError) {
+              console.error("Failed to sign in with newly created admin user:", finalSignInError);
+              toast.error("Error signing in with new admin user");
+              return false;
+            }
+          } else {
+            console.log("Admin signed in successfully");
+          }
+        } else {
+          // Check if admin user exists in the returned list
+          const adminUser = users?.find(user => user.email === adminEmail);
+          
+          if (adminUser) {
+            console.log("Found existing admin user in auth system, signing in");
+            // User exists, sign in
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email: adminEmail,
+              password: password
+            });
+            
+            if (signInError) {
+              console.error("Error signing in with existing admin credentials:", signInError);
+              toast.error("Error signing in");
+              return false;
+            }
+          } else {
+            console.log("Admin user doesn't exist in auth system, creating");
+            // Create user since they don't exist
+            const { error: createUserError } = await supabase.auth.admin.createUser({
+              email: adminEmail,
+              password: password,
+              email_confirm: true
+            });
+            
+            if (createUserError) {
+              console.error("Failed to create admin user:", createUserError);
+              toast.error("Error creating admin user");
+              return false;
+            }
+            
+            console.log("Admin user created successfully, signing in");
+            
+            // Now sign in
+            const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+              email: adminEmail,
+              password: password
+            });
+            
+            if (finalSignInError) {
+              console.error("Failed to sign in with newly created admin user:", finalSignInError);
+              toast.error("Error signing in with new admin user");
+              return false;
+            }
+          }
+        }
+        
+        // Verify we now have a valid session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.error("Failed to create a valid session");
           toast.error("Error creating session");
           return false;
         }

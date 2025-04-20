@@ -36,7 +36,7 @@ const VisitorStats = () => {
         // Check authentication status explicitly
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Authentication check before loading stats:", { 
-          isAuthenticated: !!session,
+          isAuthenticated,
           sessionExists: !!session,
           userId: session?.user?.id || 'no user'
         });
