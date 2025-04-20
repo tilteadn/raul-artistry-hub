@@ -72,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending email to artist...");
     const emailResponse = await resend.emails.send({
       from: "Contacto Web <onboarding@resend.dev>",
-      to: ["raulalvarezjimenez@hotmail.com"],
+      to: ["rauloalvarez@gmail.com"],
       subject: `Nuevo mensaje de contacto: ${subject}`,
       reply_to: email,
       html: `
