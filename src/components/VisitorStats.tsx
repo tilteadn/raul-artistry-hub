@@ -9,32 +9,19 @@ import { calculateVisitorStats, getEmptyStats } from "@/utils/visitorTrackingSer
 import type { VisitorData } from "@/utils/visitorTrackingService";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 
 const VisitorStats = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visitData, setVisitData] = useState<VisitorData | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    // Check if the admin is authenticated
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-      
-      if (!data.session) {
-        setError("Usuario no autenticado. Necesitas iniciar sesión como administrador para ver las estadísticas.");
-      }
-    };
-    
-    checkAuth();
-  }, []);
+  const { isAuthenticated } = useAdminAuth();
 
   useEffect(() => {
     async function loadVisitorStats() {
       try {
-        if (isAuthenticated === false) {
+        if (!isAuthenticated) {
           return;
         }
         
@@ -59,10 +46,7 @@ const VisitorStats = () => {
       }
     }
     
-    // Only load stats when we know authentication state
-    if (isAuthenticated !== null) {
-      loadVisitorStats();
-    }
+    loadVisitorStats();
   }, [retryCount, isAuthenticated]);
 
   const handleManualRefresh = () => {
@@ -72,11 +56,11 @@ const VisitorStats = () => {
     setRetryCount(count => count + 1);
   };
   
-  if (isAuthenticated === null || loading) {
+  if (loading && !visitData) {
     return <VisitorStatsLoading />;
   }
   
-  if (isAuthenticated === false) {
+  if (!isAuthenticated) {
     return (
       <VisitorStatsEmpty 
         hasVisitors={false} 
