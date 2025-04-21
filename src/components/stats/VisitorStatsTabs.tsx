@@ -1,5 +1,5 @@
 
-import { BarChart2, MapPin, City } from "lucide-react";
+import { BarChart2, MapPin, City as CityIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VisitorMonthlyChart } from "./VisitorMonthlyChart";
 import { VisitorLocationsTable } from "./VisitorLocationsTable";
@@ -27,7 +27,7 @@ export function VisitorStatsTabs({ visitData }: VisitorStatsTabsProps) {
           Países
         </TabsTrigger>
         <TabsTrigger value="cities">
-          <City className="h-4 w-4 mr-2" />
+          <CityIcon className="h-4 w-4 mr-2" />
           Ciudades
         </TabsTrigger>
       </TabsList>
