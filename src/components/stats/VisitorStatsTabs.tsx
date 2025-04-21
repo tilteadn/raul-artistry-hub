@@ -1,8 +1,9 @@
 
-import { BarChart2, MapPin } from "lucide-react";
+import { BarChart2, MapPin, City } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VisitorMonthlyChart } from "./VisitorMonthlyChart";
 import { VisitorLocationsTable } from "./VisitorLocationsTable";
+import { VisitorCitiesTable } from "./VisitorCitiesTable";
 import type { VisitorData } from "@/utils/visitorTrackingService";
 
 interface VisitorStatsTabsProps {
@@ -10,6 +11,10 @@ interface VisitorStatsTabsProps {
 }
 
 export function VisitorStatsTabs({ visitData }: VisitorStatsTabsProps) {
+  // Combine all cities from all countries
+  const allCities = visitData.topCountries
+    .flatMap(country => country.topCities || []);
+
   return (
     <Tabs defaultValue="chart" className="mt-6">
       <TabsList>
@@ -19,7 +24,11 @@ export function VisitorStatsTabs({ visitData }: VisitorStatsTabsProps) {
         </TabsTrigger>
         <TabsTrigger value="locations">
           <MapPin className="h-4 w-4 mr-2" />
-          Ubicaciones
+          Países
+        </TabsTrigger>
+        <TabsTrigger value="cities">
+          <City className="h-4 w-4 mr-2" />
+          Ciudades
         </TabsTrigger>
       </TabsList>
       
@@ -29,6 +38,10 @@ export function VisitorStatsTabs({ visitData }: VisitorStatsTabsProps) {
       
       <TabsContent value="locations">
         <VisitorLocationsTable topCountries={visitData.topCountries} />
+      </TabsContent>
+
+      <TabsContent value="cities">
+        <VisitorCitiesTable cities={allCities} />
       </TabsContent>
     </Tabs>
   );
