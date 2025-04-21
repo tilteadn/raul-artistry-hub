@@ -5,58 +5,32 @@ import { VisitorStatsTabs } from "./stats/VisitorStatsTabs";
 import { VisitorStatsLoading } from "./stats/VisitorStatsLoading";
 import { VisitorStatsEmpty } from "./stats/VisitorStatsEmpty";
 import { SESSION_COUNTRY_KEY } from "@/utils/visitor/countryDetection";
-import { calculateVisitorStats } from "@/utils/visitor/visitorDataService";
-import { getEmptyStats } from "@/utils/visitor/statsCalculation";
-import type { VisitorData } from "@/utils/visitor/types";
+import { calculateVisitorStats, getEmptyStats } from "@/utils/visitorTrackingService";
+import type { VisitorData } from "@/utils/visitorTrackingService";
 import { toast } from "sonner";
-import { useAdminAuth } from "@/hooks/use-admin-auth";
-import { supabase } from "@/integrations/supabase/client";
 
 const VisitorStats = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visitData, setVisitData] = useState<VisitorData | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const { isAuthenticated } = useAdminAuth();
 
   useEffect(() => {
     async function loadVisitorStats() {
       try {
-        if (!isAuthenticated) {
-          console.log("Not authenticated, not loading visitor stats");
-          setLoading(false);
-          return;
-        }
-        
         setLoading(true);
         setError(null);
         
         console.log("Starting to load visitor statistics...");
-        
-        // Check authentication status explicitly
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log("Authentication check before loading stats:", { 
-          isAuthenticated,
-          sessionExists: !!session,
-          userId: session?.user?.id || 'no user'
-        });
-        
-        if (!session) {
-          console.warn("No active session found in VisitorStats component");
-          setError("No se encontró una sesión de administrador activa. Por favor, inicia sesión de nuevo.");
-          setLoading(false);
-          return;
-        }
-        
         const stats = await calculateVisitorStats();
         console.log("Visitor stats loaded:", stats);
         setVisitData(stats);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error loading visitor stats:", err);
-        setError(err?.message || "Hubo un error al cargar las estadísticas de visitantes.");
+        setError("Hubo un error al cargar las estadísticas de visitantes.");
         // Let's show a toast for better visibility of the error
         toast.error("Error loading visitor statistics", {
-          description: err?.message || "Please try refreshing the page."
+          description: "Please try refreshing the page."
         });
         // Fallback to empty stats when there's an error
         setVisitData(getEmptyStats());
@@ -66,7 +40,7 @@ const VisitorStats = () => {
     }
     
     loadVisitorStats();
-  }, [retryCount, isAuthenticated]);
+  }, [retryCount]);
 
   const handleManualRefresh = () => {
     // Clear the country cache to force a new check on next visit
@@ -75,16 +49,7 @@ const VisitorStats = () => {
     setRetryCount(count => count + 1);
   };
   
-  if (!isAuthenticated) {
-    return (
-      <VisitorStatsEmpty 
-        hasVisitors={false} 
-        error="Necesitas iniciar sesión como administrador para ver las estadísticas." 
-      />
-    );
-  }
-  
-  if (loading && !visitData) {
+  if (loading) {
     return <VisitorStatsLoading />;
   }
   

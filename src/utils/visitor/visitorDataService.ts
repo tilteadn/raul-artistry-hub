@@ -9,26 +9,6 @@ import { getEmptyStats } from "./statsCalculation";
 export async function fetchVisitorRecords() {
   try {
     console.log("Fetching visitor records from database...");
-    
-    // Check if we have an active session for the admin user
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      console.warn("No authenticated session found when fetching visitor records");
-      console.log("Authentication state details:", { 
-        hasSession: !!session,
-        sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'No expiry'
-      });
-      throw new Error("Authentication required to access visitor data");
-    }
-    
-    console.log("Authenticated session found, proceeding with visitor records fetch", { 
-      userId: session.user?.id,
-      expiresAt: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'unknown'
-    });
-    
-    // Use the authenticated client to fetch visitor data with explicit GET request
-    console.log("Sending GET request to visitors table...");
     const { data: visitors, error } = await supabase
       .from('visitors')
       .select('*')
@@ -39,8 +19,8 @@ export async function fetchVisitorRecords() {
       throw error;
     }
     
-    console.log(`Retrieved ${visitors?.length || 0} visitor records`);
-    return visitors || [];
+    console.log(`Retrieved ${visitors.length} visitor records`);
+    return visitors;
   } catch (error) {
     console.error("Failed to fetch visitor records:", error);
     throw error;
@@ -52,15 +32,12 @@ export async function fetchVisitorRecords() {
  */
 export async function calculateVisitorStats(): Promise<VisitorData> {
   try {
-    console.log("Starting to calculate visitor stats...");
     const visitors = await fetchVisitorRecords();
     
     if (!visitors || visitors.length === 0) {
       console.log("No visitor records found, returning empty stats");
       return getEmptyStats();
     }
-    
-    console.log(`Processing ${visitors.length} visitor records for stats`);
     
     // Get current month and year for filtering
     const now = new Date();
@@ -114,8 +91,6 @@ export async function calculateVisitorStats(): Promise<VisitorData> {
       return { month, visits: visitsInMonth };
     });
     
-    console.log("Visitor stats calculation complete");
-    
     return {
       totalVisits: visitors.length,
       currentMonthVisits,
@@ -128,3 +103,5 @@ export async function calculateVisitorStats(): Promise<VisitorData> {
     throw error;
   }
 }
+
+// No need to re-export getEmptyStats here
