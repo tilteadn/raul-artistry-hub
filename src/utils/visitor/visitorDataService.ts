@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { VisitorData, MonthlyData, CountryData } from "./types";
 import { getEmptyStats } from "./statsCalculation";
@@ -63,19 +62,38 @@ export async function calculateVisitorStats(): Promise<VisitorData> {
       ? 100 // If no visits last month, consider it a 100% increase
       : ((currentMonthVisits - lastMonthVisits) / lastMonthVisits) * 100;
     
-    // Calculate top countries
-    const countryCounts: Record<string, number> = {};
+    // Enhance top countries calculation to include city details
+    const countryCityCounts: Record<string, Record<string, number>> = {};
     visitors.forEach(visitor => {
       const country = visitor.country || 'Unknown';
-      countryCounts[country] = (countryCounts[country] || 0) + 1;
+      const city = visitor.city || 'Unknown';
+      
+      if (!countryCityCounts[country]) {
+        countryCityCounts[country] = {};
+      }
+      countryCityCounts[country][city] = (countryCityCounts[country][city] || 0) + 1;
     });
     
-    const topCountries: CountryData[] = Object.entries(countryCounts)
-      .map(([country, visits]) => ({
-        country,
-        visits,
-        percentage: (visits / visitors.length) * 100
-      }))
+    // Prepare top countries with their top cities
+    const topCountries: CountryData[] = Object.entries(countryCityCounts)
+      .map(([country, cityCounts]) => {
+        const totalCountryVisits = Object.values(cityCounts).reduce((a, b) => a + b, 0);
+        const topCities = Object.entries(cityCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([city, visits]) => ({ 
+            city, 
+            visits, 
+            percentage: (visits / totalCountryVisits) * 100 
+          }));
+        
+        return {
+          country,
+          visits: totalCountryVisits,
+          percentage: (totalCountryVisits / visitors.length) * 100,
+          topCities
+        };
+      })
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 5);
     

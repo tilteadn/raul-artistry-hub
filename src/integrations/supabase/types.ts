@@ -129,6 +129,7 @@ export type Database = {
       visitors: {
         Row: {
           browser: string | null
+          city: string | null
           country: string
           created_at: string
           device: string | null
@@ -137,6 +138,7 @@ export type Database = {
         }
         Insert: {
           browser?: string | null
+          city?: string | null
           country: string
           created_at?: string
           device?: string | null
@@ -145,6 +147,7 @@ export type Database = {
         }
         Update: {
           browser?: string | null
+          city?: string | null
           country?: string
           created_at?: string
           device?: string | null

@@ -1,44 +1,53 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// Session storage key for country
 export const SESSION_COUNTRY_KEY = "visitor_country";
+export const SESSION_CITY_KEY = "visitor_city";
 
-// Get the visitor's country using the detect-country edge function
-// with session-based caching to avoid redundant API calls
-export const getUserCountry = async (): Promise<string> => {
+export const getUserCountry = async (): Promise<{ country: string; city: string | null }> => {
   try {
-    // Check if we already have the country in sessionStorage
+    // Check if we already have the country and city in sessionStorage
     const cachedCountry = sessionStorage.getItem(SESSION_COUNTRY_KEY);
+    const cachedCity = sessionStorage.getItem(SESSION_CITY_KEY);
+    
     if (cachedCountry) {
-      console.log("Using cached country from session:", cachedCountry);
-      return cachedCountry;
+      console.log("Using cached country and city from session:", cachedCountry, cachedCity);
+      return { 
+        country: cachedCountry, 
+        city: cachedCity 
+      };
     }
     
     console.log("No cached country found, calling detect-country edge function...");
     
-    // Using our Supabase edge function to get visitor's country
+    // Using our Supabase edge function to get visitor's country and city
     const { data, error } = await supabase.functions.invoke('detect-country');
     
     if (error) {
       console.error("Error detecting country via edge function:", error);
-      return "Unknown";
+      return { country: "Unknown", city: null };
     }
     
     if (!data || !data.country) {
       console.error("Invalid response from detect-country:", data);
-      return "Unknown";
+      return { country: "Unknown", city: null };
     }
     
-    console.log("Country detected:", data.country);
+    console.log("Country and city detected:", data.country, data.city);
     
-    // Store the country in sessionStorage for future use
+    // Store the country and city in sessionStorage for future use
     sessionStorage.setItem(SESSION_COUNTRY_KEY, data.country);
+    if (data.city) {
+      sessionStorage.setItem(SESSION_CITY_KEY, data.city);
+    }
     
-    // Return the country name
-    return data.country || "Unknown";
+    // Return the country and city
+    return { 
+      country: data.country || "Unknown", 
+      city: data.city || null 
+    };
   } catch (error) {
     console.error("Exception in getUserCountry:", error);
-    return "Unknown";
+    return { country: "Unknown", city: null };
   }
 };
