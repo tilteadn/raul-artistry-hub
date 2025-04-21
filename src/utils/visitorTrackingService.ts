@@ -3,4 +3,4 @@
 export { trackVisit } from './visitor/trackVisit';
 export { calculateVisitorStats } from './visitor/visitorDataService';
 export { getEmptyStats } from './visitor/statsCalculation'; // Import directly from statsCalculation
-export type { CountryData, MonthlyData, VisitorData } from './visitor/types';
+export type { CountryData, MonthlyData, VisitorData, CityData } from './visitor/types';

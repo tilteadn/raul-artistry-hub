@@ -1,3 +1,4 @@
+
 export interface VisitorRecord {
   id?: string;
   country: string;
@@ -19,4 +20,17 @@ export interface CountryData {
   visits: number;
   percentage: number;
   topCities?: CityData[];  // Optional array of top cities
+}
+
+export interface MonthlyData {
+  month: string;
+  visits: number;
+}
+
+export interface VisitorData {
+  totalVisits: number;
+  currentMonthVisits: number;
+  visitIncrease: number;
+  topCountries: CountryData[];
+  monthlyData: MonthlyData[];
 }
