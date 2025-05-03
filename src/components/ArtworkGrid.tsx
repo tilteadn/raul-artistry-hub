@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Artwork } from "@/types/artwork";
@@ -6,38 +7,119 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ImageOff } from "lucide-react";
 import { getImageUrl } from "@/utils/artwork/artworkService";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface ArtworkGridProps {
   artworks: Artwork[];
   collection?: string;
   loading?: boolean;
+  itemsPerPage?: number;
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
-const ArtworkGrid = ({ artworks, collection, loading = false }: ArtworkGridProps) => {
+const ArtworkGrid = ({ 
+  artworks, 
+  collection, 
+  loading = false,
+  itemsPerPage = 9,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange
+}: ArtworkGridProps) => {
   return (
-    <div className="artwork-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {loading ? (
-        Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <Skeleton className="w-full aspect-[3/4]" />
-            <CardContent className="p-4">
-              <Skeleton className="h-6 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2" />
-            </CardContent>
-          </Card>
-        ))
-      ) : artworks.length > 0 ? (
-        artworks.map((artwork) => (
-          <ArtworkCard key={artwork.id} artwork={artwork} />
-        ))
-      ) : (
-        <div className="col-span-full text-center py-12">
-          <p className="text-muted-foreground">
-            {collection
-              ? `No se encontraron obras en la colección "${collection}".`
-              : "No se encontraron obras."}
-          </p>
-        </div>
+    <div className="space-y-8">
+      <div className="artwork-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          Array.from({ length: itemsPerPage }).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="w-full aspect-[3/4]" />
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardContent>
+            </Card>
+          ))
+        ) : artworks.length > 0 ? (
+          artworks.map((artwork) => (
+            <ArtworkCard key={artwork.id} artwork={artwork} isGridView={true} />
+          ))
+        ) : (
+          <div className="col-span-full text-center py-12">
+            <p className="text-muted-foreground">
+              {collection
+                ? `No se encontraron obras en la colección "${collection}".`
+                : "No se encontraron obras."}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {!loading && totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            {currentPage > 1 && (
+              <PaginationItem>
+                <PaginationPrevious 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPageChange?.(currentPage - 1);
+                  }}
+                />
+              </PaginationItem>
+            )}
+            
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              // Show pages around current page
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink 
+                    href="#" 
+                    isActive={pageNum === currentPage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onPageChange?.(pageNum);
+                    }}
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            
+            {currentPage < totalPages && (
+              <PaginationItem>
+                <PaginationNext 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPageChange?.(currentPage + 1);
+                  }}
+                />
+              </PaginationItem>
+            )}
+          </PaginationContent>
+        </Pagination>
       )}
     </div>
   );
@@ -45,14 +127,18 @@ const ArtworkGrid = ({ artworks, collection, loading = false }: ArtworkGridProps
 
 interface ArtworkCardProps {
   artwork: Artwork;
+  isGridView?: boolean;
 }
 
-const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
+const ArtworkCard = ({ artwork, isGridView = false }: ArtworkCardProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
-
-  const imageUrlString = getImageUrl(artwork.imageUrl);
+  
+  // Use thumbnail in grid view and full image in detail view
+  const imageUrlString = isGridView && artwork.thumbnailUrl 
+    ? getImageUrl(artwork.thumbnailUrl) 
+    : getImageUrl(artwork.imageUrl);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();

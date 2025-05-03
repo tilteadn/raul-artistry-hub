@@ -91,7 +91,7 @@ const Index = () => {
             </Button>
           </div>
         ) : (
-          <ArtworkGrid artworks={featuredArtworks} loading={false} />
+          <ArtworkGrid artworks={featuredArtworks} loading={false} isGridView={true} />
         )}
       </section>
       

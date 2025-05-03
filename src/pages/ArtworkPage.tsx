@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -54,6 +55,7 @@ const ArtworkPage = () => {
     loadArtwork();
   }, [id]);
   
+  // Use full-size image for meta tags on detail page
   const metaTitle = artwork ? `${artwork.title} | Raúl Álvarez` : "Obra | Raúl Álvarez";
   const metaDescription = artwork 
     ? `${artwork.title}${artwork.subtitle ? ` - ${artwork.subtitle}` : ''} - Obra de arte de Raúl Álvarez, ${artwork.technique || ''} (${artwork.year || 'n/a'})`

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ImageOff } from "lucide-react";
 import { Artwork } from "@/types/artwork";
@@ -14,6 +15,7 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
 
+  // Always use full-size image in detail view
   const imageUrlString = artwork ? getImageUrl(artwork.imageUrl) : '';
 
   const handleContextMenu = (e: React.MouseEvent) => {

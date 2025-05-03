@@ -8,7 +8,8 @@ import {
   getCollectionsFromDb,
   saveArtworkToDb, 
   updateArtworkInDb, 
-  deleteArtworkFromDb 
+  deleteArtworkFromDb,
+  getPaginatedArtworksFromDb
 } from "./supabaseArtworkService";
 
 /**
@@ -29,6 +30,31 @@ export const getAllArtworks = async (): Promise<Artwork[]> => {
     return await getAllArtworksFromDb();
   } catch (error) {
     console.error("Error accessing Supabase:", error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves paginated artworks with optional filtering
+ * @param page Page number (starting from 1)
+ * @param pageSize Number of items per page
+ * @param collection Optional collection filter
+ * @returns Paginated artworks and total count
+ */
+export const getPaginatedArtworks = async (
+  page: number = 1,
+  pageSize: number = 9,
+  collection?: string
+): Promise<{ artworks: Artwork[]; total: number; totalPages: number }> => {
+  try {
+    const result = await getPaginatedArtworksFromDb(page, pageSize, collection);
+    const totalPages = Math.ceil(result.total / pageSize);
+    return { 
+      ...result,
+      totalPages
+    };
+  } catch (error) {
+    console.error("Error fetching paginated artworks:", error);
     throw error;
   }
 };

@@ -2,21 +2,27 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Artwork } from "@/types/artwork";
-import { getAllArtworks, getCollections } from "@/utils/artworkService";
+import { getPaginatedArtworks, getCollections } from "@/utils/artworkService";
 import { Loader2 } from "lucide-react";
 import ArtworkGrid from "@/components/ArtworkGrid";
 import { toast } from "@/hooks/use-toast";
 import MetaTags from "@/components/MetaTags";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+const ITEMS_PER_PAGE = 9; // Number of artworks per page
+
 const Artworks = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [collections, setCollections] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalArtworks, setTotalArtworks] = useState(0);
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const collectionFilter = searchParams.get("coleccion") || "todas";
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam) : 1;
 
   // Load collections
   useEffect(() => {
@@ -33,16 +39,20 @@ const Artworks = () => {
     loadCollections();
   }, []);
 
-  // Load artworks
+  // Load artworks with pagination
   useEffect(() => {
     const loadArtworks = async () => {
       setLoading(true);
       setError(null);
       try {
-        console.log("Loading artworks from database...");
-        const data = await getAllArtworks();
-        console.log(`Loaded ${data.length} artworks`);
-        setArtworks(data);
+        console.log(`Loading paginated artworks for page ${currentPage} with ${ITEMS_PER_PAGE} items per page...`);
+        const collection = collectionFilter === "todas" ? undefined : collectionFilter;
+        const result = await getPaginatedArtworks(currentPage, ITEMS_PER_PAGE, collection);
+        
+        console.log(`Loaded ${result.artworks.length} artworks (page ${currentPage}/${result.totalPages}, total: ${result.total})`);
+        setArtworks(result.artworks);
+        setTotalPages(result.totalPages);
+        setTotalArtworks(result.total);
       } catch (err) {
         console.error("Error loading artworks:", err);
         setError("Error al cargar las obras");
@@ -57,26 +67,35 @@ const Artworks = () => {
     };
 
     loadArtworks();
-  }, [location.pathname]);
+  }, [currentPage, collectionFilter, location.pathname]);
 
   // Handle collection filter change
   const handleCollectionChange = (value: string) => {
-    // Update URL params
+    // Update URL params and reset to page 1 when changing collection
     setSearchParams(params => {
       if (value === "todas") {
         params.delete("coleccion");
       } else {
         params.set("coleccion", value);
       }
+      params.set("page", "1"); // Reset to page 1
       return params;
     });
   };
 
-  // Filter artworks based on selected collection
-  const filteredArtworks =
-    collectionFilter === "todas"
-      ? artworks
-      : artworks.filter((artwork) => artwork.collection === collectionFilter);
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setSearchParams(params => {
+      params.set("page", page.toString());
+      return params;
+    });
+    
+    // Scroll to top when changing pages
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
 
   return (
     <div className="min-h-screen">
@@ -142,7 +161,24 @@ const Artworks = () => {
             </p>
           </div>
         ) : (
-          <ArtworkGrid artworks={filteredArtworks} loading={false} collection={collectionFilter !== "todas" ? collectionFilter : undefined} />
+          <>
+            <ArtworkGrid 
+              artworks={artworks} 
+              loading={false} 
+              collection={collectionFilter !== "todas" ? collectionFilter : undefined} 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onPageChange={handlePageChange}
+            />
+            
+            {totalArtworks > 0 && (
+              <p className="text-center text-sm text-muted-foreground mt-8">
+                Mostrando {artworks.length} de {totalArtworks} obras
+                {collectionFilter !== "todas" ? ` en la colección "${collectionFilter}"` : ""}
+              </p>
+            )}
+          </>
         )}
       </section>
     </div>

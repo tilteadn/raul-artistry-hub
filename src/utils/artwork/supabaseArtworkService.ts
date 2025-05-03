@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Artwork, Collection } from "@/types/artwork";
 import { v4 as uuidv4 } from 'uuid';
@@ -101,36 +100,83 @@ export const uploadImage = async (fileOrDataUrl: File | string): Promise<string>
 };
 
 /**
+ * Creates a thumbnail from an original image URL
+ * @param originalUrl The original image URL
+ * @param width Desired width of the thumbnail
+ * @returns URL of the thumbnail with resize transformation
+ */
+export const createThumbnailUrl = (originalUrl: string, width: number = 400): string => {
+  try {
+    // Check if we can create a Supabase Storage thumbnail
+    if (originalUrl && originalUrl.includes('storage.googleapis.com')) {
+      // Craft a thumbnail URL using Supabase's image transformation API
+      const url = new URL(originalUrl);
+      
+      // Add width resize parameter
+      url.searchParams.set('width', width.toString());
+      
+      // Lower quality for thumbnails to reduce size
+      url.searchParams.set('quality', '80');
+      
+      return url.toString();
+    }
+    
+    // For other URLs, return the original
+    return originalUrl;
+  } catch (error) {
+    console.error('Error creating thumbnail URL:', error);
+    return originalUrl;
+  }
+};
+
+/**
  * Maps database artwork to frontend Artwork type
  */
-const mapDbArtworkToArtwork = (dbArtwork: any): Artwork => ({
-  id: dbArtwork.id,
-  title: dbArtwork.title,
-  subtitle: dbArtwork.subtitle,
-  collection: dbArtwork.collection,
-  imageUrl: dbArtwork.image_url,
-  thumbnailUrl: dbArtwork.thumbnail_url,
-  year: dbArtwork.year || undefined,
-  technique: dbArtwork.technique || undefined,
-  dimensions: dbArtwork.dimensions || undefined,
-  description: dbArtwork.description || undefined,
-  createdAt: new Date(dbArtwork.created_at),
-});
+const mapDbArtworkToArtwork = (dbArtwork: any): Artwork => {
+  // Generate a thumbnail URL if one doesn't exist
+  let thumbnailUrl = dbArtwork.thumbnail_url;
+  
+  if (!thumbnailUrl && dbArtwork.image_url) {
+    thumbnailUrl = createThumbnailUrl(dbArtwork.image_url);
+  }
+  
+  return {
+    id: dbArtwork.id,
+    title: dbArtwork.title,
+    subtitle: dbArtwork.subtitle,
+    collection: dbArtwork.collection,
+    imageUrl: dbArtwork.image_url,
+    thumbnailUrl: thumbnailUrl,
+    year: dbArtwork.year || undefined,
+    technique: dbArtwork.technique || undefined,
+    dimensions: dbArtwork.dimensions || undefined,
+    description: dbArtwork.description || undefined,
+    createdAt: new Date(dbArtwork.created_at),
+  };
+};
 
 /**
  * Maps frontend Artwork to database format
  */
-const mapArtworkToDbArtwork = (artwork: Omit<Artwork, "id" | "createdAt">) => ({
-  title: artwork.title,
-  subtitle: artwork.subtitle,
-  collection: artwork.collection,
-  image_url: artwork.imageUrl,
-  thumbnail_url: artwork.thumbnailUrl || null,
-  year: artwork.year || null,
-  technique: artwork.technique || null,
-  dimensions: artwork.dimensions || null,
-  description: artwork.description || null,
-});
+const mapArtworkToDbArtwork = (artwork: Omit<Artwork, "id" | "createdAt">) => {
+  // Generate thumbnail URL from the main image if available
+  let thumbnailUrl = artwork.thumbnailUrl;
+  if (!thumbnailUrl && typeof artwork.imageUrl === 'string' && !artwork.imageUrl.startsWith('blob:')) {
+    thumbnailUrl = createThumbnailUrl(artwork.imageUrl);
+  }
+  
+  return {
+    title: artwork.title,
+    subtitle: artwork.subtitle,
+    collection: artwork.collection,
+    image_url: artwork.imageUrl,
+    thumbnail_url: thumbnailUrl || null,
+    year: artwork.year || null,
+    technique: artwork.technique || null,
+    dimensions: artwork.dimensions || null,
+    description: artwork.description || null,
+  };
+};
 
 /**
  * Retrieves all artworks from Supabase
@@ -151,6 +197,53 @@ export const getAllArtworksFromDb = async (): Promise<Artwork[]> => {
     return data ? data.map(mapDbArtworkToArtwork) : [];
   } catch (error) {
     console.error('Error in getAllArtworksFromDb:', error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves paginated artworks from Supabase with optional filtering
+ * @param page Page number (starting from 1)
+ * @param pageSize Number of items per page
+ * @param collection Optional collection filter
+ */
+export const getPaginatedArtworksFromDb = async (
+  page: number = 1,
+  pageSize: number = 9,
+  collection?: string
+): Promise<{ artworks: Artwork[]; total: number }> => {
+  try {
+    // Calculate range for pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    
+    // Start query builder
+    let query = supabase.from('artworks').select('*', { count: 'exact' });
+    
+    // Apply collection filter if provided
+    if (collection) {
+      query = query.eq('collection', collection);
+    }
+    
+    // Apply range and order
+    query = query.order('created_at', { ascending: false }).range(from, to);
+    
+    // Execute query
+    const { data, error, count } = await query;
+    
+    if (error) {
+      console.error('Error fetching paginated artworks:', error);
+      throw error;
+    }
+    
+    console.log(`Retrieved ${data?.length || 0} paginated artworks from database (page ${page}, total: ${count || 0})`);
+    
+    return {
+      artworks: data ? data.map(mapDbArtworkToArtwork) : [],
+      total: count || 0
+    };
+  } catch (error) {
+    console.error('Error in getPaginatedArtworksFromDb:', error);
     throw error;
   }
 };
