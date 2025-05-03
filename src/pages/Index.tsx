@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -91,7 +90,7 @@ const Index = () => {
             </Button>
           </div>
         ) : (
-          <ArtworkGrid artworks={featuredArtworks} loading={false} isGridView={true} />
+          <ArtworkGrid artworks={featuredArtworks} loading={false} />
         )}
       </section>
       

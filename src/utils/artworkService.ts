@@ -9,7 +9,8 @@ import {
   getCollectionsFromDb,
   saveArtworkToDb,
   updateArtworkInDb,
-  deleteArtworkFromDb
+  deleteArtworkFromDb,
+  getPaginatedArtworksFromDb
 } from './artwork/supabaseArtworkService';
 
 export const getAllArtworks = getAllArtworksFromDb;
@@ -20,3 +21,4 @@ export const getCollections = getCollectionsFromDb;
 export const saveArtwork = saveArtworkToDb;
 export const updateArtwork = updateArtworkInDb; // This function expects (id, artwork)
 export const deleteArtwork = deleteArtworkFromDb;
+export const getPaginatedArtworks = getPaginatedArtworksFromDb;
