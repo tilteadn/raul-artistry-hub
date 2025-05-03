@@ -50,7 +50,7 @@ const ArtworkGrid = ({
           ))
         ) : artworks.length > 0 ? (
           artworks.map((artwork) => (
-            <ArtworkCard key={artwork.id} artwork={artwork} isGridView={true} />
+            <ArtworkCard key={artwork.id} artwork={artwork} />
           ))
         ) : (
           <div className="col-span-full text-center py-12">
@@ -64,7 +64,7 @@ const ArtworkGrid = ({
       </div>
 
       {!loading && totalPages > 1 && (
-        <Pagination>
+        <Pagination className="my-8">
           <PaginationContent>
             {currentPage > 1 && (
               <PaginationItem>
@@ -72,7 +72,7 @@ const ArtworkGrid = ({
                   href="#" 
                   onClick={(e) => {
                     e.preventDefault();
-                    onPageChange?.(currentPage - 1);
+                    if (onPageChange) onPageChange(currentPage - 1);
                   }}
                 />
               </PaginationItem>
@@ -98,7 +98,7 @@ const ArtworkGrid = ({
                     isActive={pageNum === currentPage}
                     onClick={(e) => {
                       e.preventDefault();
-                      onPageChange?.(pageNum);
+                      if (onPageChange) onPageChange(pageNum);
                     }}
                   >
                     {pageNum}
@@ -113,7 +113,7 @@ const ArtworkGrid = ({
                   href="#" 
                   onClick={(e) => {
                     e.preventDefault();
-                    onPageChange?.(currentPage + 1);
+                    if (onPageChange) onPageChange(currentPage + 1);
                   }}
                 />
               </PaginationItem>

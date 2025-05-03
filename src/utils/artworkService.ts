@@ -21,4 +21,23 @@ export const getCollections = getCollectionsFromDb;
 export const saveArtwork = saveArtworkToDb;
 export const updateArtwork = updateArtworkInDb; // This function expects (id, artwork)
 export const deleteArtwork = deleteArtworkFromDb;
-export const getPaginatedArtworks = getPaginatedArtworksFromDb;
+
+/**
+ * Retrieves paginated artworks with optional filtering
+ * @param page Page number (starting from 1)
+ * @param pageSize Number of items per page
+ * @param collection Optional collection filter
+ * @returns Paginated artworks, total count, and total pages
+ */
+export const getPaginatedArtworks = async (
+  page: number = 1,
+  pageSize: number = 9,
+  collection?: string
+): Promise<{ artworks: Artwork[]; total: number; totalPages: number }> => {
+  const result = await getPaginatedArtworksFromDb(page, pageSize, collection);
+  const totalPages = Math.ceil(result.total / pageSize);
+  return { 
+    ...result,
+    totalPages
+  };
+};
