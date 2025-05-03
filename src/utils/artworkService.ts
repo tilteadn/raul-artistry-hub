@@ -1,6 +1,7 @@
 
 // This file is just a facade for the Supabase artwork service module
 
+import { Artwork } from "@/types/artwork";
 import { 
   getAllArtworksFromDb,
   getFeaturedArtworksFromDb,
