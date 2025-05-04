@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { LogOut, RefreshCw } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
@@ -204,9 +205,11 @@ const Admin = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCollectionChange = (value: string | undefined) => {
+  const handleCollectionChange = (value: string | undefined, shouldResetPage: boolean = true) => {
     setCollectionFilter(value);
-    setCurrentPage(1);
+    if (shouldResetPage) {
+      setCurrentPage(1);
+    }
   };
 
   if (isLoading) {
