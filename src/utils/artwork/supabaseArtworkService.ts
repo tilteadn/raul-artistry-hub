@@ -147,6 +147,7 @@ const mapDbArtworkToArtwork = (dbArtwork: any): Artwork => {
     collection: dbArtwork.collection,
     imageUrl: dbArtwork.image_url,
     thumbnailUrl: thumbnailUrl,
+    orientation: dbArtwork.orientation || undefined,
     year: dbArtwork.year || undefined,
     technique: dbArtwork.technique || undefined,
     dimensions: dbArtwork.dimensions || undefined,
@@ -171,6 +172,7 @@ const mapArtworkToDbArtwork = (artwork: Omit<Artwork, "id" | "createdAt">) => {
     collection: artwork.collection,
     image_url: artwork.imageUrl,
     thumbnail_url: thumbnailUrl || null,
+    orientation: artwork.orientation || null,
     year: artwork.year || null,
     technique: artwork.technique || null,
     dimensions: artwork.dimensions || null,
@@ -393,13 +395,29 @@ export const saveArtworkToDb = async (artwork: Artwork): Promise<Artwork> => {
     
     // Handle image upload if it's a File object or data URL
     let imageUrl = artwork.imageUrl;
+    let orientation = artwork.orientation;
     
     if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image');
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded data URL image:', imageUrl);
+      
+      // Detect orientation if not provided
+      if (!orientation) {
+        const { detectImageOrientation } = await import('./imageUtils');
+        orientation = await detectImageOrientation(imageUrl as string);
+        console.log('Detected image orientation:', orientation);
+      }
     } else if (artwork.imageUrl instanceof File) {
       console.log('Processing File object');
+      
+      // Detect orientation if not provided
+      if (!orientation) {
+        const { detectImageOrientation } = await import('./imageUtils');
+        orientation = await detectImageOrientation(artwork.imageUrl);
+        console.log('Detected image orientation:', orientation);
+      }
+      
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded File image:', imageUrl);
     } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('blob:')) {
@@ -407,14 +425,23 @@ export const saveArtworkToDb = async (artwork: Artwork): Promise<Artwork> => {
       throw new Error('Blob URLs are not supported for upload. Please provide the original file.');
     } else {
       console.log('Using existing image URL:', imageUrl);
+      
+      // Detect orientation if not provided and imageUrl is a string
+      if (!orientation && typeof imageUrl === 'string') {
+        const { detectImageOrientation } = await import('./imageUtils');
+        orientation = await detectImageOrientation(imageUrl as string);
+        console.log('Detected image orientation:', orientation);
+      }
     }
     
     const dbArtwork = {
       ...mapArtworkToDbArtwork({
         ...artwork,
-        imageUrl: typeof imageUrl === 'string' ? imageUrl : ''
+        imageUrl: typeof imageUrl === 'string' ? imageUrl : '',
+        orientation
       }),
-      image_url: typeof imageUrl === 'string' ? imageUrl : ''
+      image_url: typeof imageUrl === 'string' ? imageUrl : '',
+      orientation
     };
     
     console.log('Inserting artwork into database:', dbArtwork);
@@ -450,13 +477,29 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
     
     // Handle image upload if it's a File object or data URL
     let imageUrl = artwork.imageUrl;
+    let orientation = artwork.orientation;
     
     if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('data:')) {
       console.log('Processing data URL image for update');
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded data URL image for update:', imageUrl);
+      
+      // Detect orientation if not provided
+      if (!orientation) {
+        const { detectImageOrientation } = await import('./imageUtils');
+        orientation = await detectImageOrientation(imageUrl as string);
+        console.log('Detected image orientation:', orientation);
+      }
     } else if (artwork.imageUrl instanceof File) {
       console.log('Processing File object for update');
+      
+      // Detect orientation if not provided
+      if (!orientation) {
+        const { detectImageOrientation } = await import('./imageUtils');
+        orientation = await detectImageOrientation(artwork.imageUrl);
+        console.log('Detected image orientation:', orientation);
+      }
+      
       imageUrl = await uploadImage(artwork.imageUrl);
       console.log('Uploaded File image for update:', imageUrl);
     } else if (typeof artwork.imageUrl === 'string' && artwork.imageUrl.startsWith('blob:')) {
@@ -464,14 +507,23 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
       throw new Error('Blob URLs are not supported for upload. Please provide the original file.');
     } else {
       console.log('Using existing image URL for update:', imageUrl);
+      
+      // Detect orientation if not provided and imageUrl is a string
+      if (!orientation && typeof imageUrl === 'string') {
+        const { detectImageOrientation } = await import('./imageUtils');
+        orientation = await detectImageOrientation(imageUrl as string);
+        console.log('Detected image orientation:', orientation);
+      }
     }
     
     const dbArtwork = {
       ...mapArtworkToDbArtwork({
         ...artwork,
-        imageUrl: typeof imageUrl === 'string' ? imageUrl : ''
+        imageUrl: typeof imageUrl === 'string' ? imageUrl : '',
+        orientation
       }),
       image_url: typeof imageUrl === 'string' ? imageUrl : '',
+      orientation,
       updated_at: new Date().toISOString()
     };
     

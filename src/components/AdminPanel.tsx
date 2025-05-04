@@ -44,6 +44,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/utils";
+import { getAspectRatioClass } from "@/utils/artwork/imageUtils";
 
 interface AdminPanelProps {
   artworks: Artwork[];
@@ -261,11 +263,14 @@ const AdminPanel = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {artworks.map((artwork) => (
                   <Card key={artwork.id} className="overflow-hidden">
-                    <div className="relative aspect-[3/4]">
+                    <div className={cn("relative", getAspectRatioClass(artwork.orientation))}>
                       <img
                         src={getImageUrl(artwork.thumbnailUrl || artwork.imageUrl)}
                         alt={artwork.title}
-                        className="w-full h-full object-cover"
+                        className={cn(
+                          "w-full h-full",
+                          artwork.orientation === 'landscape' ? "object-contain bg-gray-100" : "object-cover"
+                        )}
                         loading="lazy"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/placeholder.svg';
@@ -278,6 +283,9 @@ const AdminPanel = ({
                         <div>
                           <h3 className="font-medium text-lg line-clamp-1">{artwork.title}</h3>
                           <p className="text-sm text-muted-foreground">{artwork.collection}</p>
+                          {artwork.orientation && (
+                            <p className="text-xs text-muted-foreground capitalize">{artwork.orientation}</p>
+                          )}
                         </div>
                         <div className="flex space-x-2">
                           <Button

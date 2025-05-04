@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ImageOff } from "lucide-react";
 import { getImageUrl } from "@/utils/artwork/artworkService";
+import { getAspectRatioClass } from "@/utils/artwork/imageUtils";
 import { 
   Pagination,
   PaginationContent,
@@ -140,6 +141,9 @@ const ArtworkCard = ({ artwork, isGridView = false }: ArtworkCardProps) => {
     ? getImageUrl(artwork.thumbnailUrl) 
     : getImageUrl(artwork.imageUrl);
 
+  // Get aspect ratio class based on orientation
+  const aspectRatioClass = getAspectRatioClass(artwork.orientation);
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
@@ -202,7 +206,8 @@ const ArtworkCard = ({ artwork, isGridView = false }: ArtworkCardProps) => {
       >
         <div 
           className={cn(
-            "relative w-full aspect-[3/4] overflow-hidden blur-load",
+            "relative w-full overflow-hidden blur-load",
+            aspectRatioClass,
             isLoaded && "loaded"
           )}
           style={{ 

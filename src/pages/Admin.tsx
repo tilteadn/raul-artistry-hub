@@ -204,6 +204,7 @@ const Admin = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Fix the function signature to accept two parameters as expected
   const handleCollectionChange = (value: string | undefined, shouldResetPage: boolean = true) => {
     setCollectionFilter(value);
     if (shouldResetPage) {

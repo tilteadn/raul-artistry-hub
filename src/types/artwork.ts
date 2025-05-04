@@ -6,6 +6,7 @@ export interface Artwork {
   collection: string;
   imageUrl: string | File; // Updated to accept File objects
   thumbnailUrl?: string;
+  orientation?: 'portrait' | 'landscape' | 'square'; // Added orientation field
   year?: string;
   technique?: string;
   dimensions?: string;

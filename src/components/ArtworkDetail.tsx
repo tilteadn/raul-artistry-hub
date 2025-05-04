@@ -5,6 +5,7 @@ import { Artwork } from "@/types/artwork";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { getImageUrl } from "@/utils/artwork/artworkService";
+import { getAspectRatioClass } from "@/utils/artwork/imageUtils";
 
 interface ArtworkDetailProps {
   artwork: Artwork;
@@ -17,6 +18,9 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
 
   // Always use full-size image in detail view
   const imageUrlString = artwork ? getImageUrl(artwork.imageUrl) : '';
+
+  // Get aspect ratio class based on orientation
+  const aspectRatioClass = artwork ? getAspectRatioClass(artwork.orientation) : 'aspect-[3/4]';
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -100,7 +104,10 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
       <div className="w-full md:sticky md:top-24 h-fit">
         {hasImageError ? (
           <div 
-            className="w-full aspect-[3/4] flex items-center justify-center rounded-lg"
+            className={cn(
+              "w-full flex items-center justify-center rounded-lg",
+              aspectRatioClass
+            )}
             style={{ backgroundColor: fallbackBgColor }}
           >
             <div className="text-center p-8">
@@ -112,7 +119,8 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
         ) : (
           <div 
             className={cn(
-              "relative w-full aspect-[3/4] overflow-hidden rounded-lg",
+              "relative w-full overflow-hidden rounded-lg",
+              aspectRatioClass,
               isImageLoaded ? "opacity-100" : "opacity-50"
             )}
             onContextMenu={handleContextMenu}
@@ -120,7 +128,10 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
             <img
               src={imageUrlString}
               alt={artworkAltText}
-              className="w-full h-full object-cover transition-opacity duration-700"
+              className={cn(
+                "w-full h-full object-cover transition-opacity duration-700",
+                artwork.orientation === 'landscape' ? "object-contain" : "object-cover"
+              )}
               onError={() => setHasImageError(true)}
               onLoad={() => setIsImageLoaded(true)}
               draggable="false"
@@ -146,6 +157,13 @@ const ArtworkDetail = ({ artwork, loading = false }: ArtworkDetailProps) => {
           <dl className="grid grid-cols-2 gap-2 text-sm">
             <dt className="text-muted-foreground">Colección:</dt>
             <dd>{artwork.collection}</dd>
+            
+            {artwork.orientation && (
+              <>
+                <dt className="text-muted-foreground">Orientación:</dt>
+                <dd className="capitalize">{artwork.orientation}</dd>
+              </>
+            )}
             
             {artwork.year && (
               <>
