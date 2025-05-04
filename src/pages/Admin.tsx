@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { LogOut, RefreshCw } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
@@ -205,8 +204,8 @@ const Admin = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCollectionChange = (collection: string | undefined) => {
-    setCollectionFilter(collection);
+  const handleCollectionChange = (value: string) => {
+    setCollectionFilter(value === "todas" ? undefined : value);
     setCurrentPage(1); // Reset to first page when changing collection
   };
 
