@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { LogOut, RefreshCw } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
@@ -7,12 +8,15 @@ import AdminPanel from "@/components/AdminPanel";
 import AdminAuth from "@/components/AdminAuth";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Artwork } from "@/types/artwork";
-import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork } from "@/utils/artwork/artworkService";
+import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork, getPaginatedArtworks, getCollections } from "@/utils/artworkService";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
+const ITEMS_PER_PAGE = 9; // Number of artworks per page
+
 const Admin = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [collections, setCollections] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -20,6 +24,10 @@ const Admin = () => {
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated, isLoading, logout, setIsAuthenticated } = useAdminAuth();
   const [showAuthForm, setShowAuthForm] = useState(!isAuthenticated);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalArtworks, setTotalArtworks] = useState(0);
+  const [collectionFilter, setCollectionFilter] = useState<string | undefined>(undefined);
 
   const loadArtworks = async () => {
     if (!isAuthenticated) return;
@@ -27,10 +35,12 @@ const Admin = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log("Loading artworks from database...");
-      const data = await getAllArtworks();
-      console.log(`Loaded ${data.length} artworks`);
-      setArtworks(data);
+      console.log("Loading paginated artworks for admin...");
+      const result = await getPaginatedArtworks(currentPage, ITEMS_PER_PAGE, collectionFilter);
+      console.log(`Loaded ${result.artworks.length} artworks (page ${currentPage}/${result.totalPages}, total: ${result.total})`);
+      setArtworks(result.artworks);
+      setTotalPages(result.totalPages);
+      setTotalArtworks(result.total);
     } catch (err) {
       console.error("Error loading artworks:", err);
       setError("Error al cargar las obras");
@@ -44,13 +54,32 @@ const Admin = () => {
     }
   };
 
+  const loadCollections = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const collectionsData = await getCollections();
+      const collectionNames = collectionsData.map((c) => c.name);
+      setCollections(collectionNames);
+    } catch (err) {
+      console.error("Error loading collections:", err);
+    }
+  };
+
   useEffect(() => {
     setShowAuthForm(!isAuthenticated);
     
     if (isAuthenticated) {
       loadArtworks();
+      loadCollections();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadArtworks();
+    }
+  }, [currentPage, collectionFilter, isAuthenticated]);
 
   const handleSuccessfulAuthentication = (rememberMe: boolean) => {
     if (rememberMe) {
@@ -65,6 +94,7 @@ const Admin = () => {
     console.log("Authentication successful, artworks will be loaded");
     
     loadArtworks();
+    loadCollections();
   };
 
   const handleAddArtwork = async (artworkData: Omit<Artwork, "id" | "createdAt">) => {
@@ -150,7 +180,9 @@ const Admin = () => {
       console.log(`Deleting artwork ID: ${id}`);
       await deleteArtwork(id);
       
-      setArtworks((prev) => prev.filter((a) => a.id !== id));
+      // Reload the current page to ensure pagination is up to date
+      await loadArtworks();
+      
       toast({
         title: "Éxito",
         description: "Obra eliminada correctamente",
@@ -166,6 +198,16 @@ const Admin = () => {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCollectionChange = (collection: string | undefined) => {
+    setCollectionFilter(collection);
+    setCurrentPage(1); // Reset to first page when changing collection
   };
 
   if (isLoading) {
@@ -231,6 +273,7 @@ const Admin = () => {
         ) : (
           <AdminPanel
             artworks={artworks}
+            collections={collections}
             onAddArtwork={handleAddArtwork}
             onUpdateArtwork={handleUpdateArtwork}
             onDeleteArtwork={handleDeleteArtwork}
@@ -238,6 +281,12 @@ const Admin = () => {
             isAdding={isAdding}
             isUpdating={isUpdating}
             isDeleting={isDeleting}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalArtworks={totalArtworks}
+            onPageChange={handlePageChange}
+            onCollectionChange={handleCollectionChange}
+            collectionFilter={collectionFilter}
           />
         )}
       </div>
