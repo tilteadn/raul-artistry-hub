@@ -264,12 +264,13 @@ const AdminPanel = ({
                   <Card key={artwork.id} className="overflow-hidden">
                     <div className="relative aspect-[3/4]">
                       <img
-                        src={getImageUrl(artwork.imageUrl)}
+                        src={getImageUrl(artwork.thumbnailUrl || artwork.imageUrl)}
                         alt={artwork.title}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/placeholder.svg';
-                          console.error("Failed to load image:", artwork.imageUrl);
+                          console.error("Failed to load image:", artwork.thumbnailUrl || artwork.imageUrl);
                         }}
                       />
                     </div>
@@ -413,9 +414,10 @@ const AdminPanel = ({
                     <div className="relative aspect-[3/4]">
                       {thumbnailArtwork ? (
                         <img
-                          src={getImageUrl(thumbnailArtwork.imageUrl)}
+                          src={getImageUrl(thumbnailArtwork.thumbnailUrl || thumbnailArtwork.imageUrl)}
                           alt={collection}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/placeholder.svg';
                           }}
