@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -62,7 +61,7 @@ interface AdminPanelProps {
   totalArtworks?: number;
   onPageChange?: (page: number) => void;
   // Collection filtering props
-  onCollectionChange?: (collection: string | undefined) => void;
+  onCollectionChange?: (collection: string | undefined, shouldResetPage?: boolean) => void;
   collectionFilter?: string | undefined;
 }
 
@@ -108,7 +107,7 @@ const AdminPanel = ({
 
   const handleCollectionFilterChange = (value: string) => {
     if (onCollectionChange) {
-      onCollectionChange(value === "todas" ? undefined : value);
+      onCollectionChange(value === "todas" ? undefined : value, true);
     }
   };
 
