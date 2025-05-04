@@ -250,21 +250,36 @@ export const getPaginatedArtworksFromDb = async (
 
 /**
  * Retrieves featured artworks from Supabase
+ * Specifically pulls "Sicut ars tunica", "El pintor (Retrato de Leo)", and "Sal y limones"
  */
 export const getFeaturedArtworksFromDb = async (): Promise<Artwork[]> => {
   try {
+    const featuredTitles = [
+      'Sicut ars tunica',
+      'El pintor (Retrato de Leo)',
+      'Sal y limones'
+    ];
+    
+    console.log('Fetching specific featured artworks:', featuredTitles.join(', '));
+    
     const { data, error } = await supabase
       .from('artworks')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(3);
+      .in('title', featuredTitles);
     
     if (error) {
       console.error('Error fetching featured artworks:', error);
       throw error;
     }
     
-    return data ? data.map(mapDbArtworkToArtwork) : [];
+    // Sort them in the order specified in the featuredTitles array
+    const sortedData = data ? [...data].sort((a, b) => {
+      return featuredTitles.indexOf(a.title) - featuredTitles.indexOf(b.title);
+    }) : [];
+    
+    console.log(`Retrieved ${sortedData.length} featured artworks`);
+    
+    return sortedData.map(mapDbArtworkToArtwork);
   } catch (error) {
     console.error('Error in getFeaturedArtworksFromDb:', error);
     throw error;
