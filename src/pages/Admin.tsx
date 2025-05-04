@@ -204,8 +204,8 @@ const Admin = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCollectionChange = (value: string) => {
-    setCollectionFilter(value === "todas" ? undefined : value);
+  const handleCollectionChange = (collection: string | undefined) => {
+    setCollectionFilter(collection);
     setCurrentPage(1); // Reset to first page when changing collection
   };
 
