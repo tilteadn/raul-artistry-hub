@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -44,7 +45,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/utils";
+import { cn } from "@/lib/utils";
 import { getAspectRatioClass } from "@/utils/artwork/imageUtils";
 
 interface AdminPanelProps {

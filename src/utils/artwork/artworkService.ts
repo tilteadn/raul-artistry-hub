@@ -1,16 +1,18 @@
 
-import { Artwork, Collection } from "@/types/artwork";
+// This file is just a facade for the Supabase artwork service module
+
+import { Artwork } from "@/types/artwork";
 import { 
-  getAllArtworksFromDb, 
+  getAllArtworksFromDb,
   getFeaturedArtworksFromDb,
   getArtworkByIdFromDb,
   getRelatedArtworksFromDb,
   getCollectionsFromDb,
-  saveArtworkToDb, 
-  updateArtworkInDb, 
+  saveArtworkToDb,
+  updateArtworkInDb,
   deleteArtworkFromDb,
   getPaginatedArtworksFromDb
-} from "./supabaseArtworkService";
+} from './supabaseArtworkService';
 
 /**
  * Helper function to safely get string URL from imageUrl which could be File or string

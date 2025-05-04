@@ -38,6 +38,7 @@ export type Database = {
           dimensions: string | null
           id: string
           image_url: string
+          orientation: string | null
           subtitle: string | null
           technique: string | null
           thumbnail_url: string | null
@@ -52,6 +53,7 @@ export type Database = {
           dimensions?: string | null
           id?: string
           image_url: string
+          orientation?: string | null
           subtitle?: string | null
           technique?: string | null
           thumbnail_url?: string | null
@@ -66,6 +68,7 @@ export type Database = {
           dimensions?: string | null
           id?: string
           image_url?: string
+          orientation?: string | null
           subtitle?: string | null
           technique?: string | null
           thumbnail_url?: string | null
