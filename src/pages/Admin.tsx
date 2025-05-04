@@ -204,9 +204,11 @@ const Admin = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCollectionChange = (collection: string | undefined) => {
-    setCollectionFilter(collection);
-    setCurrentPage(1); // Reset to first page when changing collection
+  const handleCollectionChange = (value: string | undefined, shouldResetPage: boolean = true) => {
+    setCollectionFilter(value);
+    if (shouldResetPage) {
+      setCurrentPage(1);
+    }
   };
 
   if (isLoading) {
