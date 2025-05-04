@@ -204,12 +204,14 @@ const Admin = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCollectionChange = (value: string | undefined, shouldResetPage: boolean = true) => {
+  const handleCollectionChange: (value: string | undefined, shouldResetPage?: boolean) => void =
+  (value, shouldResetPage = true) => {
     setCollectionFilter(value);
     if (shouldResetPage) {
       setCurrentPage(1);
     }
-  };
+};
+
 
   if (isLoading) {
     return (
