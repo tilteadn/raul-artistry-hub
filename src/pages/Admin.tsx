@@ -150,7 +150,7 @@ const Admin = () => {
         createdAt: existingArtwork.createdAt,
       };
   
-      const result = await updateArtwork(updatedArtwork);
+      const result = await updateArtwork(id,updatedArtwork);
       console.log("Artwork updated successfully:", result.id);
   
       await loadArtworks();
