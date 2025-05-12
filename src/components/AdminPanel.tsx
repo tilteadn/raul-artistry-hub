@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2, Upload } from "lucide-react";
+import { Edit, Trash2, Plus, Image, Users, LayoutGrid, Grid3X3, Loader2, Upload, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Artwork } from "@/types/artwork";
 import { Button } from "@/components/ui/button";
@@ -66,6 +65,8 @@ interface AdminPanelProps {
   // Collection filtering props
   onCollectionChange?: (collection: string | undefined, shouldResetPage?: boolean) => void;
   collectionFilter?: string | undefined;
+  // Featured toggle
+  onToggleFeatured?: (id: string, featured: boolean) => void;
 }
 
 const AdminPanel = ({
@@ -81,6 +82,7 @@ const AdminPanel = ({
   onPageChange,
   onCollectionChange,
   collectionFilter,
+  onToggleFeatured,
 }: AdminPanelProps) => {
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -112,6 +114,13 @@ const AdminPanel = ({
     if (onCollectionChange) {
       onCollectionChange(value === "todas" ? undefined : value, true);
     }
+  };
+
+  const handleToggleFeatured = (artwork: Artwork) => {
+    if (!onToggleFeatured) return;
+    
+    const newFeaturedState = !artwork.featured;
+    onToggleFeatured(artwork.id, newFeaturedState);
   };
 
   const AddArtworkDialog = () => (
@@ -278,6 +287,11 @@ const AdminPanel = ({
                           console.error("Failed to load image:", artwork.thumbnailUrl || artwork.imageUrl);
                         }}
                       />
+                      {artwork.featured && (
+                        <div className="absolute top-2 right-2 bg-primary text-white p-1 rounded-full">
+                          <Star className="h-4 w-4 fill-current" />
+                        </div>
+                      )}
                     </div>
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-2">
@@ -289,6 +303,16 @@ const AdminPanel = ({
                           )}
                         </div>
                         <div className="flex space-x-2">
+                          {onToggleFeatured && (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              title={artwork.featured ? "Quitar de destacados" : "Destacar en página de inicio"}
+                              onClick={() => handleToggleFeatured(artwork)}
+                            >
+                              <Star className={cn("h-4 w-4", artwork.featured && "fill-primary")} />
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="icon"

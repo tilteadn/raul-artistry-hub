@@ -91,6 +91,12 @@ const Index = () => {
               Reintentar
             </Button>
           </div>
+        ) : featuredArtworks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-secondary/50 rounded-lg">
+            <p className="text-center text-muted-foreground">
+              No hay obras destacadas configuradas.
+            </p>
+          </div>
         ) : (
           <ArtworkGrid artworks={featuredArtworks} loading={false} />
         )}

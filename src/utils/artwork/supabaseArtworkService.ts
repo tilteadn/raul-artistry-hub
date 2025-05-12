@@ -152,6 +152,7 @@ const mapDbArtworkToArtwork = (dbArtwork: any): Artwork => {
     technique: dbArtwork.technique || undefined,
     dimensions: dbArtwork.dimensions || undefined,
     description: dbArtwork.description || undefined,
+    featured: dbArtwork.featured || false,
     createdAt: new Date(dbArtwork.created_at),
   };
 };
@@ -177,6 +178,7 @@ const mapArtworkToDbArtwork = (artwork: Omit<Artwork, "id" | "createdAt">) => {
     technique: artwork.technique || null,
     dimensions: artwork.dimensions || null,
     description: artwork.description || null,
+    featured: artwork.featured || false,
   };
 };
 
@@ -252,36 +254,27 @@ export const getPaginatedArtworksFromDb = async (
 
 /**
  * Retrieves featured artworks from Supabase
- * Specifically pulls "Sicut ars tunica", "El pintor (Retrato de Leo)", and "Sal y limones"
+ * Now selects artworks with featured=true flag
  */
 export const getFeaturedArtworksFromDb = async (): Promise<Artwork[]> => {
   try {
-    const featuredTitles = [
-      'Sicut ars tunica',
-      'El pintor (Retrato de Leo)',
-      'Sal y limones'
-    ];
-    
-    console.log('Fetching specific featured artworks:', featuredTitles.join(', '));
+    console.log('Fetching featured artworks from database...');
     
     const { data, error } = await supabase
       .from('artworks')
       .select('*')
-      .in('title', featuredTitles);
+      .eq('featured', true)
+      .order('created_at', { ascending: false })
+      .limit(3);
     
     if (error) {
       console.error('Error fetching featured artworks:', error);
       throw error;
     }
     
-    // Sort them in the order specified in the featuredTitles array
-    const sortedData = data ? [...data].sort((a, b) => {
-      return featuredTitles.indexOf(a.title) - featuredTitles.indexOf(b.title);
-    }) : [];
+    console.log(`Retrieved ${data?.length || 0} featured artworks`);
     
-    console.log(`Retrieved ${sortedData.length} featured artworks`);
-    
-    return sortedData.map(mapDbArtworkToArtwork);
+    return data ? data.map(mapDbArtworkToArtwork) : [];
   } catch (error) {
     console.error('Error in getFeaturedArtworksFromDb:', error);
     throw error;

@@ -11,6 +11,7 @@ export interface Artwork {
   technique?: string;
   dimensions?: string;
   description?: string;
+  featured?: boolean; // Added featured flag
   createdAt: Date;
 }
 

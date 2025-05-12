@@ -7,7 +7,7 @@ import AdminPanel from "@/components/AdminPanel";
 import AdminAuth from "@/components/AdminAuth";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Artwork } from "@/types/artwork";
-import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork, getPaginatedArtworks, getCollections } from "@/utils/artworkService";
+import { getAllArtworks, saveArtwork, updateArtwork, deleteArtwork, getPaginatedArtworks, getCollections } from "@/utils/artwork/artworkService";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
@@ -199,6 +199,48 @@ const Admin = () => {
     }
   };
 
+  const handleToggleFeatured = async (id: string, featured: boolean) => {
+    try {
+      setIsUpdating(true);
+      console.log(`Toggling featured status for artwork ID: ${id} to ${featured}`);
+      
+      const existingArtwork = artworks.find((a) => a.id === id);
+      
+      if (!existingArtwork) {
+        throw new Error("Artwork not found");
+      }
+      
+      const updatedArtwork: Artwork = {
+        ...existingArtwork,
+        featured: featured
+      };
+      
+      const result = await updateArtwork(id, updatedArtwork);
+      console.log("Artwork featured status updated successfully:", result.id, featured);
+      
+      await loadArtworks();
+      
+      toast({
+        title: "Éxito",
+        description: featured 
+          ? "Obra añadida a destacados" 
+          : "Obra eliminada de destacados",
+      });
+      
+      return result;
+    } catch (error) {
+      console.error("Error updating artwork featured status:", error);
+      toast({
+        title: "Error",
+        description: "Error al actualizar el estado destacado de la obra",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -279,6 +321,7 @@ const Admin = () => {
             onAddArtwork={handleAddArtwork}
             onUpdateArtwork={handleUpdateArtwork}
             onDeleteArtwork={handleDeleteArtwork}
+            onToggleFeatured={handleToggleFeatured}
             isLoading={loading}
             isAdding={isAdding}
             isUpdating={isUpdating}
