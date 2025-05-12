@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { LogOut, RefreshCw } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
@@ -150,7 +151,8 @@ const Admin = () => {
         createdAt: existingArtwork.createdAt,
       };
   
-      const result = await updateArtwork(id,updatedArtwork);
+      // Fix: Passing just the updatedArtwork object instead of id and updatedArtwork
+      const result = await updateArtwork(updatedArtwork);
       console.log("Artwork updated successfully:", result.id);
   
       await loadArtworks();
@@ -215,7 +217,8 @@ const Admin = () => {
         featured: featured
       };
       
-      const result = await updateArtwork(id, updatedArtwork);
+      // Fix: Passing just the updatedArtwork object instead of id and updatedArtwork
+      const result = await updateArtwork(updatedArtwork);
       console.log("Artwork featured status updated successfully:", result.id, featured);
       
       await loadArtworks();
@@ -246,12 +249,10 @@ const Admin = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Fix the function signature to accept two parameters as expected
-  const handleCollectionChange = (value: string | undefined, shouldResetPage: boolean = true) => {
+  // Fix: Matching the function signature to what AdminPanel expects
+  const handleCollectionChange = (value: string | undefined) => {
     setCollectionFilter(value);
-    if (shouldResetPage) {
-      setCurrentPage(1);
-    }
+    setCurrentPage(1);
   };
 
   if (isLoading) {

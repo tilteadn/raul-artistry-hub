@@ -1,3 +1,6 @@
+
+// Only fixing the problematic part around line 263
+
 import { supabase } from "@/integrations/supabase/client";
 import { Artwork, Collection } from "@/types/artwork";
 import { v4 as uuidv4 } from 'uuid';
@@ -160,7 +163,8 @@ const mapDbArtworkToArtwork = (dbArtwork: any): Artwork => {
 /**
  * Maps frontend Artwork to database format
  */
-const mapArtworkToDbArtwork = (artwork: Omit<Artwork, "id" | "createdAt">) => {
+// Fix: Changing parameter type to avoid recursive type issue
+const mapArtworkToDbArtwork = (artwork: Partial<Omit<Artwork, "id" | "createdAt">>) => {
   // Generate thumbnail URL from the main image if available
   let thumbnailUrl = artwork.thumbnailUrl;
   if (!thumbnailUrl && typeof artwork.imageUrl === 'string' && !artwork.imageUrl.startsWith('blob:')) {
@@ -168,9 +172,9 @@ const mapArtworkToDbArtwork = (artwork: Omit<Artwork, "id" | "createdAt">) => {
   }
   
   return {
-    title: artwork.title,
+    title: artwork.title || "",
     subtitle: artwork.subtitle,
-    collection: artwork.collection,
+    collection: artwork.collection || "",
     image_url: artwork.imageUrl,
     thumbnail_url: thumbnailUrl || null,
     orientation: artwork.orientation || null,
@@ -464,7 +468,7 @@ export const saveArtworkToDb = async (artwork: Artwork): Promise<Artwork> => {
 /**
  * Updates an existing artwork in Supabase
  */
-export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" | "createdAt">): Promise<Artwork> => {
+export const updateArtworkInDb = async (id: string, artwork: Partial<Artwork>): Promise<Artwork> => {
   try {
     console.log(`Updating artwork ID: ${id}, Title: ${artwork.title}`);
     
@@ -509,21 +513,30 @@ export const updateArtworkInDb = async (id: string, artwork: Omit<Artwork, "id" 
       }
     }
     
-    const dbArtwork = {
+    // Create an object with only the fields we want to update
+    const updateData: any = {
       ...mapArtworkToDbArtwork({
         ...artwork,
         imageUrl: typeof imageUrl === 'string' ? imageUrl : '',
         orientation
       }),
-      image_url: typeof imageUrl === 'string' ? imageUrl : '',
-      orientation,
       updated_at: new Date().toISOString()
     };
     
-    console.log('Updating artwork in database:', dbArtwork);
+    // If we have a new image URL, update it
+    if (typeof imageUrl === 'string') {
+      updateData.image_url = imageUrl;
+    }
+    
+    // If we have a new orientation, update it
+    if (orientation) {
+      updateData.orientation = orientation;
+    }
+    
+    console.log('Updating artwork in database:', updateData);
     const { data, error } = await supabase
       .from('artworks')
-      .update(dbArtwork)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();

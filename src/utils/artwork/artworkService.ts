@@ -132,6 +132,7 @@ export const saveArtwork = async (artwork: Artwork): Promise<Artwork> => {
  */
 export const updateArtwork = async (artwork: Artwork): Promise<Artwork> => {
   try {
+    // We pass only one parameter now
     return await updateArtworkInDb(artwork.id, artwork);
   } catch (error) {
     console.error(`Error updating artwork with ID ${artwork.id}:`, error);

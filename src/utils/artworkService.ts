@@ -20,7 +20,12 @@ export const getArtworkById = getArtworkByIdFromDb;
 export const getRelatedArtworks = getRelatedArtworksFromDb;
 export const getCollections = getCollectionsFromDb;
 export const saveArtwork = saveArtworkToDb;
-export const updateArtwork = updateArtworkInDb; // This function expects (id, artwork)
+
+// Fix: Make sure the updateArtwork function matches the expected signature
+export const updateArtwork = (artwork: Artwork): Promise<Artwork> => {
+  return updateArtworkInDb(artwork.id, artwork);
+};
+
 export const deleteArtwork = deleteArtworkFromDb;
 
 /**
