@@ -1,4 +1,3 @@
-
 // Only fixing the problematic part around line 263
 
 import { supabase } from "@/integrations/supabase/client";
@@ -163,8 +162,20 @@ const mapDbArtworkToArtwork = (dbArtwork: any): Artwork => {
 /**
  * Maps frontend Artwork to database format
  */
-// Fix: Changing parameter type to avoid recursive type issue
-const mapArtworkToDbArtwork = (artwork: Partial<Omit<Artwork, "id" | "createdAt">>) => {
+// Fix: Using a more specific type to avoid recursion issues
+const mapArtworkToDbArtwork = (artwork: {
+  title?: string;
+  subtitle?: string;
+  collection?: string;
+  imageUrl?: string | File;
+  thumbnailUrl?: string;
+  orientation?: 'portrait' | 'landscape' | 'square';
+  year?: string;
+  technique?: string;
+  dimensions?: string;
+  description?: string;
+  featured?: boolean;
+}) => {
   // Generate thumbnail URL from the main image if available
   let thumbnailUrl = artwork.thumbnailUrl;
   if (!thumbnailUrl && typeof artwork.imageUrl === 'string' && !artwork.imageUrl.startsWith('blob:')) {

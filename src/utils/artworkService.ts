@@ -21,7 +21,7 @@ export const getRelatedArtworks = getRelatedArtworksFromDb;
 export const getCollections = getCollectionsFromDb;
 export const saveArtwork = saveArtworkToDb;
 
-// Fix: Make sure the updateArtwork function matches the expected signature
+// Use the correct signature that matches the implementation in supabaseArtworkService
 export const updateArtwork = (artwork: Artwork): Promise<Artwork> => {
   return updateArtworkInDb(artwork.id, artwork);
 };
