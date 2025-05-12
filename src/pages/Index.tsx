@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -5,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import Hero from "@/components/Hero";
 import ArtworkGrid from "@/components/ArtworkGrid";
 import { Artwork } from "@/types/artwork";
-import { getFeaturedArtworks } from "@/utils/artworkService";
+import { getFeaturedArtworks } from "@/utils/artwork/artworkService";
 import { toast } from "@/hooks/use-toast";
 import MetaTags from "@/components/MetaTags";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const Index = () => {
   const [featuredArtworks, setFeaturedArtworks] = useState<Artwork[]>([]);
@@ -179,7 +181,15 @@ const Index = () => {
               <Link to="/contacto">Contactar</Link>
             </Button>
           </div>
-          <div className="aspect-[4/3] bg-[url('https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1471&q=80')] bg-cover bg-center rounded-lg shadow-lg" />
+          <div className="rounded-lg shadow-lg overflow-hidden">
+            <AspectRatio ratio={4/3}>
+              <img 
+                src="/lovable-uploads/d0cf8cb3-7238-4964-bcad-f575607d3709.png" 
+                alt="Espacio de trabajo del artista con pinturas y pinceles" 
+                className="w-full h-full object-cover"
+              />
+            </AspectRatio>
+          </div>
         </div>
       </section>
     </div>
