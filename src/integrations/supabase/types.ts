@@ -36,6 +36,7 @@ export type Database = {
           created_at: string
           description: string | null
           dimensions: string | null
+          featured: boolean
           id: string
           image_url: string
           orientation: string | null
@@ -51,6 +52,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           dimensions?: string | null
+          featured?: boolean
           id?: string
           image_url: string
           orientation?: string | null
@@ -66,6 +68,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           dimensions?: string | null
+          featured?: boolean
           id?: string
           image_url?: string
           orientation?: string | null

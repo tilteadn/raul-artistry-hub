@@ -1,3 +1,4 @@
+
 // Only fixing the problematic part around line 263
 
 import { supabase } from "@/integrations/supabase/client";
@@ -162,7 +163,7 @@ const mapDbArtworkToArtwork = (dbArtwork: any): Artwork => {
 /**
  * Maps frontend Artwork to database format
  */
-// Fix: Using a more specific type to avoid recursion issues
+// Fix: Using a more specific type signature to avoid recursion issues
 const mapArtworkToDbArtwork = (artwork: {
   title?: string;
   subtitle?: string;
