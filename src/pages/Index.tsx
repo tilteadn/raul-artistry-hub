@@ -111,7 +111,7 @@ const Index = () => {
             <p className="text-muted-foreground mb-8 leading-relaxed">
               Artista multidisciplinar con una pasión por explorar diferentes medios y técnicas.
               Su trabajo refleja una constante búsqueda de expresión visual, navegando entre
-              lo figurativo y lo abstracto para crear piezas que invitan a la reflexión y
+              la figuración y el realismo para crear piezas que invitan a la reflexión y
               conectan con el espectador a un nivel emocional.
             </p>
             <div className="flex justify-center space-x-4">
