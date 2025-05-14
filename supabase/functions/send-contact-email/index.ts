@@ -72,11 +72,11 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending email to artist...");
     
     // Store the recipient in a variable for debugging
-    const artistEmail = "yourartist@youremail.com"; // Replace with your actual email address
+    const artistEmail = "rauloalvarez@gmail.com";
     console.log("Artist email recipient:", artistEmail);
     
     const emailResponse = await resend.emails.send({
-      from: "Contact Form <no-reply@yourdomain.com>", // Updated sender email
+      from: "Contacto Web <onboarding@resend.dev>",
       to: [artistEmail], // Using the variable to ensure it's correct
       subject: `Nuevo mensaje de contacto: ${subject}`,
       reply_to: email,
@@ -104,13 +104,13 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to the user
     console.log("Sending confirmation email to user...");
     await resend.emails.send({
-      from: "Your Artist Name <no-reply@yourdomain.com>", // Updated sender email
+      from: "Raúl Álvarez <onboarding@resend.dev>",
       to: [email],
       subject: "Hemos recibido tu mensaje",
       html: `
         <h2>Gracias por contactar, ${name}</h2>
         <p>Hemos recibido tu mensaje con asunto "${subject}" y nos pondremos en contacto contigo lo antes posible.</p>
-        <p>Atentamente,<br>Your Artist Name</p>
+        <p>Atentamente,<br>Raúl Álvarez</p>
       `,
     }).catch(error => {
       console.error("Error sending confirmation email to user:", error);
