@@ -96,29 +96,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email to artist sent successfully:", artistEmailData);
 
-    // Send confirmation email to the user
-    console.log("Sending confirmation email to user...");
-    const { data: userEmailData, error: userEmailError } = await resend.emails.send({
-      from: "Raúl Álvarez <onboarding@resend.dev>",
-      to: [email],
-      subject: "Hemos recibido tu mensaje",
-      html: `
-        <h2>Gracias por contactar, ${name}</h2>
-        <p>Hemos recibido tu mensaje con asunto "${subject}" y nos pondremos en contacto contigo lo antes posible.</p>
-        <p>Atentamente,<br>Raúl Álvarez</p>
-      `,
-    });
-
-    if (userEmailError) {
-      console.error("Error sending confirmation email to user:", userEmailError);
-      // We still continue if this fails, since the main email was sent
-    } else {
-      console.log("Confirmation email to user sent successfully:", userEmailData);
-    }
-
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Emails sent successfully to both artist and requester" 
+      message: "Email sent successfully to artist" 
     }), {
       status: 200,
       headers: {

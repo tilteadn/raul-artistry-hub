@@ -57,7 +57,7 @@ const ContactForm = () => {
       console.log("Form submitted successfully", data);
       
       if (data?.success) {
-        toast.success("Mensaje enviado correctamente. Te hemos enviado una confirmación por email.");
+        toast.success("Mensaje enviado correctamente. Nos pondremos en contacto contigo lo antes posible.");
         form.reset();
       } else {
         throw new Error(data?.error || "No se recibió confirmación del servidor");
