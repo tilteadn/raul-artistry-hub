@@ -60,11 +60,11 @@ const ContactForm = () => {
         toast.success("Mensaje enviado correctamente. Te hemos enviado una confirmación por email.");
         form.reset();
       } else {
-        throw new Error("No se recibió confirmación del servidor");
+        throw new Error(data?.error || "No se recibió confirmación del servidor");
       }
     } catch (error: any) {
       console.error("Error sending contact form:", error);
-      toast.error("Error al enviar el mensaje. Por favor, inténtalo de nuevo.");
+      toast.error(`Error al enviar el mensaje: ${error.message || 'Por favor, inténtalo de nuevo.'}`);
     } finally {
       setIsSubmitting(false);
     }
