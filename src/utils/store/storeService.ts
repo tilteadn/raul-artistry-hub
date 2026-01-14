@@ -36,14 +36,11 @@ export const getStoreArtworks = async (): Promise<{
   prints: Artwork[];
 }> => {
   try {
-    // Get artworks that are for sale as originals (sale_type = 'original' or 'both')
-    // AND original is still available
+    // Get artworks where description contains "A la venta"
     const { data: originalsData, error: originalsError } = await supabase
       .from('artworks')
       .select('*')
-      .eq('for_sale', true)
-      .eq('original_available', true)
-      .in('sale_type', ['original', 'both'])
+      .ilike('description', '%A la venta%')
       .order('created_at', { ascending: false });
 
     if (originalsError) {
