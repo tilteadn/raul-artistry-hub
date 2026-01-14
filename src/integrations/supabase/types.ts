@@ -42,9 +42,14 @@ export type Database = {
           description: string | null
           dimensions: string | null
           featured: boolean
+          for_sale: boolean
           id: string
           image_url: string
           orientation: string | null
+          original_available: boolean | null
+          original_price: number | null
+          print_price: number | null
+          sale_type: string | null
           subtitle: string | null
           technique: string | null
           thumbnail_url: string | null
@@ -58,9 +63,14 @@ export type Database = {
           description?: string | null
           dimensions?: string | null
           featured?: boolean
+          for_sale?: boolean
           id?: string
           image_url: string
           orientation?: string | null
+          original_available?: boolean | null
+          original_price?: number | null
+          print_price?: number | null
+          sale_type?: string | null
           subtitle?: string | null
           technique?: string | null
           thumbnail_url?: string | null
@@ -74,9 +84,14 @@ export type Database = {
           description?: string | null
           dimensions?: string | null
           featured?: boolean
+          for_sale?: boolean
           id?: string
           image_url?: string
           orientation?: string | null
+          original_available?: boolean | null
+          original_price?: number | null
+          print_price?: number | null
+          sale_type?: string | null
           subtitle?: string | null
           technique?: string | null
           thumbnail_url?: string | null

@@ -1,18 +1,25 @@
+export type SaleType = 'none' | 'original' | 'print' | 'both';
 
 export interface Artwork {
   id: string;
   title: string;
   subtitle?: string;
   collection: string;
-  imageUrl: string | File; // Updated to accept File objects
+  imageUrl: string | File;
   thumbnailUrl?: string;
-  orientation?: 'portrait' | 'landscape' | 'square'; // Added orientation field
+  orientation?: 'portrait' | 'landscape' | 'square';
   year?: string;
   technique?: string;
   dimensions?: string;
   description?: string;
-  featured?: boolean; // Added featured flag
+  featured?: boolean;
   createdAt: Date;
+  // Store-related fields
+  forSale?: boolean;
+  saleType?: SaleType;
+  originalPrice?: number;
+  printPrice?: number;
+  originalAvailable?: boolean;
 }
 
 export interface Collection {

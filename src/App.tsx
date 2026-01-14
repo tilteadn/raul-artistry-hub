@@ -9,6 +9,8 @@ import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Artworks from "./pages/Artworks";
 import ArtworkPage from "./pages/ArtworkPage";
+import Store from "./pages/Store";
+import StoreArtworkPage from "./pages/StoreArtworkPage";
 import AboutMe from "./pages/AboutMe";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
@@ -47,6 +49,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/obras" element={<Artworks />} />
               <Route path="/obras/:id" element={<ArtworkPage />} />
+              <Route path="/tienda" element={<Store />} />
+              <Route path="/tienda/:id" element={<StoreArtworkPage />} />
               <Route path="/sobre-mi" element={<AboutMe />} />
               <Route path="/contacto" element={<Contact />} />
               <Route path="/admin" element={<Admin />} />
